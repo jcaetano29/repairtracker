@@ -1,0 +1,22 @@
+import "./globals.css";
+
+export const metadata = {
+  title: "RepairTrack — Gestión de Reparaciones",
+  description: "Sistema de gestión para relojerías y joyerías",
+  manifest: "/manifest.json",
+  themeColor: "#0f172a",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="es">
+      <body>{children}</body>
+    </html>
+  );
+}

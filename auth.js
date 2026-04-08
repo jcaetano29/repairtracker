@@ -6,13 +6,20 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin"
 export async function authorizeUser(credentials) {
   if (!credentials?.username || !credentials?.password) return null
 
-  const { data: usuario } = await getSupabaseAdmin()
+  const { data: usuario, error } = await getSupabaseAdmin()
     .from("usuarios")
     .select("id, username, password_hash, role")
     .eq("username", credentials.username)
     .single()
 
-  if (!usuario) return null
+  // PGRST116 = no rows found (expected), other errors should throw
+  if (error && error.code !== "PGRST116") throw new Error(error.message)
+
+  // Always run bcrypt to prevent username enumeration via timing
+  if (!usuario) {
+    await bcrypt.compare(String(credentials.password), "$2b$10$dummyhashfortimingprotect")
+    return null
+  }
 
   const valid = await bcrypt.compare(String(credentials.password), usuario.password_hash)
   if (!valid) return null

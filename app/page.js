@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { StatCard } from "@/components/StatCard";
 import { NuevoIngresoModal } from "@/components/NuevoIngresoModal";
@@ -22,6 +23,13 @@ export default function DashboardPage() {
   const [showNuevo, setShowNuevo] = useState(false);
   const [selectedOrden, setSelectedOrden] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDueno, setIsDueno] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.app_metadata?.role === "dueno") setIsDueno(true);
+    });
+  }, []);
 
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
@@ -92,6 +100,14 @@ export default function DashboardPage() {
             >
               + Nuevo Ingreso
             </button>
+            {isDueno && (
+              <Link
+                href="/admin"
+                className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"
+              >
+                Admin
+              </Link>
+            )}
             <button
               onClick={handleLogout}
               className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"

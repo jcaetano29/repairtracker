@@ -36,9 +36,20 @@ export async function POST(request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { email, role } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { email, role } = body;
   if (!email || !role) {
     return NextResponse.json({ error: "email and role required" }, { status: 400 });
+  }
+
+  if (!["empleado", "dueno"].includes(role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
@@ -46,6 +57,10 @@ export async function POST(request) {
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  if (!data?.user?.id) {
+    return NextResponse.json({ error: "Invalid response from auth service" }, { status: 500 });
+  }
 
   // Set app_metadata.role (more secure than user_metadata)
   await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
@@ -61,7 +76,14 @@ export async function DELETE(request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { userId } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { userId } = body;
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
 
   const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);

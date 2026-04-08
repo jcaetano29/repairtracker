@@ -1,59 +1,30 @@
-// middleware.js
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
+import { auth } from "@/auth"
+import { NextResponse } from "next/server"
 
-export async function middleware(request) {
-  let response = NextResponse.next({ request });
+export default auth((req) => {
+  const { pathname } = req.nextUrl
+  const session = req.auth
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+  // Always public
+  if (pathname.startsWith("/seguimiento")) return NextResponse.next()
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const { pathname } = request.nextUrl;
-
-  // Public routes — no auth needed
-  if (pathname.startsWith("/login") || pathname.startsWith("/seguimiento")) {
-    // Redirect logged-in users away from login
-    if (user && pathname.startsWith("/login")) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-    return response;
+  // Login page: redirect authenticated users to dashboard
+  if (pathname.startsWith("/login")) {
+    if (session) return NextResponse.redirect(new URL("/", req.url))
+    return NextResponse.next()
   }
 
   // All other routes require auth
-  if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  if (!session) return NextResponse.redirect(new URL("/login", req.url))
 
   // Admin routes require dueno role
-  if (pathname.startsWith("/admin")) {
-    const role = user.app_metadata?.role;
-    if (role !== "dueno") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  if (pathname.startsWith("/admin") && session.user?.role !== "dueno") {
+    return NextResponse.redirect(new URL("/", req.url))
   }
 
-  return response;
-}
+  return NextResponse.next()
+})
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|manifest.json).*)"],
-};
+}

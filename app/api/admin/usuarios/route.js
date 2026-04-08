@@ -63,9 +63,13 @@ export async function POST(request) {
   }
 
   // Set app_metadata.role (more secure than user_metadata)
-  await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
     app_metadata: { role },
   });
+
+  if (updateError) {
+    return NextResponse.json({ error: "Failed to set role" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

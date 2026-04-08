@@ -57,6 +57,7 @@ export default function LoginPage() {
               required
               autoFocus
               autoComplete="username"
+              disabled={loading}
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               placeholder="usuario"
             />
@@ -71,6 +72,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
+              disabled={loading}
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               placeholder="••••••••"
             />

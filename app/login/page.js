@@ -1,29 +1,33 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const router = useRouter()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const result = await signIn("credentials", {
+      username,
+      password,
+      redirect: false,
+    })
 
-    if (error) {
-      setError("Email o contraseña incorrectos");
-      setLoading(false);
+    if (result?.error) {
+      setError("Usuario o contraseña incorrectos")
+      setLoading(false)
     } else {
-      router.push("/");
-      router.refresh();
+      router.push("/")
+      router.refresh()
     }
   }
 
@@ -44,16 +48,17 @@ export default function LoginPage() {
           )}
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-              Email
+              Usuario
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
+              autoComplete="username"
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              placeholder="tu@email.com"
+              placeholder="usuario"
             />
           </div>
           <div>
@@ -65,6 +70,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               placeholder="••••••••"
             />
@@ -79,5 +85,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-  );
+  )
 }

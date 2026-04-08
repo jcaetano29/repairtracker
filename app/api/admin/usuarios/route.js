@@ -1,97 +1,124 @@
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { NextResponse } from "next/server";
+import { auth } from "@/auth"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
+import bcrypt from "bcryptjs"
+import { NextResponse } from "next/server"
 
-// Helper: verify caller is dueno
 async function verifyDueno() {
-  const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.app_metadata?.role !== "dueno") return false;
-  return true;
+  const session = await auth()
+  return session?.user?.role === "dueno" ? session : null
 }
 
-// GET — list all users
+// GET — list all usuarios
 export async function GET() {
   if (!(await verifyDueno())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { data, error } = await getSupabaseAdmin().auth.admin.listUsers();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { data, error } = await getSupabaseAdmin()
+    .from("usuarios")
+    .select("id, username, role, created_at")
+    .order("created_at")
 
-  const users = data.users.map((u) => ({
-    id: u.id,
-    email: u.email,
-    role: u.app_metadata?.role || "empleado",
-    created_at: u.created_at,
-    last_sign_in_at: u.last_sign_in_at,
-  }));
-
-  return NextResponse.json({ users });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ users: data })
 }
 
-// POST — invite a new user
+// POST — create new usuario
 export async function POST(request) {
   if (!(await verifyDueno())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  let body;
+  let body
   try {
-    body = await request.json();
+    body = await request.json()
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { email, role } = body;
-  if (!email || !role) {
-    return NextResponse.json({ error: "email and role required" }, { status: 400 });
+  const { username, password, role } = body
+  if (!username || !password || !role) {
+    return NextResponse.json({ error: "username, password and role are required" }, { status: 400 })
   }
-
   if (!["empleado", "dueno"].includes(role)) {
-    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+  }
+  if (password.length < 6) {
+    return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
   }
 
-  const { data, error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
-    data: { role }, // sets user_metadata
-  });
+  const password_hash = await bcrypt.hash(password, 10)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { error } = await getSupabaseAdmin()
+    .from("usuarios")
+    .insert({ username, password_hash, role })
 
-  if (!data?.user?.id) {
-    return NextResponse.json({ error: "Invalid response from auth service" }, { status: 500 });
+  if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "El nombre de usuario ya existe" }, { status: 409 })
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Set app_metadata.role (more secure than user_metadata)
-  const { error: updateError } = await getSupabaseAdmin().auth.admin.updateUserById(data.user.id, {
-    app_metadata: { role },
-  });
-
-  if (updateError) {
-    return NextResponse.json({ error: "Failed to set role" }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true })
 }
 
-// DELETE — remove a user
+// DELETE — remove usuario
 export async function DELETE(request) {
-  if (!(await verifyDueno())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const session = await verifyDueno()
+  if (!session) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  let body;
+  let body
   try {
-    body = await request.json();
+    body = await request.json()
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { userId } = body;
-  if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
+  const { userId } = body
+  if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 })
 
-  const { error } = await getSupabaseAdmin().auth.admin.deleteUser(userId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (userId === session.user.id) {
+    return NextResponse.json({ error: "No podés eliminar tu propia cuenta" }, { status: 400 })
+  }
 
-  return NextResponse.json({ ok: true });
+  const { error } = await getSupabaseAdmin()
+    .from("usuarios")
+    .delete()
+    .eq("id", userId)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
+// PATCH — update role
+export async function PATCH(request) {
+  if (!(await verifyDueno())) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+
+  let body
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+  }
+
+  const { userId, role } = body
+  if (!userId || !role) {
+    return NextResponse.json({ error: "userId and role required" }, { status: 400 })
+  }
+  if (!["empleado", "dueno"].includes(role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+  }
+
+  const { error } = await getSupabaseAdmin()
+    .from("usuarios")
+    .update({ role })
+    .eq("id", userId)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
 }

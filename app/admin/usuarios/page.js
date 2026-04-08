@@ -14,8 +14,12 @@ export default function UsuariosPage() {
     setLoading(true)
     try {
       const res = await fetch("/api/admin/usuarios")
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { users } = await res.json()
       setUsers(users || [])
+    } catch (e) {
+      setError(e.message)
+      setUsers([])
     } finally {
       setLoading(false)
     }

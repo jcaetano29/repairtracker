@@ -22,12 +22,15 @@ CREATE TABLE IF NOT EXISTS tipos_servicio (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Initial service types
-INSERT INTO tipos_servicio (nombre, ciclo_meses) VALUES
-  ('Cambio de pila', 18),
-  ('Service completo', 36),
-  ('Ajuste de correa', 12),
-  ('Limpieza', 12);
+-- Initial service types (only if table is empty)
+INSERT INTO tipos_servicio (nombre, ciclo_meses)
+SELECT nombre, ciclo_meses FROM (VALUES
+  ('Cambio de pila'::TEXT, 18),
+  ('Service completo'::TEXT, 36),
+  ('Ajuste de correa'::TEXT, 12),
+  ('Limpieza'::TEXT, 12)
+) AS v(nombre, ciclo_meses)
+WHERE NOT EXISTS (SELECT 1 FROM tipos_servicio LIMIT 1);
 
 -- RLS for tipos_servicio
 ALTER TABLE tipos_servicio ENABLE ROW LEVEL SECURITY;

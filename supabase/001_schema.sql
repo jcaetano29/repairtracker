@@ -64,7 +64,6 @@ CREATE TABLE ordenes (
       'RECHAZADO',
       'EN_REPARACION',
       'LISTO_EN_TALLER',
-      'RETIRADO_POR_CADETE',
       'LISTO_PARA_RETIRO',
       'ENTREGADO'
     )),
@@ -117,24 +116,6 @@ CREATE TABLE historial_estados (
 
 CREATE INDEX idx_historial_orden ON historial_estados(orden_id);
 CREATE INDEX idx_historial_fecha ON historial_estados(created_at DESC);
-
--- ============================================================
--- TABLA: movimientos_cadete
--- ============================================================
-CREATE TABLE movimientos_cadete (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  orden_id UUID REFERENCES ordenes(id) NOT NULL,
-  tipo TEXT NOT NULL
-    CHECK (tipo IN ('RETIRO_LOCAL', 'ENTREGA_TALLER', 'RETIRO_TALLER', 'ENTREGA_LOCAL')),
-  taller_id UUID REFERENCES talleres(id),
-  cadete TEXT,
-  fecha TIMESTAMPTZ DEFAULT NOW(),
-  notas TEXT,
-  confirmado BOOLEAN DEFAULT false
-);
-
-CREATE INDEX idx_movimientos_orden ON movimientos_cadete(orden_id);
-CREATE INDEX idx_movimientos_fecha ON movimientos_cadete(fecha DESC);
 
 -- ============================================================
 -- TABLA: notificaciones_enviadas
@@ -284,35 +265,6 @@ LEFT JOIN clientes c ON o.cliente_id = c.id
 LEFT JOIN talleres t ON o.taller_id = t.id;
 
 -- ============================================================
--- VIEW: Resumen para cadete
--- ============================================================
-CREATE OR REPLACE VIEW v_cadete_pendientes AS
-SELECT
-  o.id,
-  o.numero_orden,
-  c.nombre AS cliente_nombre,
-  o.tipo_articulo,
-  o.marca,
-  o.estado,
-  t.nombre AS taller_nombre,
-  t.direccion AS taller_direccion,
-  CASE
-    WHEN o.estado = 'ENVIADO_A_TALLER' THEN 'LLEVAR_A_TALLER'
-    WHEN o.estado = 'LISTO_EN_TALLER' THEN 'RETIRAR_DE_TALLER'
-    WHEN o.estado = 'RETIRADO_POR_CADETE' THEN 'ENTREGAR_EN_LOCAL'
-  END AS accion_pendiente
-FROM ordenes o
-LEFT JOIN clientes c ON o.cliente_id = c.id
-LEFT JOIN talleres t ON o.taller_id = t.id
-WHERE o.estado IN ('ENVIADO_A_TALLER', 'LISTO_EN_TALLER', 'RETIRADO_POR_CADETE')
-ORDER BY
-  CASE o.estado
-    WHEN 'RETIRADO_POR_CADETE' THEN 1
-    WHEN 'LISTO_EN_TALLER' THEN 2
-    WHEN 'ENVIADO_A_TALLER' THEN 3
-  END;
-
--- ============================================================
 -- VIEW: Stats por taller
 -- ============================================================
 CREATE OR REPLACE VIEW v_talleres_stats AS
@@ -338,7 +290,6 @@ ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE talleres ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ordenes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE historial_estados ENABLE ROW LEVEL SECURITY;
-ALTER TABLE movimientos_cadete ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notificaciones_enviadas ENABLE ROW LEVEL SECURITY;
 
 -- Política: usuarios autenticados pueden ver y editar todo
@@ -350,8 +301,6 @@ CREATE POLICY "Authenticated users full access" ON talleres
 CREATE POLICY "Authenticated users full access" ON ordenes
   FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated users full access" ON historial_estados
-  FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users full access" ON movimientos_cadete
   FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated users full access" ON notificaciones_enviadas
   FOR ALL USING (auth.role() = 'authenticated');

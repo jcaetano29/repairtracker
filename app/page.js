@@ -1,43 +1,34 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Badge } from "@/components/Badge";
-import { StatCard } from "@/components/StatCard";
-import { NuevoIngresoModal } from "@/components/NuevoIngresoModal";
-import { DetalleOrdenModal } from "@/components/DetalleOrdenModal";
-import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants";
-import { getOrdenes, getStats, getTalleres } from "@/lib/data";
-import { supabase } from "@/lib/supabase";
+import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
+import Link from "next/link"
+import { Badge } from "@/components/Badge"
+import { StatCard } from "@/components/StatCard"
+import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
+import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
+import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
+import { getOrdenes, getStats, getTalleres } from "@/lib/data"
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [ordenes, setOrdenes] = useState([]);
-  const [stats, setStatsState] = useState({ activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 });
-  const [talleres, setTalleresState] = useState([]);
-  const [filtroEstado, setFiltroEstado] = useState("TODOS");
-  const [filtroTaller, setFiltroTaller] = useState("TODOS");
-  const [busqueda, setBusqueda] = useState("");
-  const [vista, setVista] = useState("tabla");
-  const [showNuevo, setShowNuevo] = useState(false);
-  const [selectedOrden, setSelectedOrden] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isDueno, setIsDueno] = useState(false);
+  const router = useRouter()
+  const { data: session } = useSession()
+  const isDueno = session?.user?.role === "dueno"
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.app_metadata?.role === "dueno") setIsDueno(true);
-    });
-  }, []);
+  const [ordenes, setOrdenes] = useState([])
+  const [stats, setStatsState] = useState({ activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 })
+  const [talleres, setTalleresState] = useState([])
+  const [filtroEstado, setFiltroEstado] = useState("TODOS")
+  const [filtroTaller, setFiltroTaller] = useState("TODOS")
+  const [busqueda, setBusqueda] = useState("")
+  const [vista, setVista] = useState("tabla")
+  const [showNuevo, setShowNuevo] = useState(false)
+  const [selectedOrden, setSelectedOrden] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout failed:", error);
-    }
-    router.push("/login");
-    router.refresh();
+    await signOut({ callbackUrl: "/login" })
   }
 
   const loadData = useCallback(async () => {
@@ -50,36 +41,36 @@ export default function DashboardPage() {
         }),
         getStats(),
         getTalleres(),
-      ]);
-      setOrdenes(ordenesData);
-      setStatsState(statsData);
-      setTalleresState(talleresData);
+      ])
+      setOrdenes(ordenesData)
+      setStatsState(statsData)
+      setTalleresState(talleresData)
     } catch (e) {
-      console.error("Error cargando datos:", e);
+      console.error("Error cargando datos:", e)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [filtroEstado, filtroTaller, busqueda]);
+  }, [filtroEstado, filtroTaller, busqueda])
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData()
+  }, [loadData])
 
   // Auto-refresh cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(loadData, 30000);
-    return () => clearInterval(interval);
-  }, [loadData]);
+    const interval = setInterval(loadData, 30000)
+    return () => clearInterval(interval)
+  }, [loadData])
 
   // Debounce búsqueda
-  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [searchTimeout, setSearchTimeout] = useState(null)
   function handleSearch(value) {
-    setBusqueda(value);
-    if (searchTimeout) clearTimeout(searchTimeout);
-    setSearchTimeout(setTimeout(() => loadData(), 400));
+    setBusqueda(value)
+    if (searchTimeout) clearTimeout(searchTimeout)
+    setSearchTimeout(setTimeout(() => loadData(), 400))
   }
 
-  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO");
+  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO")
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -210,7 +201,7 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {ordenes.map((o) => {
-                  const retraso = getNivelRetraso(o.estado, o.dias_en_estado);
+                  const retraso = getNivelRetraso(o.estado, o.dias_en_estado)
                   return (
                     <tr
                       key={o.id}
@@ -260,7 +251,7 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-4 py-3 text-slate-300">›</td>
                     </tr>
-                  );
+                  )
                 })}
               </tbody>
             </table>
@@ -276,12 +267,12 @@ export default function DashboardPage() {
         {!loading && vista === "kanban" && (
           <div className="flex gap-3 overflow-x-auto pb-4">
             {estadosActivos.map(([estado, config]) => {
-              const enEstado = ordenes.filter((o) => o.estado === estado);
+              const enEstado = ordenes.filter((o) => o.estado === estado)
               if (
                 enEstado.length === 0 &&
                 !["INGRESADO", "EN_REPARACION", "LISTO_PARA_RETIRO"].includes(estado)
               )
-                return null;
+                return null
               return (
                 <div
                   key={estado}
@@ -302,7 +293,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-2 space-y-1.5 overflow-y-auto flex-1">
                     {enEstado.map((o) => {
-                      const retraso = getNivelRetraso(o.estado, o.dias_en_estado);
+                      const retraso = getNivelRetraso(o.estado, o.dias_en_estado)
                       return (
                         <div
                           key={o.id}
@@ -336,14 +327,14 @@ export default function DashboardPage() {
                             </div>
                           )}
                         </div>
-                      );
+                      )
                     })}
                     {enEstado.length === 0 && (
                       <div className="py-8 text-center text-[11px] text-slate-300">Sin órdenes</div>
                     )}
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         )}
@@ -364,5 +355,5 @@ export default function DashboardPage() {
         />
       )}
     </div>
-  );
+  )
 }

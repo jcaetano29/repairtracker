@@ -1,5 +1,5 @@
 // app/api/cron/recordatorios/route.js
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendNotification } from "@/lib/notifications";
 import { isReminderDue } from "@/lib/notifications/reminder-logic";
 import { NextResponse } from "next/server";
@@ -14,7 +14,7 @@ export async function GET(request) {
   }
 
   // Fetch all delivered orders with client email + service type info
-  const { data: ordenes, error } = await supabaseAdmin
+  const { data: ordenes, error } = await getSupabaseAdmin()
     .from("ordenes")
     .select(`
       id,
@@ -32,7 +32,7 @@ export async function GET(request) {
   }
 
   // Fetch service types with their cycles
-  const { data: tiposServicio } = await supabaseAdmin
+  const { data: tiposServicio } = await getSupabaseAdmin()
     .from("tipos_servicio")
     .select("nombre, ciclo_meses")
     .eq("activo", true);
@@ -47,7 +47,7 @@ export async function GET(request) {
   const today = new Date();
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
 
-  const { data: yaEnviados } = await supabaseAdmin
+  const { data: yaEnviados } = await getSupabaseAdmin()
     .from("notificaciones_enviadas")
     .select("orden_id")
     .eq("tipo_notificacion", "RECORDATORIO_MANTENIMIENTO")
@@ -91,7 +91,7 @@ export async function GET(request) {
       });
 
       // Record that we sent it
-      await supabaseAdmin.from("notificaciones_enviadas").insert({
+      await getSupabaseAdmin().from("notificaciones_enviadas").insert({
         orden_id: orden.id,
         cliente_id: orden.clientes.id,
         tipo_notificacion: "RECORDATORIO_MANTENIMIENTO",

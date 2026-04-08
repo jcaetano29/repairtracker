@@ -1,12 +1,12 @@
 // app/seguimiento/[token]/page.js
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { ESTADOS, formatFecha, formatNumeroOrden } from "@/lib/constants";
 import { notFound } from "next/navigation";
 
 export default async function SeguimientoPage({ params }) {
   const { token } = await params;
 
-  const { data: orden, error } = await supabaseAdmin
+  const { data: orden, error } = await getSupabaseAdmin()
     .from("ordenes")
     .select("*, clientes(nombre), talleres(nombre)")
     .eq("tracking_token", token)

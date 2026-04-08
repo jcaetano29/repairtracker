@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { NextResponse } from "next/server";
 
@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+  const { data, error } = await getSupabaseAdmin().auth.admin.listUsers();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const users = data.users.map((u) => ({
@@ -52,7 +52,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 
-  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+  const { data, error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
     data: { role }, // sets user_metadata
   });
 
@@ -63,7 +63,7 @@ export async function POST(request) {
   }
 
   // Set app_metadata.role (more secure than user_metadata)
-  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
+  const { error: updateError } = await getSupabaseAdmin().auth.admin.updateUserById(data.user.id, {
     app_metadata: { role },
   });
 
@@ -90,7 +90,7 @@ export async function DELETE(request) {
   const { userId } = body;
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
 
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+  const { error } = await getSupabaseAdmin().auth.admin.deleteUser(userId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });

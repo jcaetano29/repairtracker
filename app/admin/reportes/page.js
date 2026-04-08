@@ -18,14 +18,17 @@ function StatBox({ label, value, sub, color = "#6366f1" }) {
 export default function ReportesPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     getReportesStats()
       .then(setStats)
+      .catch(() => setError("Error cargando reportes"))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="text-center py-12 text-slate-400">Cargando reportes...</div>;
+  if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
   if (!stats) return null;
 
   const topTipos = Object.entries(stats.porTipo)
@@ -98,7 +101,7 @@ export default function ReportesPage() {
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-400 rounded-full"
-                      style={{ width: `${(count / stats.totalOrdenes) * 100}%` }}
+                      style={{ width: `${stats.totalOrdenes > 0 ? (count / stats.totalOrdenes) * 100 : 0}%` }}
                     />
                   </div>
                 </div>

@@ -1,61 +1,77 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
 
 export default function UsuariosPage() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showInvite, setShowInvite] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: "", role: "empleado" });
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ username: "", password: "", role: "empleado" })
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
 
   async function loadUsers() {
-    setLoading(true);
+    setLoading(true)
     try {
-      const res = await fetch("/api/admin/usuarios");
-      const { users } = await res.json();
-      setUsers(users || []);
+      const res = await fetch("/api/admin/usuarios")
+      const { users } = await res.json()
+      setUsers(users || [])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => { loadUsers() }, [])
 
-  async function handleInvite(e) {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
+  async function handleCreate(e) {
+    e.preventDefault()
+    setError(null)
+    setSuccess(null)
     try {
       const res = await fetch("/api/admin/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inviteForm),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSuccess(`Invitación enviada a ${inviteForm.email}`);
-      setShowInvite(false);
-      setInviteForm({ email: "", role: "empleado" });
-      await loadUsers();
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setSuccess(`Usuario "${form.username}" creado correctamente`)
+      setShowForm(false)
+      setForm({ username: "", password: "", role: "empleado" })
+      await loadUsers()
     } catch (e) {
-      setError(e.message);
+      setError(e.message)
     }
   }
 
-  async function handleDelete(userId, email) {
-    if (!confirm(`¿Eliminar el usuario ${email}?`)) return;
+  async function handleRoleChange(userId, newRole) {
+    setError(null)
+    try {
+      const res = await fetch("/api/admin/usuarios", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, role: newRole }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      await loadUsers()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleDelete(userId, username) {
+    if (!confirm(`¿Eliminar el usuario "${username}"?`)) return
+    setError(null)
     try {
       const res = await fetch("/api/admin/usuarios", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error);
-      await loadUsers();
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      await loadUsers()
     } catch (e) {
-      setError(e.message);
+      setError(e.message)
     }
   }
 
@@ -64,39 +80,65 @@ export default function UsuariosPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Usuarios</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Invitá y gestioná el acceso al sistema</p>
+          <p className="text-sm text-slate-500 mt-0.5">Gestioná el acceso al sistema</p>
         </div>
         <button
-          onClick={() => setShowInvite(true)}
+          onClick={() => { setShowForm(true); setError(null); setSuccess(null) }}
           className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 transition-colors"
         >
-          + Invitar usuario
+          + Nuevo usuario
         </button>
       </div>
 
-      {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
-      {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">{success}</div>}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+          {success}
+        </div>
+      )}
 
-      {showInvite && (
-        <form onSubmit={handleInvite} className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
-          <h3 className="font-semibold text-slate-900 mb-4">Invitar nuevo usuario</h3>
-          <div className="grid grid-cols-2 gap-4">
+      {showForm && (
+        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
+          <h3 className="font-semibold text-slate-900 mb-4">Crear nuevo usuario</h3>
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Email</label>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Usuario
+              </label>
               <input
-                type="email"
+                type="text"
                 required
-                value={inviteForm.email}
-                onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                placeholder="empleado@email.com"
+                placeholder="nombreusuario"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Rol</label>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                placeholder="mínimo 6 caracteres"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Rol
+              </label>
               <select
-                value={inviteForm.role}
-                onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
               >
                 <option value="empleado">Empleado</option>
@@ -105,10 +147,17 @@ export default function UsuariosPage() {
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <button type="submit" className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600">
-              Enviar invitación
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600"
+            >
+              Crear usuario
             </button>
-            <button type="button" onClick={() => setShowInvite(false)} className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600"
+            >
               Cancelar
             </button>
           </div>
@@ -122,33 +171,38 @@ export default function UsuariosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">Email</th>
-                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rol</th>
-                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">Último acceso</th>
-                <th className="px-4 py-3"></th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Usuario
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Rol
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Creado
+                </th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{u.email}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900">{u.username}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      u.role === "dueno"
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "bg-slate-100 text-slate-600"
-                    }`}>
-                      {u.role === "dueno" ? "Dueño" : "Empleado"}
-                    </span>
+                    <select
+                      value={u.role}
+                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                      className="px-2 py-0.5 rounded-full text-xs font-semibold border-0 cursor-pointer focus:ring-2 focus:ring-indigo-500/20 bg-transparent"
+                    >
+                      <option value="empleado">Empleado</option>
+                      <option value="dueno">Dueño</option>
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs">
-                    {u.last_sign_in_at
-                      ? new Date(u.last_sign_in_at).toLocaleDateString("es-UY")
-                      : "Nunca"}
+                    {new Date(u.created_at).toLocaleDateString("es-UY")}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => handleDelete(u.id, u.email)}
+                      onClick={() => handleDelete(u.id, u.username)}
                       className="text-xs text-red-500 hover:text-red-700 font-medium"
                     >
                       Eliminar
@@ -156,10 +210,17 @@ export default function UsuariosPage() {
                   </td>
                 </tr>
               ))}
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-sm">
+                    No hay usuarios creados
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       )}
     </div>
-  );
+  )
 }

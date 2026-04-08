@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/Badge";
 import { StatCard } from "@/components/StatCard";
 import { NuevoIngresoModal } from "@/components/NuevoIngresoModal";
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal";
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants";
 import { getOrdenes, getStats, getTalleres } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [ordenes, setOrdenes] = useState([]);
   const [stats, setStatsState] = useState({ activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 });
   const [talleres, setTalleresState] = useState([]);
@@ -19,6 +22,12 @@ export default function DashboardPage() {
   const [showNuevo, setShowNuevo] = useState(false);
   const [selectedOrden, setSelectedOrden] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   const loadData = useCallback(async () => {
     try {
@@ -79,6 +88,12 @@ export default function DashboardPage() {
               className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
             >
               + Nuevo Ingreso
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"
+            >
+              Salir
             </button>
           </div>
         </div>

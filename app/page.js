@@ -24,7 +24,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout failed:", error);
+    }
     router.push("/login");
     router.refresh();
   }

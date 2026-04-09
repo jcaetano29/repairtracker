@@ -46,7 +46,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
-    if (!nuevoCliente.nombre || !nuevoCliente.telefono) return;
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim()) return;
     setLoading(true);
     try {
       const cliente = await crearCliente(nuevoCliente);

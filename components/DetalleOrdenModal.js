@@ -79,7 +79,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
   }
 
   async function handlePresupuesto() {
-    if (!monto) return;
+    if (!monto || parseFloat(monto) <= 0) return;
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto));
@@ -214,6 +214,8 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
               <div className="text-sm font-semibold text-cyan-900">Registrar presupuesto</div>
               <input
                 type="number"
+                min="0"
+                step="0.01"
                 placeholder="Monto en UYU"
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
@@ -237,6 +239,8 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
               <div className="text-sm font-semibold text-green-900">Registrar entrega</div>
               <input
                 type="number"
+                min="0"
+                step="0.01"
                 placeholder={`Monto final (${orden.monto_presupuesto || ""})`}
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}

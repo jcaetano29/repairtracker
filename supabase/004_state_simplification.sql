@@ -75,6 +75,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop and recreate the trigger for log_estado_change()
+DROP TRIGGER IF EXISTS tr_ordenes_estado ON ordenes;
+CREATE TRIGGER tr_ordenes_estado
+  BEFORE UPDATE ON ordenes
+  FOR EACH ROW EXECUTE FUNCTION log_estado_change();
+
+-- 6a. Recreate log_estado_insert() function and trigger
+CREATE OR REPLACE FUNCTION log_estado_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO historial_estados (orden_id, estado_anterior, estado_nuevo)
+  VALUES (NEW.id, NULL, NEW.estado);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_ordenes_insert ON ordenes;
+CREATE TRIGGER tr_ordenes_insert
+  AFTER INSERT ON ordenes
+  FOR EACH ROW EXECUTE FUNCTION log_estado_insert();
+
 -- 7. Recreate v_ordenes_dashboard view
 CREATE OR REPLACE VIEW v_ordenes_dashboard AS
 SELECT
@@ -110,9 +131,9 @@ SELECT
   -- Retraso
   CASE
     WHEN o.estado = 'INGRESADO'
-         AND NOW() - o.updated_at > INTERVAL '3 days' THEN 'leve'
-    WHEN o.estado = 'INGRESADO'
          AND NOW() - o.updated_at > INTERVAL '6 days' THEN 'grave'
+    WHEN o.estado = 'INGRESADO'
+         AND NOW() - o.updated_at > INTERVAL '3 days' THEN 'leve'
     WHEN o.estado = 'EN_TALLER'
          AND NOW() - o.updated_at > INTERVAL '10 days' THEN 'grave'
     WHEN o.estado = 'EN_TALLER'

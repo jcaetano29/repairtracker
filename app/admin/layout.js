@@ -25,6 +25,7 @@ export default function AdminLayout({ children }) {
           <nav className="flex gap-1">
             {[
               { href: "/admin/tipos-servicio", label: "⚙️ Tipos de servicio" },
+              { href: "/admin/talleres", label: "🏪 Talleres" },
               { href: "/admin/usuarios", label: "👤 Usuarios" },
               { href: "/admin/reportes", label: "📊 Reportes" },
             ].map(({ href, label }) => (

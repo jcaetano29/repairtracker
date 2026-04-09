@@ -27,6 +27,7 @@ export default function AdminLayout({ children }) {
               { href: "/admin/tipos-servicio", label: "⚙️ Tipos de servicio" },
               { href: "/admin/talleres", label: "🏪 Talleres" },
               { href: "/admin/usuarios", label: "👤 Usuarios" },
+              { href: "/admin/sucursales", label: "🏢 Sucursales" },
               { href: "/admin/reportes", label: "📊 Reportes" },
             ].map(({ href, label }) => (
               <Link

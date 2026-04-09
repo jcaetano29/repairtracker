@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
@@ -22,6 +22,8 @@ export default function DashboardPage() {
   const [filtroEstado, setFiltroEstado] = useState("TODOS")
   const [filtroTaller, setFiltroTaller] = useState("TODOS")
   const [busqueda, setBusqueda] = useState("")
+  const [debouncedBusqueda, setDebouncedBusqueda] = useState("")
+  const searchTimeoutRef = useRef(null)
   const [vista, setVista] = useState("tabla")
   const [showNuevo, setShowNuevo] = useState(false)
   const [selectedOrden, setSelectedOrden] = useState(null)
@@ -37,7 +39,8 @@ export default function DashboardPage() {
         getOrdenes({
           estado: filtroEstado,
           taller_id: filtroTaller,
-          busqueda: busqueda || undefined,
+          busqueda: debouncedBusqueda || undefined,
+          incluirEntregados: filtroEstado === "ENTREGADO",
         }),
         getStats(),
         getTalleres(),
@@ -50,7 +53,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [filtroEstado, filtroTaller, busqueda])
+  }, [filtroEstado, filtroTaller, debouncedBusqueda])
 
   useEffect(() => {
     loadData()
@@ -62,15 +65,13 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [loadData])
 
-  // Debounce búsqueda
-  const [searchTimeout, setSearchTimeout] = useState(null)
   function handleSearch(value) {
     setBusqueda(value)
-    if (searchTimeout) clearTimeout(searchTimeout)
-    setSearchTimeout(setTimeout(() => loadData(), 400))
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    searchTimeoutRef.current = setTimeout(() => setDebouncedBusqueda(value), 400)
   }
 
-  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO")
+  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO" && k !== "RECHAZADO")
 
   return (
     <div className="min-h-screen bg-slate-100">

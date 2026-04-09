@@ -87,8 +87,20 @@ export default function ReportesPage() {
         />
       </div>
 
-      {/* Second row: Retraso + Rechazo */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      {/* Second row: Revenue histórica + Ticket promedio */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <StatBox
+          label="Ingresos históricos"
+          value={`$${Math.round(stats.ingresosHistoricos).toLocaleString("es-UY")}`}
+          sub="UYU — total facturado"
+          color="#10b981"
+        />
+        <StatBox
+          label="Ticket promedio"
+          value={stats.ticketPromedio !== null ? `$${stats.ticketPromedio.toLocaleString("es-UY")}` : "—"}
+          sub="UYU — por orden entregada"
+          color="#6366f1"
+        />
         <StatBox
           label="Órdenes con retraso"
           value={stats.ordenesConRetraso}
@@ -96,9 +108,9 @@ export default function ReportesPage() {
           color={stats.ordenesConRetraso > 0 ? "#ef4444" : "#22c55e"}
         />
         <StatBox
-          label="Tasa de rechazo"
-          value={stats.tasaRechazo !== null ? `${stats.tasaRechazo}%` : "—"}
-          sub="presupuestos rechazados"
+          label="Presupuestos rechazados"
+          value={stats.totalRechazadas}
+          sub={stats.tasaRechazo !== null ? `${stats.tasaRechazo}% de tasa de rechazo` : "total histórico"}
           color={stats.tasaRechazo > 30 ? "#ef4444" : "#64748b"}
         />
       </div>

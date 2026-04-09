@@ -46,7 +46,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
-    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim()) return;
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.email.trim()) return;
     setLoading(true);
     try {
       const cliente = await crearCliente(nuevoCliente);
@@ -199,7 +199,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-                  Email (opcional)
+                  Email *
                 </label>
                 <input
                   type="email"
@@ -211,7 +211,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <button
                 onClick={handleCrearCliente}
-                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || loading}
+                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || loading}
                 className="w-full py-3 bg-indigo-500 text-white rounded-lg font-semibold text-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creando..." : "Crear cliente y continuar →"}

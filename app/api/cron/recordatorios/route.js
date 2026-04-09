@@ -6,8 +6,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
   // Verify secret token to prevent unauthorized calls
-  const { searchParams } = new URL(request.url);
-  const secret = searchParams.get("secret");
+  // Vercel sends: Authorization: Bearer <CRON_SECRET>
+  const authHeader = request.headers.get("authorization");
+  const secret = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
   if (secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,0 +1,5 @@
+{"type":"server-started","port":49344,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:49344","screen_dir":"/Users/joaquincaetano/gitrepo/.superpowers/brainstorm/17023-1775699025/content","state_dir":"/Users/joaquincaetano/gitrepo/.superpowers/brainstorm/17023-1775699025/state"}
+{"type":"screen-added","file":"/Users/joaquincaetano/gitrepo/.superpowers/brainstorm/17023-1775699025/content/flujo-final.html"}
+{"type":"screen-added","file":"/Users/joaquincaetano/gitrepo/.superpowers/brainstorm/17023-1775699025/content/flujo-final-v2.html"}
+{"type":"screen-added","file":"/Users/joaquincaetano/gitrepo/.superpowers/brainstorm/17023-1775699025/content/notificaciones.html"}
+{"type":"server-stopped","reason":"idle timeout"}

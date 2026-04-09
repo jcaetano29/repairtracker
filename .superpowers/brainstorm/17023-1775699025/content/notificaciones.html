@@ -1,0 +1,46 @@
+<h2>Notificaciones al cliente — estado actual</h2>
+<p class="subtitle">Ya existe la infraestructura. Solo funciona si el cliente tiene email registrado.</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
+    <div style="font-size:20px;">📥</div>
+    <div>
+      <div style="font-weight:700;font-size:13px;">ORDEN_CREADA</div>
+      <div style="font-size:12px;color:#374151;margin-top:2px;">Se dispara automáticamente al crear una orden. El cliente recibe confirmación con los datos del artículo.</div>
+      <div style="font-size:11px;color:#16a34a;margin-top:4px;">✓ Activo</div>
+    </div>
+  </div>
+
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
+    <div style="font-size:20px;">🎉</div>
+    <div>
+      <div style="font-weight:700;font-size:13px;">LISTO_PARA_RETIRO</div>
+      <div style="font-size:12px;color:#374151;margin-top:2px;">Se dispara cuando la orden pasa a "Listo para Retiro". El cliente recibe aviso para ir a buscar el artículo.</div>
+      <div style="font-size:11px;color:#16a34a;margin-top:4px;">✓ Activo</div>
+    </div>
+  </div>
+
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
+    <div style="font-size:20px;">🔔</div>
+    <div>
+      <div style="font-weight:700;font-size:13px;">RECORDATORIO_MANTENIMIENTO</div>
+      <div style="font-size:12px;color:#374151;margin-top:2px;">Cron job periódico. Recuerda al cliente cuando el ciclo de mantenimiento de su artículo está próximo a vencer.</div>
+      <div style="font-size:11px;color:#16a34a;margin-top:4px;">✓ Activo (cron)</div>
+    </div>
+  </div>
+
+  <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
+    <div style="font-size:20px;">📞</div>
+    <div>
+      <div style="font-weight:700;font-size:13px;">ESPERANDO_APROBACION → ¿notificamos?</div>
+      <div style="font-size:12px;color:#374151;margin-top:2px;">Cuando llega el presupuesto del taller, hoy el local llama al cliente por teléfono. ¿Queremos agregar un email automático también?</div>
+      <div style="font-size:11px;color:#b45309;margin-top:4px;">⚠ No existe — oportunidad de mejora</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#f1f5f9;border-radius:10px;padding:14px;font-size:12px;color:#475569;">
+  <strong>Nota técnica:</strong> Si el cliente no tiene email registrado, las notificaciones se omiten silenciosamente. No hay soporte para SMS o WhatsApp aún (la arquitectura está preparada para agregarlo).
+</div>

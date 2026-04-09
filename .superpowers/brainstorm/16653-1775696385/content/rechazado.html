@@ -1,0 +1,52 @@
+<h2>¿Qué pasa cuando el cliente rechaza el presupuesto?</h2>
+<p class="subtitle">En el flujo actual existe el estado "Rechazado". ¿Lo mantenemos en el flujo simplificado?</p>
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:24px;">
+  <div class="label" style="margin-bottom:12px;">Flujo opción C (confirmado)</div>
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
+    <span style="background:#eef2ff;color:#6366f1;padding:4px 10px;border-radius:20px;font-weight:600;">📥 Ingresado</span>
+    <span style="color:#94a3b8">→</span>
+    <span style="background:#f5f3ff;color:#8b5cf6;padding:4px 10px;border-radius:20px;font-weight:600;">🚚 En Taller</span>
+    <span style="color:#94a3b8">o</span>
+    <span style="background:#eff6ff;color:#3b82f6;padding:4px 10px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+    <span style="color:#94a3b8">→</span>
+    <span style="background:#fff7ed;color:#f97316;padding:4px 10px;border-radius:20px;font-weight:600;">📞 Esp. Aprobación</span>
+    <span style="color:#94a3b8">→</span>
+    <span style="background:#f0fdf4;color:#22c55e;padding:4px 10px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+    <span style="color:#94a3b8">→</span>
+    <span style="background:#f8fafc;color:#64748b;padding:4px 10px;border-radius:20px;font-weight:600;">✅ Entregado</span>
+  </div>
+</div>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Sí, mantener "Rechazado"</h3>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:12px;">
+        <span style="background:#fff7ed;color:#f97316;padding:3px 9px;border-radius:20px;font-weight:600;">📞 Esp. Aprobación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#fef2f2;color:#ef4444;padding:3px 9px;border-radius:20px;font-weight:600;">✗ Rechazado</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:3px 9px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+      </div>
+      <p>El cliente rechaza el presupuesto → se devuelve el artículo sin reparar. Útil para trackear cuántos presupuestos se rechazan y por qué.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>No, ir directo a "Listo para Retiro"</h3>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:12px;">
+        <span style="background:#fff7ed;color:#f97316;padding:3px 9px;border-radius:20px;font-weight:600;">📞 Esp. Aprobación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:3px 9px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+        <span style="color:#94a3b8">(sin reparar)</span>
+      </div>
+      <p>Si rechazan, directamente se mueve a "Listo para Retiro" — el artículo espera que lo vengan a buscar. Menos estados, más simple. El rechazo queda en las notas o en el historial.</p>
+    </div>
+  </div>
+
+</div>

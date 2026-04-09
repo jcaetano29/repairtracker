@@ -1,0 +1,75 @@
+<h2>Flujo simplificado — confirmá el diseño</h2>
+<p class="subtitle">Dos caminos posibles desde el ingreso. El presupuesto es un campo que se puede cargar en cualquier momento.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+
+  <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:16px;">
+    <div class="label" style="color:#16a34a;margin-bottom:12px;">📍 Camino 1 — Reparación en el local</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;">
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;">
+        📥 <strong>Ingresado</strong>
+        <div style="color:#6366f1;font-size:10px;margin-top:2px;">+ presupuesto opcional (si ya lo saben)</div>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ dan presupuesto y cliente aprueba</div>
+      <div style="background:white;border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;">
+        🔧 <strong>En Reparación</strong>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ reparación lista</div>
+      <div style="background:white;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;">
+        🎉 <strong>Listo para Retiro</strong>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:10px;">↓</div>
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;">
+        ✅ <strong>Entregado</strong>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#faf5ff;border:2px solid #d8b4fe;border-radius:12px;padding:16px;">
+    <div class="label" style="color:#7c3aed;margin-bottom:12px;">🚚 Camino 2 — Envío a taller externo</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;">
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;">
+        📥 <strong>Ingresado</strong>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ se envía al taller</div>
+      <div style="background:white;border:1px solid #e9d5ff;border-radius:8px;padding:8px 12px;">
+        🚚 <strong>En Taller</strong>
+        <div style="color:#7c3aed;font-size:10px;margin-top:2px;">campo: taller asignado</div>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ llega presupuesto del taller</div>
+      <div style="background:white;border:1px solid #fed7aa;border-radius:8px;padding:8px 12px;">
+        📞 <strong>Esperando Aprobación</strong>
+        <div style="color:#ea580c;font-size:10px;margin-top:2px;">+ monto presupuesto</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px;">
+        <div>
+          <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ aprueba</div>
+          <div style="background:white;border:1px solid #bfdbfe;border-radius:8px;padding:6px 10px;font-size:11px;">🔧 En Reparación</div>
+          <div style="text-align:center;color:#94a3b8;font-size:10px;">↓</div>
+          <div style="background:white;border:1px solid #bbf7d0;border-radius:8px;padding:6px 10px;font-size:11px;">🎉 Listo p/Retiro</div>
+          <div style="text-align:center;color:#94a3b8;font-size:10px;">↓</div>
+          <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;font-size:11px;">✅ Entregado</div>
+        </div>
+        <div>
+          <div style="text-align:center;color:#94a3b8;font-size:10px;">↓ rechaza</div>
+          <div style="background:white;border:1px solid #fecaca;border-radius:8px;padding:6px 10px;font-size:11px;">✗ Rechazado</div>
+          <div style="text-align:center;color:#94a3b8;font-size:10px;">↓</div>
+          <div style="background:white;border:1px solid #bbf7d0;border-radius:8px;padding:6px 10px;font-size:11px;">🎉 Listo p/Retiro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:14px;font-size:13px;">
+  <strong>Estados eliminados del flujo actual:</strong>
+  <span style="text-decoration:line-through;color:#94a3b8;margin-left:8px;">⏳ Esperando Presupuesto</span>
+  <span style="text-decoration:line-through;color:#94a3b8;margin-left:8px;">💰 Presupuesto Recibido</span>
+  <span style="text-decoration:line-through;color:#94a3b8;margin-left:8px;">✓ Listo en Taller</span>
+  <div style="margin-top:6px;color:#713f12;font-size:12px;">Los estados de taller se condensan en uno solo. El presupuesto es un campo, no un estado.</div>
+</div>
+
+<div style="margin-top:16px;background:#f1f5f9;border-radius:10px;padding:14px;font-size:13px;">
+  <strong>¿Te parece bien este flujo?</strong> Respondé en el terminal para continuar con el diseño del formulario de ingreso.
+</div>

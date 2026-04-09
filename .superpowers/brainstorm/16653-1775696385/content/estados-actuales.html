@@ -1,0 +1,89 @@
+<h2>¿Cómo simplificamos los estados?</h2>
+<p class="subtitle">Actualmente hay 10 estados. Revisá el flujo actual y las 3 propuestas.</p>
+
+<div class="section">
+  <div class="label">Flujo actual (10 estados)</div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:8px;overflow-x:auto;">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
+      <span style="background:#eef2ff;color:#6366f1;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">📥 Ingresado</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#fffbeb;color:#f59e0b;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">⏳ Esp. Presupuesto</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#f5f3ff;color:#8b5cf6;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">🚚 Enviado a Taller</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#ecfeff;color:#06b6d4;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">💰 Presup. Recibido</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#fff7ed;color:#f97316;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">📞 Esp. Aprobación</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#eff6ff;color:#3b82f6;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">🔧 En Reparación</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#f0fdfa;color:#14b8a6;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">✓ Listo en Taller</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#f0fdf4;color:#22c55e;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">🎉 Listo p/Retiro</span>
+      <span style="color:#94a3b8">→</span>
+      <span style="background:#f8fafc;color:#64748b;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">✅ Entregado</span>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:#94a3b8;">+ Rechazado (desde Esp. Aprobación) · + atajos directos INGRESADO→TALLER, INGRESADO→LISTO</div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:24px;">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Flujo mínimo — 4 estados</h3>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:12px;">
+        <span style="background:#eef2ff;color:#6366f1;padding:3px 9px;border-radius:20px;font-weight:600;">📥 Ingresado</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#eff6ff;color:#3b82f6;padding:3px 9px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:3px 9px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f8fafc;color:#64748b;padding:3px 9px;border-radius:20px;font-weight:600;">✅ Entregado</span>
+      </div>
+      <p>El taller y el presupuesto son <strong>campos opcionales</strong> en la orden, no estados separados. Sin aprobación de cliente (se gestiona por teléfono). Ideal si la mayoría de los casos son simples.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Flujo con aprobación — 5 estados</h3>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:12px;">
+        <span style="background:#eef2ff;color:#6366f1;padding:3px 9px;border-radius:20px;font-weight:600;">📥 Ingresado</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#fff7ed;color:#f97316;padding:3px 9px;border-radius:20px;font-weight:600;">📞 Esperando Aprobación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#eff6ff;color:#3b82f6;padding:3px 9px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:3px 9px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f8fafc;color:#64748b;padding:3px 9px;border-radius:20px;font-weight:600;">✅ Entregado</span>
+      </div>
+      <p>Se mantiene la aprobación cuando hay presupuesto que confirmar. El taller es un <strong>campo</strong>, no un estado. Buen balance: menos estados, pero sigue trackeando la aprobación del cliente.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Flujo con taller separado — 6 estados</h3>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0;font-size:12px;">
+        <span style="background:#eef2ff;color:#6366f1;padding:3px 9px;border-radius:20px;font-weight:600;">📥 Ingresado</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f5f3ff;color:#8b5cf6;padding:3px 9px;border-radius:20px;font-weight:600;">🚚 En Taller</span>
+        <span style="color:#94a3b8">o</span>
+        <span style="background:#eff6ff;color:#3b82f6;padding:3px 9px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#fff7ed;color:#f97316;padding:3px 9px;border-radius:20px;font-weight:600;">📞 Esp. Aprobación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:3px 9px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f8fafc;color:#64748b;padding:3px 9px;border-radius:20px;font-weight:600;">✅ Entregado</span>
+      </div>
+      <p>Mantiene visibilidad de qué está en taller externo vs en el local. Elimina los estados redundantes (<em>Esperando Presupuesto, Presupuesto Recibido, Listo en Taller</em>). Requiere migrar datos existentes.</p>
+    </div>
+  </div>
+
+</div>

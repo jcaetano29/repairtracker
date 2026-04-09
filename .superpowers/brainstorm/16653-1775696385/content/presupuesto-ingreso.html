@@ -1,0 +1,46 @@
+<h2>Presupuesto en el ingreso — ¿qué implica?</h2>
+<p class="subtitle">El cliente trae su propio presupuesto. ¿Eso significa que ya aprobó, o igual pasa por aprobación?</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Presupuesto en ingreso = aprobación implícita</h3>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0;font-size:12px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:11px;">
+          📥 <strong>Ingresado</strong><br>
+          <span style="color:#6366f1;font-size:10px;">+ presupuesto $xxx</span>
+        </div>
+        <span style="color:#22c55e;font-weight:700;font-size:16px;">→</span>
+        <span style="background:#eff6ff;color:#3b82f6;padding:4px 10px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:4px 10px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f8fafc;color:#64748b;padding:4px 10px;border-radius:20px;font-weight:600;">✅ Entregado</span>
+      </div>
+      <p>Si se carga el monto en el ingreso, se <strong>saltea</strong> "Esperando Aprobación" — el cliente ya dio el OK en persona. Flujo más corto y directo para la mayoría de los casos del local.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Presupuesto es solo un dato, siempre se confirma</h3>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0;font-size:12px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:11px;">
+          📥 <strong>Ingresado</strong><br>
+          <span style="color:#6366f1;font-size:10px;">+ presupuesto $xxx</span>
+        </div>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#eff6ff;color:#3b82f6;padding:4px 10px;border-radius:20px;font-weight:600;">🔧 En Reparación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#fff7ed;color:#f97316;padding:4px 10px;border-radius:20px;font-weight:600;">📞 Esp. Aprobación</span>
+        <span style="color:#94a3b8">→</span>
+        <span style="background:#f0fdf4;color:#22c55e;padding:4px 10px;border-radius:20px;font-weight:600;">🎉 Listo p/Retiro</span>
+      </div>
+      <p>El presupuesto en ingreso es solo informativo. El estado "Esperando Aprobación" siempre aparece como paso obligatorio. Más control pero más clics.</p>
+    </div>
+  </div>
+
+</div>

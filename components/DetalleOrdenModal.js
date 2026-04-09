@@ -3,15 +3,16 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres } from "@/lib/data";
+import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden } from "@/lib/data";
 
-export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
+export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
   const [loading, setLoading] = useState(false);
   const [historial, setHistorial] = useState([]);
   const [talleres, setTalleresState] = useState([]);
   const [showAsignar, setShowAsignar] = useState(false);
   const [showPresupuesto, setShowPresupuesto] = useState(false);
   const [showEntrega, setShowEntrega] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [monto, setMonto] = useState("");
   const [tallerSelected, setTallerSelected] = useState("");
   const [metodoPago, setMetodoPago] = useState("efectivo");
@@ -100,6 +101,21 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
       onClose();
     } catch (e) {
       setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteOrden(orden.id);
+      onUpdated();
+      onClose();
+    } catch (e) {
+      setError(e.message);
+      setShowConfirmDelete(false);
     } finally {
       setLoading(false);
     }
@@ -290,6 +306,40 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated }) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Eliminar orden — solo dueños */}
+          {isDueno && (
+            <div className="pt-2 border-t border-slate-100">
+              {!showConfirmDelete ? (
+                <button
+                  onClick={() => setShowConfirmDelete(true)}
+                  className="text-xs text-red-400 hover:text-red-600 transition-colors"
+                >
+                  Eliminar orden
+                </button>
+              ) : (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg space-y-2">
+                  <div className="text-sm font-semibold text-red-800">¿Eliminar esta orden?</div>
+                  <div className="text-xs text-red-600">Esta acción no se puede deshacer.</div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDelete}
+                      disabled={loading}
+                      className="flex-1 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+                    >
+                      {loading ? "..." : "Sí, eliminar"}
+                    </button>
+                    <button
+                      onClick={() => setShowConfirmDelete(false)}
+                      className="px-4 py-2 border rounded-lg text-sm"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

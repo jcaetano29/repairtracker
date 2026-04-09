@@ -375,6 +375,7 @@ export default function DashboardPage() {
           orden={selectedOrden}
           onClose={() => setSelectedOrden(null)}
           onUpdated={() => loadData()}
+          isDueno={isDueno}
         />
       )}
     </div>

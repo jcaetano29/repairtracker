@@ -13,37 +13,26 @@ export async function GET(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch all delivered orders with client email + service type info
+  // Fetch delivered orders that have a service type linked, with client email
   const { data: ordenes, error } = await getSupabaseAdmin()
     .from("ordenes")
     .select(`
       id,
       tipo_articulo,
       fecha_entrega,
-      clientes(id, nombre, email)
+      clientes(id, nombre, email),
+      tipos_servicio(nombre, ciclo_meses)
     `)
     .eq("estado", "ENTREGADO")
     .not("fecha_entrega", "is", null)
-    .not("clientes.email", "is", null);
+    .not("tipo_servicio_id", "is", null);
 
   if (error) {
     console.error("[Cron] Error fetching orders:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Fetch service types with their cycles
-  const { data: tiposServicio } = await getSupabaseAdmin()
-    .from("tipos_servicio")
-    .select("nombre, ciclo_meses")
-    .eq("activo", true);
-
-  // Build a map: tipo nombre → ciclo_meses
-  const cicloMap = {};
-  tiposServicio?.forEach((t) => {
-    cicloMap[t.nombre.toLowerCase()] = t.ciclo_meses;
-  });
-
-  // Check which orders already have a pending reminder sent this month
+  // Check which orders already have a reminder sent this month
   const today = new Date();
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
 
@@ -59,30 +48,17 @@ export async function GET(request) {
   const errors = [];
 
   for (const orden of ordenes || []) {
-    if (yaEnviadosSet.has(orden.id)) continue; // already sent this month
+    if (yaEnviadosSet.has(orden.id)) continue;
     if (!orden.clientes?.email) continue;
+    if (!orden.tipos_servicio?.ciclo_meses) continue;
 
-    // Find matching service cycle by tipo_articulo
-    const articulo = orden.tipo_articulo.toLowerCase();
-    let cicloMeses = null;
-
-    // Try exact match first, then partial match
-    for (const [nombre, ciclo] of Object.entries(cicloMap)) {
-      if (articulo.includes(nombre) || nombre.includes(articulo)) {
-        cicloMeses = ciclo;
-        break;
-      }
-    }
-
-    if (!cicloMeses) continue; // no matching service type configured
-
-    if (!isReminderDue(orden.fecha_entrega, cicloMeses)) continue;
+    if (!isReminderDue(orden.fecha_entrega, orden.tipos_servicio.ciclo_meses)) continue;
 
     try {
       await sendNotification("RECORDATORIO_MANTENIMIENTO", {
         clienteEmail: orden.clientes.email,
         clienteNombre: orden.clientes.nombre,
-        tipoServicio: orden.tipo_articulo,
+        tipoServicio: orden.tipos_servicio.nombre,
         ultimaFecha: new Date(orden.fecha_entrega).toLocaleDateString("es-UY", {
           day: "2-digit",
           month: "long",

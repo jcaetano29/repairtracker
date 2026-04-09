@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { TIPOS_ARTICULO } from "@/lib/constants";
-import { buscarClientes, crearCliente, crearOrden } from "@/lib/data";
+import { buscarClientes, crearCliente, crearOrden, getTiposServicio } from "@/lib/data";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const [step, setStep] = useState(1); // 1: cliente, 2: artículo
@@ -19,7 +19,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     notas_internas: "",
     nombre_articulo: "",
     monto_presupuesto: "",
+    tipo_servicio_id: "",
   });
+  const [tiposServicio, setTiposServicio] = useState([]);
+
+  useEffect(() => {
+    getTiposServicio().then(setTiposServicio).catch(() => {});
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
@@ -80,6 +86,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         notas_internas: form.notas_internas,
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
+        tipo_servicio_id: form.tipo_servicio_id || null,
       });
       onCreated(orden);
       onClose();
@@ -336,6 +343,29 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
+
+              {tiposServicio.length > 0 && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                    Tipo de servicio (opcional)
+                  </label>
+                  <select
+                    value={form.tipo_servicio_id}
+                    onChange={(e) => setForm({ ...form, tipo_servicio_id: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  >
+                    <option value="">Sin recordatorio de mantenimiento</option>
+                    {tiposServicio.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.nombre} — cada {t.ciclo_meses} meses
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Si seleccionás un servicio, el cliente recibirá un recordatorio por email cuando sea hora de renovarlo.
+                  </p>
+                </div>
+              )}
 
               <button
                 onClick={handleSubmit}

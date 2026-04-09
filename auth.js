@@ -8,7 +8,7 @@ export async function authorizeUser(credentials) {
 
   const { data: usuario, error } = await getSupabaseAdmin()
     .from("usuarios")
-    .select("id, username, password_hash, role")
+    .select("id, username, password_hash, role, sucursal_id")
     .eq("username", credentials.username)
     .single()
 
@@ -24,7 +24,7 @@ export async function authorizeUser(credentials) {
   const valid = await bcrypt.compare(String(credentials.password), usuario.password_hash)
   if (!valid) return null
 
-  return { id: usuario.id, name: usuario.username, role: usuario.role }
+  return { id: usuario.id, name: usuario.username, role: usuario.role, sucursal_id: usuario.sucursal_id ?? null }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -43,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = user.role
         token.username = user.name
         token.id = user.id
+        token.sucursal_id = user.sucursal_id ?? null
       }
       return token
     },
@@ -50,6 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.role = token.role
       session.user.username = token.username
       session.user.id = token.id
+      session.user.sucursal_id = token.sucursal_id ?? null
       return session
     },
   },

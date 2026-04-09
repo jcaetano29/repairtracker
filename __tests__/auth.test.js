@@ -74,7 +74,7 @@ describe("authorizeUser", () => {
         select: () => ({
           eq: () => ({
             single: () => ({
-              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "dueno" },
+              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "dueno", sucursal_id: null },
             }),
           }),
         }),
@@ -83,6 +83,68 @@ describe("authorizeUser", () => {
     bcrypt.default.compare.mockResolvedValue(true)
     const { authorizeUser } = await import("../auth.js")
     const result = await authorizeUser({ username: "admin", password: "admin123" })
-    expect(result).toEqual({ id: "uuid-1", name: "admin", role: "dueno" })
+    expect(result).toEqual({ id: "uuid-1", name: "admin", role: "dueno", sucursal_id: null })
+  })
+
+  it("includes sucursal_id in returned user for valid credentials", async () => {
+    const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
+    const bcrypt = await import("bcryptjs")
+    getSupabaseAdmin.mockReturnValue({
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: () => ({
+              data: {
+                id: "uuid-1",
+                username: "emp1",
+                password_hash: "$2b$10$hash",
+                role: "empleado",
+                sucursal_id: "suc-uuid-1",
+              },
+            }),
+          }),
+        }),
+      }),
+    })
+    bcrypt.default.compare.mockResolvedValue(true)
+    const { authorizeUser } = await import("../auth.js")
+    const result = await authorizeUser({ username: "emp1", password: "pass123" })
+    expect(result).toEqual({
+      id: "uuid-1",
+      name: "emp1",
+      role: "empleado",
+      sucursal_id: "suc-uuid-1",
+    })
+  })
+
+  it("returns null sucursal_id for dueno", async () => {
+    const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
+    const bcrypt = await import("bcryptjs")
+    getSupabaseAdmin.mockReturnValue({
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: () => ({
+              data: {
+                id: "uuid-2",
+                username: "dueno1",
+                password_hash: "$2b$10$hash",
+                role: "dueno",
+                sucursal_id: null,
+              },
+            }),
+          }),
+        }),
+      }),
+    })
+    bcrypt.default.compare.mockResolvedValue(true)
+    const { authorizeUser } = await import("../auth.js")
+    const result = await authorizeUser({ username: "dueno1", password: "pass123" })
+    expect(result).toEqual({
+      id: "uuid-2",
+      name: "dueno1",
+      role: "dueno",
+      sucursal_id: null,
+    })
   })
 })

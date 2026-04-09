@@ -33,15 +33,12 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Check which orders already have a reminder sent this month
-  const today = new Date();
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-
+  // Check which orders already had a reminder sent (ever — only send once)
   const { data: yaEnviados } = await getSupabaseAdmin()
     .from("notificaciones_enviadas")
     .select("orden_id")
     .eq("tipo_notificacion", "RECORDATORIO_MANTENIMIENTO")
-    .gte("created_at", startOfMonth);
+    .eq("enviado", true);
 
   const yaEnviadosSet = new Set(yaEnviados?.map((n) => n.orden_id) || []);
 

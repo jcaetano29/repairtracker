@@ -17,6 +17,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     modelo: "",
     problema_reportado: "",
     notas_internas: "",
+    nombre_articulo: "",
+    monto_presupuesto: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -60,12 +62,24 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
   async function handleSubmit() {
     if (!clienteSeleccionado || !form.problema_reportado) return;
+
+    if (form.tipo_articulo === "Otro" && !form.nombre_articulo.trim()) {
+      setError("Por favor especificá el tipo de artículo.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const orden = await crearOrden({
         cliente_id: clienteSeleccionado.id,
-        ...form,
+        tipo_articulo: form.tipo_articulo,
+        marca: form.marca,
+        modelo: form.modelo,
+        problema_reportado: form.problema_reportado,
+        notas_internas: form.notas_internas,
+        nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
+        monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
       });
       onCreated(orden);
       onClose();
@@ -242,6 +256,45 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Conditional: "Otro" text input */}
+              {form.tipo_articulo === "Otro" && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    ¿Qué tipo de artículo es?
+                  </label>
+                  <input
+                    type="text"
+                    value={form.nombre_articulo}
+                    onChange={(e) => setForm({ ...form, nombre_articulo: e.target.value })}
+                    placeholder="Ej: Consola de videojuegos, Impresora..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+              )}
+
+              {/* Presupuesto (optional) */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Presupuesto (opcional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.monto_presupuesto}
+                    onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
+                    placeholder="0.00"
+                    className="w-full border border-gray-300 rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Completá si ya tenés el monto. Podés dejarlo vacío y cargarlo después.
+                </p>
               </div>
 
               <div>

@@ -24,6 +24,25 @@ INSERT INTO sucursales (nombre) VALUES
   ('Nuevo Centro');
 
 -- ============================================================
+-- ACTUALIZAR CHECK CONSTRAINT de ordenes.estado
+-- (agregar estados nuevos que usa la aplicación)
+-- ============================================================
+ALTER TABLE ordenes DROP CONSTRAINT IF EXISTS ordenes_estado_check;
+ALTER TABLE ordenes ADD CONSTRAINT ordenes_estado_check CHECK (estado = ANY (ARRAY[
+  'INGRESADO',
+  'EN_TALLER',
+  'ESPERANDO_PRESUPUESTO',
+  'ENVIADO_A_TALLER',
+  'PRESUPUESTO_RECIBIDO',
+  'ESPERANDO_APROBACION',
+  'RECHAZADO',
+  'EN_REPARACION',
+  'LISTO_EN_TALLER',
+  'LISTO_PARA_RETIRO',
+  'ENTREGADO'
+]));
+
+-- ============================================================
 -- ALTER: ordenes y usuarios
 -- ============================================================
 
@@ -106,7 +125,8 @@ ALTER TABLE ordenes ALTER COLUMN sucursal_id SET NOT NULL;
 -- ============================================================
 -- ACTUALIZAR VIEW: v_ordenes_dashboard — agregar sucursal
 -- ============================================================
-CREATE OR REPLACE VIEW v_ordenes_dashboard AS
+DROP VIEW IF EXISTS v_ordenes_dashboard;
+CREATE VIEW v_ordenes_dashboard AS
 SELECT
   o.id,
   o.numero_orden,

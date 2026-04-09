@@ -16,7 +16,7 @@ export async function GET() {
 
   const { data, error } = await getSupabaseAdmin()
     .from("usuarios")
-    .select("id, username, role, created_at")
+    .select("id, username, role, sucursal_id, sucursales(nombre), created_at")
     .order("created_at")
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -36,12 +36,15 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { username, password, role } = body
+  const { username, password, role, sucursal_id } = body
   if (!username || !password || !role) {
     return NextResponse.json({ error: "username, password and role are required" }, { status: 400 })
   }
   if (!["empleado", "dueno"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+  }
+  if (role === "empleado" && !sucursal_id) {
+    return NextResponse.json({ error: "sucursal_id es requerido para empleados" }, { status: 400 })
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
@@ -51,7 +54,7 @@ export async function POST(request) {
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .insert({ username, password_hash, role })
+    .insert({ username, password_hash, role, sucursal_id: role === "empleado" ? sucursal_id : null })
 
   if (error) {
     if (error.code === "23505") {
@@ -106,7 +109,7 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { userId, role } = body
+  const { userId, role, sucursal_id } = body
   if (!userId || !role) {
     return NextResponse.json({ error: "userId and role required" }, { status: 400 })
   }
@@ -116,7 +119,7 @@ export async function PATCH(request) {
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .update({ role })
+    .update({ role, sucursal_id: role === "empleado" ? (sucursal_id ?? null) : null })
     .eq("id", userId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

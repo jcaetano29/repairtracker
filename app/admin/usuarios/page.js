@@ -6,9 +6,10 @@ export default function UsuariosPage() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ username: "", password: "", role: "empleado" })
+  const [form, setForm] = useState({ username: "", password: "", role: "empleado", sucursal_id: "" })
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [sucursales, setSucursales] = useState([])
 
   async function loadUsers() {
     setLoading(true)
@@ -25,7 +26,13 @@ export default function UsuariosPage() {
     }
   }
 
-  useEffect(() => { loadUsers() }, [])
+  useEffect(() => {
+    loadUsers()
+    fetch("/api/admin/sucursales")
+      .then(r => r.json())
+      .then(d => setSucursales(d.sucursales || []))
+      .catch(() => {})
+  }, [])
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -41,20 +48,20 @@ export default function UsuariosPage() {
       if (!res.ok) throw new Error(data.error)
       setSuccess(`Usuario "${form.username}" creado correctamente`)
       setShowForm(false)
-      setForm({ username: "", password: "", role: "empleado" })
+      setForm({ username: "", password: "", role: "empleado", sucursal_id: "" })
       await loadUsers()
     } catch (e) {
       setError(e.message)
     }
   }
 
-  async function handleRoleChange(userId, newRole) {
+  async function handleRoleChange(userId, newRole, newSucursalId) {
     setError(null)
     try {
       const res = await fetch("/api/admin/usuarios", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, role: newRole }),
+        body: JSON.stringify({ userId, role: newRole, sucursal_id: newSucursalId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
       await loadUsers()
@@ -142,7 +149,7 @@ export default function UsuariosPage() {
               </label>
               <select
                 value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                onChange={(e) => setForm({ ...form, role: e.target.value, sucursal_id: "" })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
               >
                 <option value="empleado">Empleado</option>
@@ -150,6 +157,24 @@ export default function UsuariosPage() {
               </select>
             </div>
           </div>
+          {form.role === "empleado" && (
+            <div className="mt-4">
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Sucursal
+              </label>
+              <select
+                required
+                value={form.sucursal_id}
+                onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+              >
+                <option value="">Seleccionar...</option>
+                {sucursales.map(s => (
+                  <option key={s.id} value={s.id}>{s.nombre}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="flex gap-2 mt-4">
             <button
               type="submit"
@@ -182,6 +207,9 @@ export default function UsuariosPage() {
                   Rol
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Sucursal
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Creado
                 </th>
                 <th className="px-4 py-3" />
@@ -194,12 +222,15 @@ export default function UsuariosPage() {
                   <td className="px-4 py-3">
                     <select
                       value={u.role}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                      onChange={(e) => handleRoleChange(u.id, e.target.value, u.sucursal_id)}
                       className="px-2 py-0.5 rounded-full text-xs font-semibold border-0 cursor-pointer focus:ring-2 focus:ring-indigo-500/20 bg-transparent"
                     >
                       <option value="empleado">Empleado</option>
                       <option value="dueno">Dueño</option>
                     </select>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 text-xs">
+                    {u.role === "empleado" ? (u.sucursales?.nombre ?? "—") : <span className="text-slate-400">Todas</span>}
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs">
                     {new Date(u.created_at).toLocaleDateString("es-UY")}
@@ -216,7 +247,7 @@ export default function UsuariosPage() {
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-sm">
+                  <td colSpan={5} className="px-4 py-8 text-center text-slate-400 text-sm">
                     No hay usuarios creados
                   </td>
                 </tr>

@@ -69,6 +69,24 @@ export default async function SeguimientoPage({ params }) {
           </div>
         </div>
 
+        {/* Actionable message for states requiring customer action */}
+        {orden.estado === "ESPERANDO_APROBACION" && (
+          <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 mb-4">
+            <div className="text-sm font-bold text-orange-800 mb-1">📞 Su aprobación es necesaria</div>
+            <p className="text-sm text-orange-700">
+              Hemos evaluado su artículo y tenemos un presupuesto listo. Por favor contáctenos para aprobarlo y continuar con la reparación.
+            </p>
+          </div>
+        )}
+        {orden.estado === "RECHAZADO" && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4">
+            <div className="text-sm font-bold text-red-800 mb-1">✗ Presupuesto rechazado</div>
+            <p className="text-sm text-red-700">
+              El presupuesto no fue aprobado. Su artículo está listo para retirar. Contáctenos para coordinar la devolución.
+            </p>
+          </div>
+        )}
+
         {/* Timeline */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
           <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">Progreso</div>

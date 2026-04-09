@@ -30,13 +30,20 @@ export default function ReportesPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filtroSucursal, setFiltroSucursal] = useState(null); // null = todas
+  const [sucursales, setSucursales] = useState([]);
 
   useEffect(() => {
-    getReportesStats()
+    fetch("/api/admin/sucursales")
+      .then(r => r.json())
+      .then(d => setSucursales(d.sucursales || []))
+      .catch(() => {});
+
+    getReportesStats({ sucursal_id: filtroSucursal })
       .then(setStats)
       .catch(() => setError("Error cargando reportes"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filtroSucursal]);
 
   if (loading) return <div className="text-center py-12 text-slate-400">Cargando reportes...</div>;
   if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
@@ -55,9 +62,36 @@ export default function ReportesPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-900">Reportes</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Resumen de actividad del negocio</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Reportes</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Resumen de actividad del negocio</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFiltroSucursal(null)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filtroSucursal === null
+                ? "bg-indigo-500 text-white"
+                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Todas
+          </button>
+          {sucursales.map(s => (
+            <button
+              key={s.id}
+              onClick={() => setFiltroSucursal(s.id)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                filtroSucursal === s.id
+                  ? "bg-indigo-500 text-white"
+                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {s.nombre}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Stats grid */}

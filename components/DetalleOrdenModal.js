@@ -309,8 +309,8 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
             </div>
           )}
 
-          {/* Eliminar orden — solo dueños */}
-          {isDueno && (
+          {/* Eliminar orden — dueños siempre, empleados solo en INGRESADO */}
+          {(isDueno || orden.estado === "INGRESADO") && (
             <div className="pt-2 border-t border-slate-100">
               {!showConfirmDelete ? (
                 <button

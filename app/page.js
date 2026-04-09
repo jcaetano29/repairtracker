@@ -9,7 +9,7 @@ import { StatCard } from "@/components/StatCard"
 import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
-import { getOrdenes, getStats, getTalleres } from "@/lib/data"
+import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [talleres, setTalleresState] = useState([])
   const [filtroEstado, setFiltroEstado] = useState("TODOS")
   const [filtroTaller, setFiltroTaller] = useState("TODOS")
+  const [filtroSucursal, setFiltroSucursal] = useState("TODAS")
+  const [sucursales, setSucursales] = useState([])
   const [busqueda, setBusqueda] = useState("")
   const [debouncedBusqueda, setDebouncedBusqueda] = useState("")
   const searchTimeoutRef = useRef(null)
@@ -35,12 +37,14 @@ export default function DashboardPage() {
 
   const loadData = useCallback(async () => {
     try {
+      const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
       const [ordenesData, statsData, talleresData] = await Promise.all([
         getOrdenes({
           estado: filtroEstado,
           taller_id: filtroTaller,
           busqueda: debouncedBusqueda || undefined,
           incluirEntregados: filtroEstado === "ENTREGADO",
+          sucursal_id: sucursalFiltro,
         }),
         getStats(),
         getTalleres(),
@@ -53,7 +57,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [filtroEstado, filtroTaller, debouncedBusqueda])
+  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal, isDueno, session])
+
+  useEffect(() => {
+    if (isDueno) {
+      getSucursales().then(setSucursales).catch(() => {})
+    }
+  }, [isDueno])
 
   useEffect(() => {
     loadData()
@@ -128,6 +138,18 @@ export default function DashboardPage() {
             onChange={(e) => handleSearch(e.target.value)}
             className="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 w-64"
           />
+          {isDueno && sucursales.length > 0 && (
+            <select
+              value={filtroSucursal}
+              onChange={(e) => setFiltroSucursal(e.target.value)}
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-700"
+            >
+              <option value="TODAS">Todas las sucursales</option>
+              {sucursales.map(s => (
+                <option key={s.id} value={s.id}>{s.nombre}</option>
+              ))}
+            </select>
+          )}
           <select
             value={filtroEstado}
             onChange={(e) => setFiltroEstado(e.target.value)}

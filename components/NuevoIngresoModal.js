@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio } from "@/lib/data";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
+  const { data: session } = useSession()
   const [step, setStep] = useState(1); // 1: cliente, 2: artículo
   const [clienteQuery, setClienteQuery] = useState("");
   const [clientesEncontrados, setClientesEncontrados] = useState([]);
@@ -87,6 +89,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
         tipo_servicio_id: form.tipo_servicio_id || null,
+        sucursal_id: session?.user?.sucursal_id,
       });
       onCreated(orden);
       onClose();

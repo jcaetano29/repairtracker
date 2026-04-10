@@ -28,6 +28,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   const [sucursales, setSucursales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     getTiposServicio().then(setTiposServicio).catch(() => {});
@@ -44,7 +45,6 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       setForm((f) => ({ ...f, sucursal_id: session.user.sucursal_id }));
     }
   }, [session]);
-  const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current?.focus();

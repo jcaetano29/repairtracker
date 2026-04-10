@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales } from "@/lib/data";
+import { sanitizePhone } from "@/lib/utils";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const { data: session } = useSession()
@@ -222,7 +223,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   type="tel"
                   placeholder="099 123 456"
                   value={nuevoCliente.telefono}
-                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: sanitizePhone(e.target.value) })}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>

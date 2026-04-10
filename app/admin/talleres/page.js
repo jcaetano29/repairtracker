@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getTalleres, crearTaller, updateTaller, deleteTaller } from "@/lib/data";
+import { sanitizePhone } from "@/lib/utils";
 
 export default function TalleresPage() {
   const [talleres, setTalleres] = useState([]);
@@ -108,7 +109,7 @@ export default function TalleresPage() {
               <input
                 type="text"
                 value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                onChange={(e) => setForm({ ...form, telefono: sanitizePhone(e.target.value) })}
                 placeholder="Ej: +598 9 1234 5678"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />

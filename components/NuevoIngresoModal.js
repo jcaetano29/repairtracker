@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO } from "@/lib/constants";
-import { buscarClientes, crearCliente, crearOrden, getTiposServicio } from "@/lib/data";
+import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales } from "@/lib/data";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const { data: session } = useSession()
@@ -22,12 +22,26 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     nombre_articulo: "",
     monto_presupuesto: "",
     tipo_servicio_id: "",
+    sucursal_id: "",
   });
   const [tiposServicio, setTiposServicio] = useState([]);
+  const [sucursales, setSucursales] = useState([]);
 
   useEffect(() => {
     getTiposServicio().then(setTiposServicio).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    getSucursales()
+      .then((data) => setSucursales(data.filter((s) => s.activo)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (session?.user?.role !== "dueno" && session?.user?.sucursal_id) {
+      setForm((f) => ({ ...f, sucursal_id: session.user.sucursal_id }));
+    }
+  }, [session]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);

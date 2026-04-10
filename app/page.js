@@ -10,6 +10,7 @@ import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
+import { getConfiguracion } from "@/lib/data/configuracion"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [pagina, setPagina] = useState(1)
   const [totalOrdenes, setTotalOrdenes] = useState(0)
+  const [umbrales, setUmbrales] = useState({})
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -40,6 +42,10 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     try {
       const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
+
+      // Load configuracion first so we can pass it to getStats
+      const configuracionData = await getConfiguracion()
+
       const [{ data: ordenesData, count: ordenesCount }, statsData, talleresData] = await Promise.all([
         getOrdenes({
           estado: filtroEstado,
@@ -50,13 +56,14 @@ export default function DashboardPage() {
           page: pagina,
           limit: 20,
         }),
-        getStats(),
+        getStats(configuracionData),
         getTalleres(),
       ])
       setOrdenes(ordenesData)
       setTotalOrdenes(ordenesCount)
       setStatsState(statsData)
       setTalleresState(talleresData)
+      setUmbrales(configuracionData)
     } catch (e) {
       console.error("Error cargando datos:", e)
     } finally {
@@ -250,7 +257,7 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {ordenes.map((o) => {
-                  const retraso = getNivelRetraso(o.estado, o.dias_en_estado)
+                  const retraso = getNivelRetraso(o.estado, o.dias_en_estado, umbrales)
                   return (
                     <tr
                       key={o.id}
@@ -381,7 +388,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-2 space-y-1.5 overflow-y-auto flex-1">
                     {enEstado.map((o) => {
-                      const retraso = getNivelRetraso(o.estado, o.dias_en_estado)
+                      const retraso = getNivelRetraso(o.estado, o.dias_en_estado, umbrales)
                       return (
                         <div
                           key={o.id}

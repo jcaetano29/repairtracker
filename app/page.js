@@ -81,7 +81,7 @@ export default function DashboardPage() {
     searchTimeoutRef.current = setTimeout(() => setDebouncedBusqueda(value), 400)
   }
 
-  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO" && k !== "RECHAZADO")
+  const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO")
 
   return (
     <div className="min-h-screen bg-slate-100">

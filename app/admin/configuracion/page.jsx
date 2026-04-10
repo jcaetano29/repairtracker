@@ -21,7 +21,7 @@ export default async function ConfiguracionPage() {
   }
 
   // Check role authorization
-  if (session.user.role !== "dueno") {
+  if (session.user.role !== "admin") {
     redirect("/dashboard")
   }
 

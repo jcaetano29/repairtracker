@@ -15,7 +15,7 @@ import { getConfiguracion } from "@/lib/data/configuracion"
 export default function DashboardPage() {
   const router = useRouter()
   const { data: session } = useSession()
-  const isDueno = session?.user?.role === "dueno"
+  const isDueno = session?.user?.role === "admin"
 
   const [ordenes, setOrdenes] = useState([])
   const [stats, setStatsState] = useState({ activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 })

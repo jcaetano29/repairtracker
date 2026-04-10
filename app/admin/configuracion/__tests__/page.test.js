@@ -49,27 +49,27 @@ describe("ConfiguracionPage Server Component - Logic", () => {
     })
 
     it("should check session.user.id exists", async () => {
-      const session = { user: { id: "123", role: "dueno" } }
+      const session = { user: { id: "123", role: "admin" } }
       expect(session?.user?.id).toBeDefined()
     })
   })
 
   describe("Authorization Logic", () => {
-    it("should redirect to /dashboard when role is not dueno", async () => {
-      const session = { user: { id: "123", role: "empleado" } }
-      const shouldRedirectToDashboard = session.user.role !== "dueno"
+    it("should redirect to /dashboard when role is not admin", async () => {
+      const session = { user: { id: "123", role: "employee" } }
+      const shouldRedirectToDashboard = session.user.role !== "admin"
       expect(shouldRedirectToDashboard).toBe(true)
     })
 
-    it("should allow access when role is dueno", async () => {
-      const session = { user: { id: "123", role: "dueno" } }
-      const shouldRedirectToDashboard = session.user.role !== "dueno"
+    it("should allow access when role is admin", async () => {
+      const session = { user: { id: "123", role: "admin" } }
+      const shouldRedirectToDashboard = session.user.role !== "admin"
       expect(shouldRedirectToDashboard).toBe(false)
     })
   })
 
   describe("Data Loading", () => {
-    it("should load configuration when authenticated as dueno", async () => {
+    it("should load configuration when authenticated as admin", async () => {
       const { getConfiguracion: mockGetConfig } = await import(
         "@/lib/data/configuracion"
       )

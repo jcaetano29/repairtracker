@@ -12,17 +12,17 @@ CREATE TABLE IF NOT EXISTS configuracion (
 ALTER TABLE configuracion ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policy: Only dueño users can read
-CREATE POLICY "dueño_read_configuracion" ON configuracion
+CREATE POLICY "admin_read_configuracion" ON configuracion
   FOR SELECT
   USING (
-    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'dueno'
+    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'admin'
   );
 
 -- RLS Policy: Only dueño users can update
-CREATE POLICY "dueño_update_configuracion" ON configuracion
+CREATE POLICY "admin_update_configuracion" ON configuracion
   FOR UPDATE
   USING (
-    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'dueno'
+    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'admin'
   );
 
 -- Insert initial delay threshold configurations

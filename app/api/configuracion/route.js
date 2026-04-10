@@ -32,7 +32,7 @@ export async function GET() {
  * POST /api/configuracion
  *
  * Updates a single configuration value
- * Requires session.user.role === 'dueno' (admin-only)
+ * Requires session.user.role === 'admin' (admin-only)
  *
  * Request body: { clave: string, valor: { leve: number, grave: number } }
  * Response: { success: true, data: updated_row } or error object with status code
@@ -40,7 +40,7 @@ export async function GET() {
 export async function POST(request) {
   // Check authentication
   const session = await auth()
-  if (!session?.user?.role || session.user.role !== "dueno") {
+  if (!session?.user?.role || session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

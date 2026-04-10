@@ -94,7 +94,7 @@ describe("POST /api/configuracion", () => {
     vi.clearAllMocks()
   })
 
-  it("requires dueño role and returns 403 for other roles", async () => {
+  it("requires admin role and returns 403 for other roles", async () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
@@ -116,7 +116,7 @@ describe("POST /api/configuracion", () => {
     expect(json.error).toBe("Forbidden")
   })
 
-  it("requires dueño role and returns 403 when no session", async () => {
+  it("requires admin role and returns 403 when no session", async () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue(null)
@@ -139,7 +139,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -158,7 +158,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -180,7 +180,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -202,7 +202,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -224,7 +224,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -247,7 +247,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     getSupabaseAdmin.mockReturnValue({
@@ -289,7 +289,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     getSupabaseAdmin.mockReturnValue({
@@ -327,7 +327,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const mockUpdateFn = vi.fn().mockReturnValue({
@@ -379,7 +379,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-456" },
+      user: { role: "admin", id: "user-456" },
     })
 
     const mockUpdateFn = vi.fn().mockReturnValue({
@@ -428,7 +428,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     getSupabaseAdmin.mockReturnValue({
@@ -476,7 +476,7 @@ describe("POST /api/configuracion", () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -496,7 +496,7 @@ describe("POST /api/configuracion", () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
-      user: { role: "dueno", id: "user-123" },
+      user: { role: "admin", id: "user-123" },
     })
 
     getSupabaseAdmin.mockReturnValue({

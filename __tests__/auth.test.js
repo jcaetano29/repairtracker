@@ -54,7 +54,7 @@ describe("authorizeUser", () => {
         select: () => ({
           eq: () => ({
             single: () => ({
-              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "dueno" },
+              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "admin" },
             }),
           }),
         }),
@@ -74,7 +74,7 @@ describe("authorizeUser", () => {
         select: () => ({
           eq: () => ({
             single: () => ({
-              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "dueno", sucursal_id: null },
+              data: { id: "uuid-1", username: "admin", password_hash: "$2b$10$hash", role: "admin", sucursal_id: null },
             }),
           }),
         }),
@@ -83,7 +83,7 @@ describe("authorizeUser", () => {
     bcrypt.default.compare.mockResolvedValue(true)
     const { authorizeUser } = await import("../auth.js")
     const result = await authorizeUser({ username: "admin", password: "admin123" })
-    expect(result).toEqual({ id: "uuid-1", name: "admin", role: "dueno", sucursal_id: null })
+    expect(result).toEqual({ id: "uuid-1", name: "admin", role: "admin", sucursal_id: null })
   })
 
   it("includes sucursal_id in returned user for valid credentials", async () => {
@@ -98,7 +98,7 @@ describe("authorizeUser", () => {
                 id: "uuid-1",
                 username: "emp1",
                 password_hash: "$2b$10$hash",
-                role: "empleado",
+                role: "employee",
                 sucursal_id: "suc-uuid-1",
               },
             }),
@@ -112,12 +112,12 @@ describe("authorizeUser", () => {
     expect(result).toEqual({
       id: "uuid-1",
       name: "emp1",
-      role: "empleado",
+      role: "employee",
       sucursal_id: "suc-uuid-1",
     })
   })
 
-  it("returns null sucursal_id for dueno", async () => {
+  it("returns null sucursal_id for admin", async () => {
     const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
     const bcrypt = await import("bcryptjs")
     getSupabaseAdmin.mockReturnValue({
@@ -129,7 +129,7 @@ describe("authorizeUser", () => {
                 id: "uuid-2",
                 username: "dueno1",
                 password_hash: "$2b$10$hash",
-                role: "dueno",
+                role: "admin",
                 sucursal_id: null,
               },
             }),
@@ -143,7 +143,7 @@ describe("authorizeUser", () => {
     expect(result).toEqual({
       id: "uuid-2",
       name: "dueno1",
-      role: "dueno",
+      role: "admin",
       sucursal_id: null,
     })
   })

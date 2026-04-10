@@ -2,14 +2,14 @@ import { auth } from "@/auth"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { NextResponse } from "next/server"
 
-async function verifyDueno() {
+async function verifyAdmin() {
   const session = await auth()
-  return session?.user?.role === "dueno" ? session : null
+  return session?.user?.role === "admin" ? session : null
 }
 
 // GET — list all sucursales
 export async function GET() {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -24,7 +24,7 @@ export async function GET() {
 
 // POST — create sucursal
 export async function POST(request) {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -48,7 +48,7 @@ export async function POST(request) {
 
 // PATCH — update nombre or activo
 export async function PATCH(request) {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

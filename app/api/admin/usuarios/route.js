@@ -3,14 +3,14 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import bcrypt from "bcryptjs"
 import { NextResponse } from "next/server"
 
-async function verifyDueno() {
+async function verifyAdmin() {
   const session = await auth()
-  return session?.user?.role === "dueno" ? session : null
+  return session?.user?.role === "admin" ? session : null
 }
 
 // GET — list all usuarios
 export async function GET() {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -25,7 +25,7 @@ export async function GET() {
 
 // POST — create new usuario
 export async function POST(request) {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -40,11 +40,11 @@ export async function POST(request) {
   if (!username || !password || !role) {
     return NextResponse.json({ error: "username, password and role are required" }, { status: 400 })
   }
-  if (!["empleado", "dueno"].includes(role)) {
+  if (!["employee", "admin"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
-  if (role === "empleado" && !sucursal_id) {
-    return NextResponse.json({ error: "sucursal_id es requerido para empleados" }, { status: 400 })
+  if (role === "employee" && !sucursal_id) {
+    return NextResponse.json({ error: "sucursal_id es requerido para employees" }, { status: 400 })
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
@@ -54,7 +54,7 @@ export async function POST(request) {
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .insert({ username, password_hash, role, sucursal_id: role === "empleado" ? sucursal_id : null })
+    .insert({ username, password_hash, role, sucursal_id: role === "employee" ? sucursal_id : null })
 
   if (error) {
     if (error.code === "23505") {
@@ -68,7 +68,7 @@ export async function POST(request) {
 
 // DELETE — remove usuario
 export async function DELETE(request) {
-  const session = await verifyDueno()
+  const session = await verifyAdmin()
   if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
@@ -98,7 +98,7 @@ export async function DELETE(request) {
 
 // PATCH — update role
 export async function PATCH(request) {
-  if (!(await verifyDueno())) {
+  if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -113,13 +113,13 @@ export async function PATCH(request) {
   if (!userId || !role) {
     return NextResponse.json({ error: "userId and role required" }, { status: 400 })
   }
-  if (!["empleado", "dueno"].includes(role)) {
+  if (!["employee", "admin"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .update({ role, sucursal_id: role === "empleado" ? (sucursal_id ?? null) : null })
+    .update({ role, sucursal_id: role === "employee" ? (sucursal_id ?? null) : null })
     .eq("id", userId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -42,7 +42,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, []);
 
   useEffect(() => {
-    if (session?.user?.role !== "dueno" && session?.user?.sucursal_id) {
+    if (session?.user?.role !== "admin" && session?.user?.sucursal_id) {
       setForm((f) => ({ ...f, sucursal_id: session.user.sucursal_id }));
     }
   }, [session]);
@@ -271,7 +271,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label htmlFor="sucursal_id" className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Sucursal *
                 </label>
-                {session?.user?.role === "dueno" ? (
+                {session?.user?.role === "admin" ? (
                   <select
                     id="sucursal_id"
                     aria-required="true"

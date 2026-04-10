@@ -17,8 +17,8 @@ export default auth((req) => {
   // All other routes require auth
   if (!session) return NextResponse.redirect(new URL("/login", req.url))
 
-  // Admin routes require dueno role
-  if (pathname.startsWith("/admin") && (!session.user || session.user.role !== "dueno")) {
+  // Admin routes require admin role
+  if (pathname.startsWith("/admin") && (!session.user || session.user.role !== "admin")) {
     return NextResponse.redirect(new URL("/", req.url))
   }
 

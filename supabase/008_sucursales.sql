@@ -49,7 +49,7 @@ ALTER TABLE ordenes ADD CONSTRAINT ordenes_estado_check CHECK (estado = ANY (ARR
 -- Agregar sucursal_id a ordenes (nullable primero para poder rellenar)
 ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS sucursal_id UUID REFERENCES sucursales(id);
 
--- Agregar sucursal_id a usuarios (nullable: NULL = dueño, UUID = empleado)
+-- Agregar sucursal_id a usuarios (nullable: NULL = admin, UUID = employee)
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS sucursal_id UUID REFERENCES sucursales(id);
 
 -- Índice en ordenes

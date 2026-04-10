@@ -93,6 +93,22 @@ export default function DashboardPage() {
 
   const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO")
 
+  function getPaginasVisibles(paginaActual, totalPaginas) {
+    if (totalPaginas <= 7) return Array.from({ length: totalPaginas }, (_, i) => i + 1)
+    const paginas = new Set([1, totalPaginas, paginaActual])
+    if (paginaActual > 1) paginas.add(paginaActual - 1)
+    if (paginaActual < totalPaginas) paginas.add(paginaActual + 1)
+    const sorted = Array.from(paginas).sort((a, b) => a - b)
+    const result = []
+    for (let i = 0; i < sorted.length; i++) {
+      if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push("...")
+      result.push(sorted[i])
+    }
+    return result
+  }
+
+  const totalPaginas = Math.ceil(totalOrdenes / 20)
+
   return (
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
@@ -293,6 +309,50 @@ export default function DashboardPage() {
                 No se encontraron órdenes con estos filtros
               </div>
             )}
+          </div>
+        )}
+
+        {/* Paginación */}
+        {!loading && vista === "tabla" && totalPaginas > 1 && (
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                disabled={pagina === 1}
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ← Anterior
+              </button>
+
+              {getPaginasVisibles(pagina, totalPaginas).map((p, i) =>
+                p === "..." ? (
+                  <span key={`dots-${i}`} className="px-2 text-slate-400 text-xs">...</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPagina(p)}
+                    className={`w-8 h-8 text-xs font-medium rounded-lg border transition-colors ${
+                      p === pagina
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                disabled={pagina === totalPaginas}
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Siguiente →
+              </button>
+            </div>
+            <p className="text-xs text-slate-400">
+              Mostrando {(pagina - 1) * 20 + 1}–{Math.min(pagina * 20, totalOrdenes)} de {totalOrdenes} órdenes
+            </p>
           </div>
         )}
 

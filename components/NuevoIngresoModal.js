@@ -260,6 +260,31 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <div className="text-xs text-slate-500">{clienteSeleccionado?.telefono}</div>
               </div>
 
+              {/* Sucursal */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  Sucursal *
+                </label>
+                {session?.user?.role === "dueno" ? (
+                  <select
+                    value={form.sucursal_id}
+                    onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  >
+                    <option value="">Seleccioná una sucursal</option>
+                    {sucursales.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nombre}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700">
+                    {sucursales.find((s) => s.id === form.sucursal_id)?.nombre ?? "Sin sucursal asignada"}
+                  </div>
+                )}
+              </div>
+
               {/* Tipo de artículo */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">

@@ -24,6 +24,7 @@ export default function AdminLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <nav className="flex gap-1">
             {[
+              { href: "/admin/configuracion", label: "⚙️ Configuración" },
               { href: "/admin/tipos-servicio", label: "⚙️ Tipos de servicio" },
               { href: "/admin/talleres", label: "🏪 Talleres" },
               { href: "/admin/usuarios", label: "👤 Usuarios" },

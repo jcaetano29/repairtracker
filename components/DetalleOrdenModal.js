@@ -154,8 +154,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
                   : "bg-amber-50 border-amber-200 text-amber-800"
               }`}
             >
-              {retraso === "grave" ? "🔴" : "⚠️"} {orden.dias_en_estado} días en este estado
-              {retraso === "grave" ? " — Retraso grave" : " — Posible retraso"}
+              {retraso === "grave" ? "🔴 Retraso grave" : "⚠️ Posible retraso"} ({orden.dias_en_estado} días en este estado)
             </div>
           )}
 
@@ -192,9 +191,9 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
               )}
             </div>
             <div className="flex gap-3 mt-2 text-xs text-slate-400">
-              <span>{orden.dias_totales} días desde ingreso</span>
+              <span>{orden.dias_totales}d desde ingreso</span>
               <span>•</span>
-              <span>{orden.dias_en_estado} días en estado actual</span>
+              <span>{orden.dias_en_estado}d en este estado</span>
             </div>
           </div>
 

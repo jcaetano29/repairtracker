@@ -158,7 +158,11 @@ SELECT
   o.fecha_listo,
   o.fecha_entrega,
   o.updated_at,
+  -- Días en estado actual: days elapsed since last state transition
+  -- Formula: EXTRACT(DAY FROM NOW() - o.updated_at)
+  -- (o.updated_at is when the order transitioned to its current state)
   EXTRACT(DAY FROM NOW() - o.updated_at)::INT AS dias_en_estado,
+  -- Días totales desde ingreso: days elapsed since order creation
   EXTRACT(DAY FROM NOW() - o.fecha_ingreso)::INT AS dias_totales,
   CASE
     WHEN o.estado IN ('INGRESADO', 'ESPERANDO_PRESUPUESTO')

@@ -146,10 +146,10 @@ export default function ConfiguracionClient({ configuracion }) {
                 Estado
               </th>
               <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                Umbral Leve
+                Umbral Leve (días)
               </th>
               <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                Umbral Grave
+                Umbral Grave (días)
               </th>
               <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                 Acción
@@ -230,11 +230,16 @@ export default function ConfiguracionClient({ configuracion }) {
         </table>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
         <p className="text-xs text-blue-900">
-          <strong>Nota:</strong> Los umbrales definen en cuántos días una orden entra en estado de alerta.
-          Si una orden permanece más de "Umbral Leve" días en un estado, se marca con ⚠️. Si supera
-          "Umbral Grave", se marca con 🔴.
+          <strong>Cómo funciona:</strong> Los umbrales definen la cantidad de días que una orden puede permanecer en un estado antes de generar una alerta.
+        </p>
+        <p className="text-xs text-blue-900">
+          • Si una orden lleva <strong>≥ Umbral Leve</strong> días en el estado → Se marca con ⚠️ (alerta leve)<br/>
+          • Si una orden lleva <strong>≥ Umbral Grave</strong> días en el estado → Se marca con 🔴 (alerta grave)
+        </p>
+        <p className="text-xs text-blue-900 opacity-75">
+          Los días se cuentan desde la última transición de estado (cuando la orden entró al estado actual).
         </p>
       </div>
     </div>

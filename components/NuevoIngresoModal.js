@@ -90,6 +90,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       return;
     }
 
+    if (!form.sucursal_id) {
+      setError("Seleccioná una sucursal.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -103,7 +108,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
         tipo_servicio_id: form.tipo_servicio_id || null,
-        sucursal_id: session?.user?.sucursal_id,
+        sucursal_id: form.sucursal_id,
       });
       onCreated(orden);
       onClose();
@@ -262,11 +267,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {/* Sucursal */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label htmlFor="sucursal_id" className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Sucursal *
                 </label>
                 {session?.user?.role === "dueno" ? (
                   <select
+                    id="sucursal_id"
+                    aria-required="true"
                     value={form.sucursal_id}
                     onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
                     className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
@@ -280,7 +287,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   </select>
                 ) : (
                   <div className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700">
-                    {sucursales.find((s) => s.id === form.sucursal_id)?.nombre ?? "Sin sucursal asignada"}
+                    {sucursales.length === 0
+                      ? "Cargando..."
+                      : sucursales.find((s) => s.id === form.sucursal_id)?.nombre ?? "Sin sucursal asignada"}
                   </div>
                 )}
               </div>
@@ -411,7 +420,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.problema_reportado || loading}
+                disabled={!form.problema_reportado || !form.sucursal_id || loading}
                 className="w-full py-3 bg-indigo-500 text-white rounded-lg font-bold text-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Registrando..." : "✓ Registrar Ingreso"}

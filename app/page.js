@@ -361,11 +361,6 @@ export default function DashboardPage() {
           <div className="flex gap-3 overflow-x-auto pb-4">
             {estadosActivos.map(([estado, config]) => {
               const enEstado = ordenes.filter((o) => o.estado === estado)
-              if (
-                enEstado.length === 0 &&
-                !["INGRESADO", "EN_REPARACION", "LISTO_PARA_RETIRO"].includes(estado)
-              )
-                return null
               return (
                 <div
                   key={estado}

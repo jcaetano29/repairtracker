@@ -30,6 +30,8 @@ export default function DashboardPage() {
   const [showNuevo, setShowNuevo] = useState(false)
   const [selectedOrden, setSelectedOrden] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [pagina, setPagina] = useState(1)
+  const [totalOrdenes, setTotalOrdenes] = useState(0)
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -38,18 +40,21 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     try {
       const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
-      const [ordenesData, statsData, talleresData] = await Promise.all([
+      const [{ data: ordenesData, count: ordenesCount }, statsData, talleresData] = await Promise.all([
         getOrdenes({
           estado: filtroEstado,
           taller_id: filtroTaller,
           busqueda: debouncedBusqueda || undefined,
           incluirEntregados: filtroEstado === "ENTREGADO",
           sucursal_id: sucursalFiltro,
+          page: pagina,
+          limit: 20,
         }),
         getStats(),
         getTalleres(),
       ])
       setOrdenes(ordenesData)
+      setTotalOrdenes(ordenesCount)
       setStatsState(statsData)
       setTalleresState(talleresData)
     } catch (e) {
@@ -57,7 +62,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal, isDueno, session])
+  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal, isDueno, session, pagina])
 
   useEffect(() => {
     if (isDueno) {
@@ -68,6 +73,11 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Reset a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setPagina(1)
+  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal])
 
   // Auto-refresh cada 30 segundos
   useEffect(() => {

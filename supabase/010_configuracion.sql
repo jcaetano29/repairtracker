@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS configuracion (
   valor JSONB NOT NULL,
   descripcion TEXT,
   actualizado_en TIMESTAMP DEFAULT NOW(),
-  actualizado_por UUID REFERENCES auth.users(id)
+  actualizado_por UUID REFERENCES public.usuarios(id)
 );
 
 -- Enable RLS
@@ -15,14 +15,14 @@ ALTER TABLE configuracion ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "dueño_read_configuracion" ON configuracion
   FOR SELECT
   USING (
-    (SELECT role FROM auth.users WHERE id = auth.uid()) = 'dueno'
+    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'dueno'
   );
 
 -- RLS Policy: Only dueño users can update
 CREATE POLICY "dueño_update_configuracion" ON configuracion
   FOR UPDATE
   USING (
-    (SELECT role FROM auth.users WHERE id = auth.uid()) = 'dueno'
+    (SELECT role FROM public.usuarios WHERE id = auth.uid()) = 'dueno'
   );
 
 -- Insert initial delay threshold configurations

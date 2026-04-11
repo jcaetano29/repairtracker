@@ -253,7 +253,12 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           {step === 2 && (
             <div className="space-y-4">
               <button
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  setStep(1);
+                  setClienteSeleccionado(null);
+                  setClienteQuery("");
+                  setClientesEncontrados([]);
+                }}
                 className="text-sm text-indigo-600 hover:text-indigo-800"
               >
                 ← Cambiar cliente

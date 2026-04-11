@@ -4,49 +4,61 @@ import { listoParaRetiroTemplate } from '@/lib/notifications/templates/listo-par
 import { recordatorioMantenimientoTemplate } from '@/lib/notifications/templates/recordatorio-mantenimiento'
 
 describe('ordenCreadaTemplate', () => {
-  it('includes order number in subject', () => {
-    const { subject } = ordenCreadaTemplate({
+  it('includes order number in body', () => {
+    const { body } = ordenCreadaTemplate({
       numeroOrden: '0042',
       clienteNombre: 'Juan',
       tipoArticulo: 'Reloj',
       marca: 'Casio',
       trackingUrl: 'https://example.com/seguimiento/abc',
     })
-    expect(subject).toContain('0042')
+    expect(body).toContain('0042')
   })
 
-  it('includes tracking URL in html', () => {
-    const { html } = ordenCreadaTemplate({
+  it('includes tracking URL in body', () => {
+    const { body } = ordenCreadaTemplate({
       numeroOrden: '0042',
       clienteNombre: 'Juan',
       tipoArticulo: 'Reloj',
       marca: 'Casio',
       trackingUrl: 'https://example.com/seguimiento/abc',
     })
-    expect(html).toContain('https://example.com/seguimiento/abc')
+    expect(body).toContain('https://example.com/seguimiento/abc')
+  })
+
+  it('does not return subject or html', () => {
+    const result = ordenCreadaTemplate({
+      numeroOrden: '0042',
+      clienteNombre: 'Juan',
+      tipoArticulo: 'Reloj',
+      marca: 'Casio',
+      trackingUrl: 'https://example.com/seguimiento/abc',
+    })
+    expect(result).not.toHaveProperty('subject')
+    expect(result).not.toHaveProperty('html')
   })
 })
 
 describe('listoParaRetiroTemplate', () => {
-  it('includes client name in html', () => {
-    const { html } = listoParaRetiroTemplate({
+  it('includes client name in body', () => {
+    const { body } = listoParaRetiroTemplate({
       numeroOrden: '0042',
       clienteNombre: 'María',
       tipoArticulo: 'Reloj',
       marca: 'Tissot',
       trackingUrl: 'https://example.com/seguimiento/xyz',
     })
-    expect(html).toContain('María')
+    expect(body).toContain('María')
   })
 })
 
 describe('recordatorioMantenimientoTemplate', () => {
-  it('includes service type in subject', () => {
-    const { subject } = recordatorioMantenimientoTemplate({
+  it('includes service type in body', () => {
+    const { body } = recordatorioMantenimientoTemplate({
       clienteNombre: 'Pedro',
       tipoServicio: 'Cambio de pila',
-      ultimaFecha: '2024-10-07',
+      ultimaFecha: '07 de octubre de 2024',
     })
-    expect(subject).toContain('Cambio de pila')
+    expect(body).toContain('Cambio de pila')
   })
 })

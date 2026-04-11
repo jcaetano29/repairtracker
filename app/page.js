@@ -243,7 +243,7 @@ export default function DashboardPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-slate-100">
-                  {["Orden", "Cliente", "Artículo", "Estado", "Taller", "Monto", "Días", ""].map(
+                  {["Orden", "Cliente", "Artículo", "Estado", "Ubicación", "Monto", "Días", ""].map(
                     (h) => (
                       <th
                         key={h}
@@ -284,7 +284,12 @@ export default function DashboardPage() {
                       <td className="px-4 py-3">
                         <Badge estado={o.estado} />
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">{o.taller_nombre || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-slate-600">
+                        {o.taller_nombre
+                          ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
+                          : <span className="text-slate-500">🏠 {o.sucursal_nombre}</span>
+                        }
+                      </td>
                       <td className="px-4 py-3 font-semibold font-mono text-sm">
                         {o.monto_presupuesto ? `$${Number(o.monto_presupuesto).toLocaleString()}` : "—"}
                       </td>
@@ -411,11 +416,12 @@ export default function DashboardPage() {
                           <div className="text-[11px] text-slate-500">
                             {o.tipo_articulo} — {o.marca || "S/M"}
                           </div>
-                          {o.taller_nombre && (
-                            <div className="text-[10px] text-purple-600 mt-1">
-                              📍 {o.taller_nombre}
-                            </div>
-                          )}
+                          <div className="text-[10px] mt-1">
+                            {o.taller_nombre
+                              ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
+                              : <span className="text-slate-400">🏠 {o.sucursal_nombre}</span>
+                            }
+                          </div>
                           {retraso !== "none" && (
                             <div className="text-[10px] mt-1">
                               {retraso === "grave" ? "🔴 Retraso grave" : "⚠️ Retraso"}

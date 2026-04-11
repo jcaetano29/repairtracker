@@ -52,20 +52,24 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [step]);
 
   // Buscar clientes mientras se escribe
+  const [buscando, setBuscando] = useState(false);
   useEffect(() => {
-    if (clienteQuery.length < 2) {
+    if (clienteQuery.trim().length < 2) {
       setClientesEncontrados([]);
       return;
     }
+    setBuscando(true);
     const timer = setTimeout(async () => {
       try {
-        const results = await buscarClientes(clienteQuery);
+        const results = await buscarClientes(clienteQuery.trim());
         setClientesEncontrados(results);
       } catch (e) {
         console.error("Error buscando clientes:", e);
+      } finally {
+        setBuscando(false);
       }
-    }, 300);
-    return () => clearTimeout(timer);
+    }, 150);
+    return () => { clearTimeout(timer); setBuscando(false); };
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
@@ -165,6 +169,14 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
+
+              {buscando && clienteQuery.trim().length >= 2 && clientesEncontrados.length === 0 && (
+                <div className="text-xs text-slate-400 text-center py-2">Buscando...</div>
+              )}
+
+              {!buscando && clienteQuery.trim().length >= 2 && clientesEncontrados.length === 0 && (
+                <div className="text-xs text-slate-400 text-center py-2">No se encontraron clientes</div>
+              )}
 
               {clientesEncontrados.length > 0 && (
                 <div className="space-y-1.5">

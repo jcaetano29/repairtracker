@@ -3,6 +3,19 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendNotification } from "@/lib/notifications";
 import { isReminderDue } from "@/lib/notifications/reminder-logic";
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
+
+function verifySecret(provided, expected) {
+  if (!provided || !expected) return false;
+  try {
+    const a = Buffer.from(provided);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
 
 export async function GET(request) {
   // Verify secret token to prevent unauthorized calls
@@ -10,7 +23,7 @@ export async function GET(request) {
   const authHeader = request.headers.get("authorization");
   const secret = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-  if (secret !== process.env.CRON_SECRET) {
+  if (!verifySecret(secret, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -30,7 +43,7 @@ export async function GET(request) {
 
   if (error) {
     console.error("[Cron] Error fetching orders:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Error fetching orders" }, { status: 500 });
   }
 
   // Check which orders already had a reminder sent (ever — only send once)
@@ -53,6 +66,23 @@ export async function GET(request) {
     if (!isReminderDue(orden.fecha_entrega, orden.tipos_servicio.ciclo_meses)) continue;
 
     try {
+      // Record the notification BEFORE sending to prevent duplicates
+      // If sending fails, the record stays but with enviado=false
+      const { error: insertError } = await getSupabaseAdmin().from("notificaciones_enviadas").insert({
+        orden_id: orden.id,
+        cliente_id: orden.clientes.id,
+        tipo_notificacion: "RECORDATORIO_MANTENIMIENTO",
+        tipo: "RECORDATORIO_MANTENIMIENTO",
+        canal: "whatsapp",
+        enviado: false,
+        fecha_envio: new Date().toISOString(),
+      });
+
+      if (insertError) {
+        errors.push({ orden_id: orden.id, error: "Failed to record notification" });
+        continue;
+      }
+
       await sendNotification("RECORDATORIO_MANTENIMIENTO", {
         clienteTelefono: orden.clientes.telefono,
         clienteNombre: orden.clientes.nombre,
@@ -64,20 +94,16 @@ export async function GET(request) {
         }),
       });
 
-      // Record that we sent it
-      await getSupabaseAdmin().from("notificaciones_enviadas").insert({
-        orden_id: orden.id,
-        cliente_id: orden.clientes.id,
-        tipo_notificacion: "RECORDATORIO_MANTENIMIENTO",
-        tipo: "RECORDATORIO_MANTENIMIENTO",
-        canal: "whatsapp",
-        enviado: true,
-        fecha_envio: new Date().toISOString(),
-      });
+      // Mark as successfully sent
+      await getSupabaseAdmin()
+        .from("notificaciones_enviadas")
+        .update({ enviado: true })
+        .eq("orden_id", orden.id)
+        .eq("tipo_notificacion", "RECORDATORIO_MANTENIMIENTO");
 
       sent++;
     } catch (e) {
-      errors.push({ orden_id: orden.id, error: e.message });
+      errors.push({ orden_id: orden.id, error: "Failed to send notification" });
     }
   }
 

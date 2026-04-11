@@ -85,7 +85,7 @@ describe("GET /api/configuracion", () => {
     const json = await response.json()
 
     expect(response.status).toBe(500)
-    expect(json.error).toBe("Database error")
+    expect(json.error).toBe("Error al obtener configuración")
   })
 })
 
@@ -154,6 +154,28 @@ describe("POST /api/configuracion", () => {
     expect(json.error).toContain("valor")
   })
 
+  it("rejects claves not in the allowed whitelist", async () => {
+    const { auth } = await import("@/auth")
+
+    auth.mockResolvedValue({
+      user: { role: "admin", id: "user-123" },
+    })
+
+    const request = new Request("http://localhost/api/configuracion", {
+      method: "POST",
+      body: JSON.stringify({
+        clave: "arbitrary_key",
+        valor: { leve: 2, grave: 5 }
+      }),
+    })
+
+    const response = await POST(request)
+    const json = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(json.error).toContain("no válida")
+  })
+
   it("validates that valor has leve and grave properties", async () => {
     const { auth } = await import("@/auth")
 
@@ -176,7 +198,7 @@ describe("POST /api/configuracion", () => {
     expect(json.error).toContain("grave")
   })
 
-  it("validates that leve and grave are numeric values", async () => {
+  it("validates that leve and grave are integer values", async () => {
     const { auth } = await import("@/auth")
 
     auth.mockResolvedValue({
@@ -195,7 +217,7 @@ describe("POST /api/configuracion", () => {
     const json = await response.json()
 
     expect(response.status).toBe(400)
-    expect(json.error).toContain("numeric")
+    expect(json.error).toContain("integer")
   })
 
   it("validates that leve and grave are non-negative", async () => {
@@ -257,7 +279,7 @@ describe("POST /api/configuracion", () => {
             select: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
                 data: {
-                  clave: "umbral_rechazado",
+                  clave: "umbral_ingresado",
                   valor: { leve: 0, grave: 0 },
                   actualizado_en: "2026-04-10T00:00:00Z",
                   actualizado_por: "user-123",
@@ -273,7 +295,7 @@ describe("POST /api/configuracion", () => {
     const request = new Request("http://localhost/api/configuracion", {
       method: "POST",
       body: JSON.stringify({
-        clave: "umbral_rechazado",
+        clave: "umbral_ingresado",
         valor: { leve: 0, grave: 0 }
       }),
     })
@@ -284,27 +306,11 @@ describe("POST /api/configuracion", () => {
     expect(response.status).toBe(200)
   })
 
-  it("returns 404 for non-existent clave", async () => {
+  it("returns 400 for non-whitelisted clave", async () => {
     const { auth } = await import("@/auth")
-    const { getSupabaseAdmin } = await import("@/lib/supabase-admin")
 
     auth.mockResolvedValue({
       user: { role: "admin", id: "user-123" },
-    })
-
-    getSupabaseAdmin.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: null,
-                error: { code: "PGRST116" }, // No rows returned
-              }),
-            }),
-          }),
-        }),
-      }),
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -318,8 +324,8 @@ describe("POST /api/configuracion", () => {
     const response = await POST(request)
     const json = await response.json()
 
-    expect(response.status).toBe(404)
-    expect(json.error).toContain("not found")
+    expect(response.status).toBe(400)
+    expect(json.error).toContain("no válida")
   })
 
   it("saves actualizado_en timestamp on update", async () => {
@@ -526,6 +532,6 @@ describe("POST /api/configuracion", () => {
     const json = await response.json()
 
     expect(response.status).toBe(500)
-    expect(json.error).toBe("Database error")
+    expect(json.error).toBe("Error al actualizar configuración")
   })
 })

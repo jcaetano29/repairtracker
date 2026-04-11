@@ -19,7 +19,8 @@ export async function GET() {
     .order("tipo")
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[/api/admin/plantillas] GET error:", error)
+    return NextResponse.json({ error: "Error al obtener plantillas" }, { status: 500 })
   }
 
   return NextResponse.json({ plantillas: data })
@@ -47,6 +48,8 @@ export async function PATCH(request) {
 
   const { tipo, mensaje } = body
 
+  const ALLOWED_TIPOS = ["PRESUPUESTO", "LISTO_PARA_RETIRO", "RECORDATORIO_MANTENIMIENTO"]
+
   if (!tipo || typeof mensaje !== "string") {
     return NextResponse.json(
       { error: "tipo and mensaje are required" },
@@ -54,9 +57,23 @@ export async function PATCH(request) {
     )
   }
 
+  if (!ALLOWED_TIPOS.includes(tipo)) {
+    return NextResponse.json(
+      { error: "Tipo de plantilla no válido" },
+      { status: 400 }
+    )
+  }
+
   if (mensaje.trim().length === 0) {
     return NextResponse.json(
       { error: "mensaje cannot be empty" },
+      { status: 400 }
+    )
+  }
+
+  if (mensaje.length > 2000) {
+    return NextResponse.json(
+      { error: "mensaje too long (max 2000 characters)" },
       { status: 400 }
     )
   }
@@ -71,11 +88,12 @@ export async function PATCH(request) {
   if (error) {
     if (error.code === "PGRST116") {
       return NextResponse.json(
-        { error: `Template '${tipo}' not found` },
+        { error: "Plantilla no encontrada" },
         { status: 404 }
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[/api/admin/plantillas] PATCH error:", error)
+    return NextResponse.json({ error: "Error al actualizar plantilla" }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, data })

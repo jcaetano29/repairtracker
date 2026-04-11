@@ -19,7 +19,10 @@ export async function GET() {
     .select("id, username, role, sucursal_id, sucursales(nombre), created_at")
     .order("created_at")
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error("[/api/admin/usuarios] GET error:", error)
+    return NextResponse.json({ error: "Error al obtener usuarios" }, { status: 500 })
+  }
   return NextResponse.json({ users: data })
 }
 
@@ -40,14 +43,21 @@ export async function POST(request) {
   if (!username || !password || !role) {
     return NextResponse.json({ error: "username, password and role are required" }, { status: 400 })
   }
+  if (typeof username !== "string" || typeof password !== "string") {
+    return NextResponse.json({ error: "Invalid input types" }, { status: 400 })
+  }
+  // Validate username format: alphanumeric and underscores only, max 50 chars
+  if (!/^[a-zA-Z0-9_]{1,50}$/.test(username)) {
+    return NextResponse.json({ error: "Username must be alphanumeric (max 50 chars)" }, { status: 400 })
+  }
   if (!["employee", "admin"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
   if (role === "employee" && !sucursal_id) {
     return NextResponse.json({ error: "sucursal_id es requerido para employees" }, { status: 400 })
   }
-  if (password.length < 6) {
-    return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
+  if (password.length < 6 || password.length > 128) {
+    return NextResponse.json({ error: "Password must be 6-128 characters" }, { status: 400 })
   }
 
   const password_hash = await bcrypt.hash(password, 10)
@@ -60,7 +70,8 @@ export async function POST(request) {
     if (error.code === "23505") {
       return NextResponse.json({ error: "El nombre de usuario ya existe" }, { status: 409 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[/api/admin/usuarios] POST error:", error)
+    return NextResponse.json({ error: "Error al crear usuario" }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
@@ -82,6 +93,10 @@ export async function DELETE(request) {
 
   const { userId } = body
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 })
+  // Validate UUID format to prevent injection
+  if (typeof userId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    return NextResponse.json({ error: "Invalid userId format" }, { status: 400 })
+  }
 
   if (userId === session.user.id) {
     return NextResponse.json({ error: "No podés eliminar tu propia cuenta" }, { status: 400 })
@@ -92,7 +107,10 @@ export async function DELETE(request) {
     .delete()
     .eq("id", userId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error("[/api/admin/usuarios] DELETE error:", error)
+    return NextResponse.json({ error: "Error al eliminar usuario" }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
 
@@ -113,6 +131,10 @@ export async function PATCH(request) {
   if (!userId || !role) {
     return NextResponse.json({ error: "userId and role required" }, { status: 400 })
   }
+  // Validate UUID format
+  if (typeof userId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    return NextResponse.json({ error: "Invalid userId format" }, { status: 400 })
+  }
   if (!["employee", "admin"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
@@ -122,6 +144,9 @@ export async function PATCH(request) {
     .update({ role, sucursal_id: role === "employee" ? (sucursal_id ?? null) : null })
     .eq("id", userId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error("[/api/admin/usuarios] PATCH error:", error)
+    return NextResponse.json({ error: "Error al actualizar usuario" }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

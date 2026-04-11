@@ -14,7 +14,8 @@ export async function GET() {
     .select("clave, valor")
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[/api/configuracion] GET error:", error)
+    return NextResponse.json({ error: "Error al obtener configuración" }, { status: 500 })
   }
 
   // Transform array of {clave, valor} into a single object
@@ -54,10 +55,29 @@ export async function POST(request) {
 
   const { clave, valor } = body
 
+  // Validate clave against allowed keys to prevent arbitrary config manipulation
+  const ALLOWED_CLAVES = [
+    "umbral_ingresado",
+    "umbral_en_taller",
+    "umbral_esperando_aprobacion",
+    "umbral_rechazado",
+    "umbral_en_reparacion",
+    "umbral_listo_en_taller",
+    "umbral_listo_para_retiro",
+    "umbral_entregado",
+  ]
+
   // Validate clave and valor are present
   if (!clave) {
     return NextResponse.json(
       { error: "clave is required" },
+      { status: 400 }
+    )
+  }
+
+  if (!ALLOWED_CLAVES.includes(clave)) {
+    return NextResponse.json(
+      { error: "Clave de configuración no válida" },
       { status: 400 }
     )
   }
@@ -77,10 +97,10 @@ export async function POST(request) {
     )
   }
 
-  // Validate leve and grave are numeric
-  if (typeof valor.leve !== "number" || typeof valor.grave !== "number") {
+  // Validate leve and grave are integers
+  if (!Number.isInteger(valor.leve) || !Number.isInteger(valor.grave)) {
     return NextResponse.json(
-      { error: "leve and grave must be numeric values" },
+      { error: "leve and grave must be integer values" },
       { status: 400 }
     )
   }
@@ -122,11 +142,12 @@ export async function POST(request) {
     // Check if it's "no rows returned" (non-existent clave)
     if (error.code === "PGRST116") {
       return NextResponse.json(
-        { error: `Configuration key '${clave}' not found` },
+        { error: "Clave de configuración no encontrada" },
         { status: 404 }
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[/api/configuracion] POST error:", error)
+    return NextResponse.json({ error: "Error al actualizar configuración" }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, data })

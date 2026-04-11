@@ -6,9 +6,15 @@ import { notFound } from "next/navigation";
 export default async function SeguimientoPage({ params }) {
   const { token } = await params;
 
+  // Validate token format (UUID) to prevent arbitrary queries
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
+    notFound();
+  }
+
+  // Only select fields needed for the public tracking page — no internal data
   const { data: orden, error } = await getSupabaseAdmin()
     .from("ordenes")
-    .select("*, clientes(nombre), talleres(nombre)")
+    .select("numero_orden, tipo_articulo, marca, estado, fecha_ingreso, fecha_envio_taller, fecha_aprobacion, fecha_listo, fecha_entrega, tracking_token, clientes(nombre), talleres(nombre)")
     .eq("tracking_token", token)
     .single();
 

@@ -368,15 +368,18 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Vista Kanban */}
-        {!loading && vista === "kanban" && (
-          <div className="flex gap-3 overflow-x-auto pb-4">
+      </main>
+
+      {/* Vista Kanban — full-width fuera del max-w-7xl */}
+      {!loading && vista === "kanban" && (
+        <div className="px-4 sm:px-6 pb-6">
+          <div className="flex gap-3 overflow-x-auto pb-2">
             {estadosActivos.map(([estado, config]) => {
               const enEstado = ordenes.filter((o) => o.estado === estado)
               return (
                 <div
                   key={estado}
-                  className="flex-shrink-0 w-64 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[70vh]"
+                  className="flex-shrink-0 w-72 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(100vh-220px)]"
                 >
                   <div
                     className="px-3.5 py-3 flex items-center gap-2 border-b-2"
@@ -438,8 +441,8 @@ export default function DashboardPage() {
               )
             })}
           </div>
-        )}
-      </main>
+        </div>
+      )}
 
       {/* Modals */}
       {showNuevo && (

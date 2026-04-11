@@ -84,8 +84,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       setShowAsignar(true);
       return;
     }
-    // Si pasa a ESPERANDO_APROBACION, pedir monto
-    if (nuevoEstado === "ESPERANDO_APROBACION" && !orden.monto_presupuesto) {
+    // Si pasa a ESPERANDO_APROBACION, mostrar panel de presupuesto
+    // (siempre mostrar para permitir notificar por WhatsApp, incluso si ya hay monto)
+    if (nuevoEstado === "ESPERANDO_APROBACION") {
+      if (orden.monto_presupuesto) setMonto(String(orden.monto_presupuesto));
       setShowPresupuesto(true);
       return;
     }

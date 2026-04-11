@@ -97,17 +97,30 @@ describe('8-state structure', () => {
     expect(ESTADOS).toHaveProperty('EN_TALLER');
   });
 
-  it('INGRESADO transitions to EN_TALLER and EN_REPARACION only', () => {
-    expect(TRANSICIONES.INGRESADO).toEqual(
-      expect.arrayContaining(['EN_TALLER', 'EN_REPARACION'])
-    );
-    expect(TRANSICIONES.INGRESADO).not.toContain('ESPERANDO_PRESUPUESTO');
-    expect(TRANSICIONES.INGRESADO).not.toContain('ENVIADO_A_TALLER');
+  it('INGRESADO transitions to EN_TALLER and ESPERANDO_APROBACION, not EN_REPARACION', () => {
+    expect(TRANSICIONES.INGRESADO).toContain('EN_TALLER');
+    expect(TRANSICIONES.INGRESADO).toContain('ESPERANDO_APROBACION');
+    expect(TRANSICIONES.INGRESADO).not.toContain('EN_REPARACION');
   });
 
-  it('ESPERANDO_APROBACION transitions to LISTO_EN_TALLER and RECHAZADO', () => {
-    expect(TRANSICIONES.ESPERANDO_APROBACION).toEqual(
-      expect.arrayContaining(['LISTO_EN_TALLER', 'RECHAZADO'])
-    );
+  it('ESPERANDO_APROBACION transitions to EN_REPARACION and RECHAZADO, not LISTO_EN_TALLER', () => {
+    expect(TRANSICIONES.ESPERANDO_APROBACION).toContain('EN_REPARACION');
+    expect(TRANSICIONES.ESPERANDO_APROBACION).toContain('RECHAZADO');
+    expect(TRANSICIONES.ESPERANDO_APROBACION).not.toContain('LISTO_EN_TALLER');
   });
-})
+
+  it('EN_REPARACION transitions to LISTO_EN_TALLER and LISTO_PARA_RETIRO', () => {
+    expect(TRANSICIONES.EN_REPARACION).toContain('LISTO_EN_TALLER');
+    expect(TRANSICIONES.EN_REPARACION).toContain('LISTO_PARA_RETIRO');
+  });
+
+  it('every state except ENTREGADO has at least one transition', () => {
+    Object.entries(TRANSICIONES).forEach(([estado, siguientes]) => {
+      if (estado === 'ENTREGADO') {
+        expect(siguientes).toHaveLength(0);
+      } else {
+        expect(siguientes.length).toBeGreaterThan(0);
+      }
+    });
+  });
+});

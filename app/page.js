@@ -56,7 +56,7 @@ export default function DashboardPage() {
           page: pagina,
           limit: 20,
         }),
-        getStats(configuracionData),
+        getStats(configuracionData, { sucursal_id: sucursalFiltro }),
         getTalleres(),
       ])
       setOrdenes(ordenesData)
@@ -454,6 +454,7 @@ export default function DashboardPage() {
           onClose={() => setSelectedOrden(null)}
           onUpdated={() => loadData()}
           isDueno={isDueno}
+          umbrales={umbrales}
         />
       )}
     </div>

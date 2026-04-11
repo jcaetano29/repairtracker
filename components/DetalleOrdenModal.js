@@ -5,7 +5,7 @@ import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
 import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto } from "@/lib/data";
 
-export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
+export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
   const [historial, setHistorial] = useState([]);
   const [talleres, setTalleresState] = useState([]);
@@ -22,7 +22,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
   const [notificarRetiro, setNotificarRetiro] = useState(true);
   const [plantillas, setPlantillas] = useState({});
 
-  const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado);
+  const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
 
   useEffect(() => {

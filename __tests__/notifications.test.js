@@ -1,64 +1,28 @@
-// __tests__/notifications.test.js
-import { ordenCreadaTemplate } from '@/lib/notifications/templates/orden-creada'
-import { listoParaRetiroTemplate } from '@/lib/notifications/templates/listo-para-retiro'
-import { recordatorioMantenimientoTemplate } from '@/lib/notifications/templates/recordatorio-mantenimiento'
+import { interpolate } from '@/lib/notifications'
 
-describe('ordenCreadaTemplate', () => {
-  it('includes order number in body', () => {
-    const { body } = ordenCreadaTemplate({
-      numeroOrden: '0042',
-      clienteNombre: 'Juan',
-      tipoArticulo: 'Reloj',
-      marca: 'Casio',
-      trackingUrl: 'https://example.com/seguimiento/abc',
-    })
-    expect(body).toContain('0042')
+describe('interpolate', () => {
+  it('replaces known variables', () => {
+    const result = interpolate('Hola {{clienteNombre}}', { clienteNombre: 'Juan' })
+    expect(result).toBe('Hola Juan')
   })
 
-  it('includes tracking URL in body', () => {
-    const { body } = ordenCreadaTemplate({
-      numeroOrden: '0042',
-      clienteNombre: 'Juan',
-      tipoArticulo: 'Reloj',
-      marca: 'Casio',
-      trackingUrl: 'https://example.com/seguimiento/abc',
-    })
-    expect(body).toContain('https://example.com/seguimiento/abc')
+  it('keeps unknown variables as placeholder', () => {
+    const result = interpolate('Hola {{clienteNombre}} {{apellido}}', { clienteNombre: 'Juan' })
+    expect(result).toBe('Hola Juan {{apellido}}')
   })
 
-  it('does not return subject or html', () => {
-    const result = ordenCreadaTemplate({
-      numeroOrden: '0042',
-      clienteNombre: 'Juan',
-      tipoArticulo: 'Reloj',
-      marca: 'Casio',
-      trackingUrl: 'https://example.com/seguimiento/abc',
-    })
-    expect(result).not.toHaveProperty('subject')
-    expect(result).not.toHaveProperty('html')
+  it('replaces multiple occurrences of the same variable', () => {
+    const result = interpolate('{{nombre}} y {{nombre}}', { nombre: 'X' })
+    expect(result).toBe('X y X')
   })
-})
 
-describe('listoParaRetiroTemplate', () => {
-  it('includes client name in body', () => {
-    const { body } = listoParaRetiroTemplate({
-      numeroOrden: '0042',
-      clienteNombre: 'María',
-      tipoArticulo: 'Reloj',
-      marca: 'Tissot',
-      trackingUrl: 'https://example.com/seguimiento/xyz',
-    })
-    expect(body).toContain('María')
+  it('handles template with no variables', () => {
+    const result = interpolate('Sin variables', { nombre: 'Juan' })
+    expect(result).toBe('Sin variables')
   })
-})
 
-describe('recordatorioMantenimientoTemplate', () => {
-  it('includes service type in body', () => {
-    const { body } = recordatorioMantenimientoTemplate({
-      clienteNombre: 'Pedro',
-      tipoServicio: 'Cambio de pila',
-      ultimaFecha: '07 de octubre de 2024',
-    })
-    expect(body).toContain('Cambio de pila')
+  it('handles empty vars object', () => {
+    const result = interpolate('Hola {{nombre}}', {})
+    expect(result).toBe('Hola {{nombre}}')
   })
 })

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden } from "@/lib/data";
+import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto } from "@/lib/data";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
   const [loading, setLoading] = useState(false);
@@ -84,6 +84,34 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto));
+      onUpdated();
+      onClose();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAprobar() {
+    setLoading(true);
+    setError(null);
+    try {
+      await aprobarPresupuesto(orden.id);
+      onUpdated();
+      onClose();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRechazar() {
+    setLoading(true);
+    setError(null);
+    try {
+      await rechazarPresupuesto(orden.id);
       onUpdated();
       onClose();
     } catch (e) {
@@ -279,8 +307,35 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
             </div>
           )}
 
-          {/* Transiciones */}
-          {siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && (
+          {/* Aprobar / Rechazar presupuesto */}
+          {orden.estado === "ESPERANDO_APROBACION" && !showAsignar && !showPresupuesto && !showEntrega && (
+            <div>
+              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+                Decisión del presupuesto
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleAprobar}
+                  disabled={loading}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                  style={{ borderColor: "#3b82f6", backgroundColor: "#eff6ff", color: "#3b82f6" }}
+                >
+                  ✓ Aprobar presupuesto
+                </button>
+                <button
+                  onClick={handleRechazar}
+                  disabled={loading}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                  style={{ borderColor: "#ef4444", backgroundColor: "#fef2f2", color: "#ef4444" }}
+                >
+                  ✗ Rechazar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
+          {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && (
             <div>
               <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Cambiar estado

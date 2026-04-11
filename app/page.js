@@ -81,11 +81,6 @@ export default function DashboardPage() {
     loadData()
   }, [loadData])
 
-  // Reset a página 1 cuando cambian los filtros
-  useEffect(() => {
-    setPagina(1)
-  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal])
-
   // Auto-refresh cada 30 segundos
   useEffect(() => {
     const interval = setInterval(loadData, 30000)
@@ -95,7 +90,10 @@ export default function DashboardPage() {
   function handleSearch(value) {
     setBusqueda(value)
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
-    searchTimeoutRef.current = setTimeout(() => setDebouncedBusqueda(value), 400)
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedBusqueda(value)
+      setPagina(1)
+    }, 400)
   }
 
   const estadosActivos = Object.entries(ESTADOS).filter(([k]) => k !== "ENTREGADO")
@@ -174,7 +172,7 @@ export default function DashboardPage() {
           {isDueno && sucursales.length > 0 && (
             <select
               value={filtroSucursal}
-              onChange={(e) => setFiltroSucursal(e.target.value)}
+              onChange={(e) => { setFiltroSucursal(e.target.value); setPagina(1) }}
               className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-700"
             >
               <option value="TODAS">Todas las sucursales</option>
@@ -185,7 +183,7 @@ export default function DashboardPage() {
           )}
           <select
             value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
+            onChange={(e) => { setFiltroEstado(e.target.value); setPagina(1) }}
             className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer"
           >
             <option value="TODOS">Todos los estados</option>
@@ -197,7 +195,7 @@ export default function DashboardPage() {
           </select>
           <select
             value={filtroTaller}
-            onChange={(e) => setFiltroTaller(e.target.value)}
+            onChange={(e) => { setFiltroTaller(e.target.value); setPagina(1) }}
             className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer"
           >
             <option value="TODOS">Todos los talleres</option>

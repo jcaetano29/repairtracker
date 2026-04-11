@@ -197,7 +197,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           {step === 1 && creandoCliente && (
             <div className="space-y-4">
               <button
-                onClick={() => setCreandoCliente(false)}
+                onClick={() => {
+                  setCreandoCliente(false);
+                  setClienteQuery("");
+                  setClientesEncontrados([]);
+                }}
                 className="text-sm text-indigo-600 hover:text-indigo-800"
               >
                 ← Volver a buscar

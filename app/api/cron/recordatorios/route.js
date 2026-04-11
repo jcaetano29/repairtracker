@@ -14,7 +14,7 @@ export async function GET(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch delivered orders that have a service type linked, with client email
+  // Fetch delivered orders that have a service type linked, with client phone
   const { data: ordenes, error } = await getSupabaseAdmin()
     .from("ordenes")
     .select(`

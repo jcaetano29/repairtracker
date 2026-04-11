@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const [busqueda, setBusqueda] = useState("")
   const [debouncedBusqueda, setDebouncedBusqueda] = useState("")
   const searchTimeoutRef = useRef(null)
-  const [vista, setVista] = useState("tabla")
+  const [vista, setVista] = useState("kanban")
   const [showNuevo, setShowNuevo] = useState(false)
   const [selectedOrden, setSelectedOrden] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -154,10 +154,10 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
         {/* Stats */}
         <div className="flex flex-wrap gap-3 mb-5">
-          <StatCard label="Activas" value={stats.activas} icon="📋" color="#0f172a" />
-          <StatCard label="Con Retraso" value={stats.conRetraso} icon="⚠️" color="#ef4444" />
-          <StatCard label="Para Retiro" value={stats.listasRetiro} icon="🎉" color="#22c55e" />
-          <StatCard label="En Talleres" value={stats.enTaller} icon="🔧" color="#8b5cf6" />
+          <StatCard label="Activas" value={stats.activas} icon="📋" color="#0f172a" description="Órdenes en curso sin entregar" />
+          <StatCard label="Con Retraso" value={stats.conRetraso} icon="⚠️" color="#ef4444" description="Superan el umbral de días en su estado" />
+          <StatCard label="Para Retiro" value={stats.listasRetiro} icon="🎉" color="#22c55e" description="Listas para que el cliente retire" />
+          <StatCard label="En Talleres" value={stats.enTaller} icon="🔧" color="#8b5cf6" description="Enviadas, en reparación o listas en taller" />
         </div>
 
         {/* Filtros */}
@@ -208,16 +208,6 @@ export default function DashboardPage() {
           </select>
           <div className="ml-auto flex gap-1">
             <button
-              onClick={() => setVista("tabla")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                vista === "tabla"
-                  ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              ☰ Tabla
-            </button>
-            <button
               onClick={() => setVista("kanban")}
               className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "kanban"
@@ -226,6 +216,16 @@ export default function DashboardPage() {
               }`}
             >
               ▥ Kanban
+            </button>
+            <button
+              onClick={() => setVista("tabla")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                vista === "tabla"
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              ☰ Tabla
             </button>
           </div>
         </div>

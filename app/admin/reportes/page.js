@@ -35,7 +35,7 @@ export default function ReportesPage() {
 
   useEffect(() => {
     fetch("/api/admin/sucursales")
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => setSucursales(d.sucursales || []))
       .catch(() => {});
 

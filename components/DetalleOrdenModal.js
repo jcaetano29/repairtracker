@@ -34,7 +34,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       const [h, t, pRes] = await Promise.all([
         getHistorial(orden.id),
         getTalleres(),
-        fetch("/api/admin/plantillas").then(r => r.ok ? r.json() : { plantillas: [] }),
+        fetch("/api/admin/plantillas").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
       ]);
       setHistorial(h);
       setTalleresState(t);
@@ -61,7 +61,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function triggerNotify(type, extras = {}) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-    await fetch("/api/notify", {
+    const res = await fetch("/api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -76,6 +76,9 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         },
       }),
     });
+    if (!res.ok) {
+      throw new Error("Error al enviar notificación");
+    }
   }
 
   async function handleCambiarEstado(nuevoEstado) {

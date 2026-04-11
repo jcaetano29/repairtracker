@@ -116,7 +116,8 @@ export async function DELETE(request) {
 
 // PATCH — update role
 export async function PATCH(request) {
-  if (!(await verifyAdmin())) {
+  const session = await verifyAdmin()
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -134,6 +135,9 @@ export async function PATCH(request) {
   // Validate UUID format
   if (typeof userId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
     return NextResponse.json({ error: "Invalid userId format" }, { status: 400 })
+  }
+  if (userId === session.user.id) {
+    return NextResponse.json({ error: "No podés cambiar tu propio rol" }, { status: 400 })
   }
   if (!["employee", "admin"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })

@@ -87,6 +87,11 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [loadData])
 
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current) }
+  }, [])
+
   function handleSearch(value) {
     setBusqueda(value)
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)

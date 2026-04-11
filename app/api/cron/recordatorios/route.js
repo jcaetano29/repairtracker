@@ -95,11 +95,15 @@ export async function GET(request) {
       });
 
       // Mark as successfully sent
-      await getSupabaseAdmin()
+      const { error: updateError } = await getSupabaseAdmin()
         .from("notificaciones_enviadas")
         .update({ enviado: true })
         .eq("orden_id", orden.id)
         .eq("tipo_notificacion", "RECORDATORIO_MANTENIMIENTO");
+
+      if (updateError) {
+        console.error("[Cron] Failed to mark notification as sent:", updateError);
+      }
 
       sent++;
     } catch (e) {

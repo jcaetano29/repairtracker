@@ -18,6 +18,24 @@ const ESTADO_ORDER = [
   "ENTREGADO",
 ]
 
+const PLANTILLA_LABELS = {
+  PRESUPUESTO: {
+    label: "Presupuesto",
+    desc: "Se envía cuando el operador registra un presupuesto y elige notificar.",
+    vars: "{{clienteNombre}}, {{numeroOrden}}, {{tipoArticulo}}, {{monto}}",
+  },
+  LISTO_PARA_RETIRO: {
+    label: "Listo para retiro",
+    desc: "Se envía cuando el artículo está listo y el operador elige notificar.",
+    vars: "{{clienteNombre}}, {{numeroOrden}}, {{tipoArticulo}}, {{trackingUrl}}",
+  },
+  RECORDATORIO_MANTENIMIENTO: {
+    label: "Recordatorio de mantenimiento",
+    desc: "Se envía automáticamente por el cron de recordatorios.",
+    vars: "{{clienteNombre}}, {{tipoServicio}}, {{ultimaFecha}}",
+  },
+}
+
 /**
  * ConfiguracionClient Component
  *
@@ -25,8 +43,9 @@ const ESTADO_ORDER = [
  * Users can edit leve/grave values and save them to the API.
  *
  * @param {Object} configuracion - Configuration object mapping clave to {leve, grave}
+ * @param {Array} plantillas - Array of plantillas from server
  */
-export default function ConfiguracionClient({ configuracion }) {
+export default function ConfiguracionClient({ configuracion, plantillas = [] }) {
   // Track local state for each threshold row: { umbral_key: { leve, grave, loading } }
   const [rows, setRows] = useState(() => {
     const initial = {}
@@ -38,6 +57,14 @@ export default function ConfiguracionClient({ configuracion }) {
         grave: valor.grave,
         loading: false,
       }
+    })
+    return initial
+  })
+
+  const [templates, setTemplates] = useState(() => {
+    const initial = {}
+    plantillas.forEach((p) => {
+      initial[p.tipo] = { mensaje: p.mensaje, loading: false }
     })
     return initial
   })
@@ -123,6 +150,43 @@ export default function ConfiguracionClient({ configuracion }) {
       setRows((prev) => ({
         ...prev,
         [clave]: { ...prev[clave], loading: false },
+      }))
+    }
+  }
+
+  async function handleSavePlantilla(tipo) {
+    const t = templates[tipo]
+    if (!t || t.mensaje.trim().length === 0) return
+
+    setTemplates((prev) => ({
+      ...prev,
+      [tipo]: { ...prev[tipo], loading: true },
+    }))
+
+    try {
+      const response = await fetch("/api/admin/plantillas", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, mensaje: t.mensaje }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al guardar")
+      }
+
+      setTemplates((prev) => ({
+        ...prev,
+        [tipo]: { ...prev[tipo], loading: false },
+      }))
+
+      toast.success("Plantilla actualizada")
+    } catch (error) {
+      toast.error(error.message)
+      setTemplates((prev) => ({
+        ...prev,
+        [tipo]: { ...prev[tipo], loading: false },
       }))
     }
   }
@@ -241,6 +305,58 @@ export default function ConfiguracionClient({ configuracion }) {
         <p className="text-xs text-blue-900 opacity-75">
           Los días se cuentan desde la última transición de estado (cuando la orden entró al estado actual).
         </p>
+      </div>
+
+      {/* Plantillas WhatsApp */}
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          Plantillas de Mensajes WhatsApp
+        </h2>
+        <p className="text-sm text-slate-600 mb-4">
+          Personalizá los mensajes que se envían a los clientes. Usá las variables entre llaves dobles para insertar datos dinámicos.
+        </p>
+
+        <div className="space-y-6">
+          {Object.entries(PLANTILLA_LABELS).map(([tipo, meta]) => {
+            const t = templates[tipo]
+            if (!t) return null
+
+            return (
+              <div key={tipo} className="bg-white rounded-xl border border-slate-200 p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-bold text-slate-900">{meta.label}</h3>
+                  <button
+                    onClick={() => handleSavePlantilla(tipo)}
+                    disabled={t.loading || t.mensaje.trim().length === 0}
+                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                      !t.loading && t.mensaje.trim().length > 0
+                        ? "bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                        : "bg-slate-200 text-slate-500 cursor-not-allowed"
+                    }`}
+                  >
+                    {t.loading ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mb-2">{meta.desc}</p>
+                <div className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-1 rounded mb-3 font-mono">
+                  Variables: {meta.vars}
+                </div>
+                <textarea
+                  value={t.mensaje}
+                  onChange={(e) =>
+                    setTemplates((prev) => ({
+                      ...prev,
+                      [tipo]: { ...prev[tipo], mensaje: e.target.value },
+                    }))
+                  }
+                  disabled={t.loading}
+                  rows={8}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500 resize-y"
+                />
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

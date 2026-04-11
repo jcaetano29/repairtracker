@@ -355,7 +355,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
                         color: next.color,
                       }}
                     >
-                      {next.icon} {next.label}
+                      {next.icon} {orden.estado === "INGRESADO" && s === "ESPERANDO_APROBACION" ? "Presupuestar en local" : next.label}
                     </button>
                   );
                 })}

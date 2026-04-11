@@ -17,6 +17,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
   const [tallerSelected, setTallerSelected] = useState("");
   const [metodoPago, setMetodoPago] = useState("efectivo");
   const [error, setError] = useState(null);
+  const [notificarPresupuesto, setNotificarPresupuesto] = useState(true);
+  const [showRetiro, setShowRetiro] = useState(false);
+  const [notificarRetiro, setNotificarRetiro] = useState(true);
+  const [plantillas, setPlantillas] = useState({});
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado);
   const siguientes = TRANSICIONES[orden.estado] || [];
@@ -27,12 +31,51 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
 
   async function loadData() {
     try {
-      const [h, t] = await Promise.all([getHistorial(orden.id), getTalleres()]);
+      const [h, t, pRes] = await Promise.all([
+        getHistorial(orden.id),
+        getTalleres(),
+        fetch("/api/admin/plantillas").then(r => r.ok ? r.json() : { plantillas: [] }),
+      ]);
       setHistorial(h);
       setTalleresState(t);
+      const map = {};
+      (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.mensaje; });
+      setPlantillas(map);
     } catch (e) {
       console.error(e);
     }
+  }
+
+  function buildPreview(tipo, extras = {}) {
+    const template = plantillas[tipo] || "";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    const vars = {
+      clienteNombre: orden.cliente_nombre,
+      numeroOrden: formatNumeroOrden(orden.numero_orden),
+      tipoArticulo: orden.tipo_articulo,
+      trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
+      ...extras,
+    };
+    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
+  }
+
+  async function triggerNotify(type, extras = {}) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    await fetch("/api/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type,
+        data: {
+          clienteTelefono: orden.cliente_telefono,
+          clienteNombre: orden.cliente_nombre,
+          numeroOrden: formatNumeroOrden(orden.numero_orden),
+          tipoArticulo: orden.tipo_articulo,
+          trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
+          ...extras,
+        },
+      }),
+    });
   }
 
   async function handleCambiarEstado(nuevoEstado) {
@@ -49,6 +92,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
     // Si pasa a ENTREGADO, pedir pago
     if (nuevoEstado === "ENTREGADO") {
       setShowEntrega(true);
+      return;
+    }
+    // Si pasa a LISTO_PARA_RETIRO, mostrar panel con checkbox de notificación
+    if (nuevoEstado === "LISTO_PARA_RETIRO") {
+      setShowRetiro(true);
       return;
     }
 
@@ -84,6 +132,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto));
+      if (notificarPresupuesto && orden.cliente_telefono) {
+        try {
+          await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() });
+        } catch (e) {
+          console.error("[Notify] Error al enviar presupuesto:", e);
+        }
+      }
       onUpdated();
       onClose();
     } catch (e) {
@@ -112,6 +167,27 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
     setError(null);
     try {
       await rechazarPresupuesto(orden.id);
+      onUpdated();
+      onClose();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRetiro() {
+    setLoading(true);
+    setError(null);
+    try {
+      await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
+      if (notificarRetiro && orden.cliente_telefono) {
+        try {
+          await triggerNotify("LISTO_PARA_RETIRO");
+        } catch (e) {
+          console.error("[Notify] Error al enviar listo para retiro:", e);
+        }
+      }
       onUpdated();
       onClose();
     } catch (e) {
@@ -264,10 +340,28 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
                 onChange={(e) => setMonto(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg text-sm"
               />
+              {orden.cliente_telefono && (
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificarPresupuesto}
+                    onChange={(e) => setNotificarPresupuesto(e.target.checked)}
+                    className="mt-0.5 rounded border-slate-300"
+                  />
+                  <div className="text-xs text-slate-600">
+                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    {notificarPresupuesto && monto && (
+                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
+                        {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() })}
+                      </div>
+                    )}
+                  </div>
+                </label>
+              )}
               <div className="flex gap-2">
                 <button onClick={handlePresupuesto} disabled={!monto || loading}
                   className="flex-1 py-2 bg-cyan-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
-                  {loading ? "..." : "Guardar y notificar cliente"}
+                  {loading ? "..." : "Guardar presupuesto"}
                 </button>
                 <button onClick={() => setShowPresupuesto(false)} className="px-4 py-2 border rounded-lg text-sm">
                   Cancelar
@@ -307,8 +401,42 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
             </div>
           )}
 
+          {/* Confirmar listo para retiro con notificación */}
+          {showRetiro && (
+            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
+              <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
+              {orden.cliente_telefono && (
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificarRetiro}
+                    onChange={(e) => setNotificarRetiro(e.target.checked)}
+                    className="mt-0.5 rounded border-slate-300"
+                  />
+                  <div className="text-xs text-slate-600">
+                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    {notificarRetiro && (
+                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
+                        {buildPreview("LISTO_PARA_RETIRO")}
+                      </div>
+                    )}
+                  </div>
+                </label>
+              )}
+              <div className="flex gap-2">
+                <button onClick={handleRetiro} disabled={loading}
+                  className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  {loading ? "..." : "✓ Confirmar listo para retiro"}
+                </button>
+                <button onClick={() => setShowRetiro(false)} className="px-4 py-2 border rounded-lg text-sm">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Aprobar / Rechazar presupuesto */}
-          {orden.estado === "ESPERANDO_APROBACION" && !showAsignar && !showPresupuesto && !showEntrega && (
+          {orden.estado === "ESPERANDO_APROBACION" && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
               <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Decisión del presupuesto
@@ -335,7 +463,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno }) {
           )}
 
           {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
-          {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && (
+          {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
               <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Cambiar estado

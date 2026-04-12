@@ -22,20 +22,20 @@ export default async function ConfiguracionPage() {
     console.error("[ConfiguracionPage] Error loading configuration:", error)
   }
 
-  let plantillas = []
+  let plantillasEmail = []
   try {
     const { data } = await getSupabaseAdmin()
-      .from("plantillas_whatsapp")
-      .select("tipo, mensaje, updated_at")
+      .from("plantillas_email")
+      .select("tipo, asunto, cuerpo, updated_at")
       .order("tipo")
-    plantillas = data || []
+    plantillasEmail = data || []
   } catch (error) {
-    console.error("[ConfiguracionPage] Error loading plantillas:", error)
+    console.error("[ConfiguracionPage] Error loading plantillas email:", error)
   }
 
   return (
     <div>
-      <ConfiguracionClient configuracion={configuracion} plantillas={plantillas} />
+      <ConfiguracionClient configuracion={configuracion} plantillasEmail={plantillasEmail} />
     </div>
   )
 }

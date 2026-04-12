@@ -34,12 +34,12 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       const [h, t, pRes] = await Promise.all([
         getHistorial(orden.id),
         getTalleres(),
-        fetch("/api/admin/plantillas").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
+        fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
       ]);
       setHistorial(h);
       setTalleresState(t);
       const map = {};
-      (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.mensaje; });
+      (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
       setPlantillas(map);
     } catch (e) {
       console.error(e);
@@ -89,7 +89,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       return;
     }
     // Si pasa a ESPERANDO_APROBACION, mostrar panel de presupuesto
-    // (siempre mostrar para permitir notificar por WhatsApp, incluso si ya hay monto)
+    // (siempre mostrar para permitir notificar por email, incluso si ya hay monto)
     if (nuevoEstado === "ESPERANDO_APROBACION") {
       if (orden.monto_presupuesto) setMonto(String(orden.monto_presupuesto));
       setShowPresupuesto(true);
@@ -138,7 +138,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto));
-      if (notificarPresupuesto && (orden.cliente_telefono || orden.cliente_email)) {
+      if (notificarPresupuesto && orden.cliente_email) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() });
         } catch (e) {
@@ -187,7 +187,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setError(null);
     try {
       await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
-      if (notificarRetiro && (orden.cliente_telefono || orden.cliente_email)) {
+      if (notificarRetiro && orden.cliente_email) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {
@@ -346,7 +346,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 onChange={(e) => setMonto(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg text-sm"
               />
-              {orden.cliente_telefono && (
+              {orden.cliente_email && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -355,7 +355,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    <span className="font-semibold">Notificar al cliente por email</span>
                     {notificarPresupuesto && monto && (
                       <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
                         {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() })}
@@ -411,7 +411,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showRetiro && (
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
               <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
-              {orden.cliente_telefono && (
+              {orden.cliente_email && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -420,7 +420,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    <span className="font-semibold">Notificar al cliente por email</span>
                     {notificarRetiro && (
                       <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
                         {buildPreview("LISTO_PARA_RETIRO")}

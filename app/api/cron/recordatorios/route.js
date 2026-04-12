@@ -34,7 +34,7 @@ export async function GET(request) {
       id,
       tipo_articulo,
       fecha_entrega,
-      clientes(id, nombre, telefono),
+      clientes(id, nombre, telefono, email),
       tipos_servicio(nombre, ciclo_meses)
     `)
     .eq("estado", "ENTREGADO")
@@ -60,7 +60,7 @@ export async function GET(request) {
 
   for (const orden of ordenes || []) {
     if (yaEnviadosSet.has(orden.id)) continue;
-    if (!orden.clientes?.telefono) continue;
+    if (!orden.clientes?.telefono && !orden.clientes?.email) continue;
     if (!orden.tipos_servicio?.ciclo_meses) continue;
 
     if (!isReminderDue(orden.fecha_entrega, orden.tipos_servicio.ciclo_meses)) continue;
@@ -73,7 +73,7 @@ export async function GET(request) {
         cliente_id: orden.clientes.id,
         tipo_notificacion: "RECORDATORIO_MANTENIMIENTO",
         tipo: "RECORDATORIO_MANTENIMIENTO",
-        canal: "whatsapp",
+        canal: "multi",
         enviado: false,
         fecha_envio: new Date().toISOString(),
       });
@@ -85,6 +85,7 @@ export async function GET(request) {
 
       await sendNotification("RECORDATORIO_MANTENIMIENTO", {
         clienteTelefono: orden.clientes.telefono,
+        clienteEmail: orden.clientes.email,
         clienteNombre: orden.clientes.nombre,
         tipoServicio: orden.tipos_servicio.nombre,
         ultimaFecha: new Date(orden.fecha_entrega).toLocaleDateString("es-UY", {

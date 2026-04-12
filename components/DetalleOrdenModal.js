@@ -68,6 +68,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         type,
         data: {
           clienteTelefono: orden.cliente_telefono,
+          clienteEmail: orden.cliente_email,
           clienteNombre: orden.cliente_nombre,
           numeroOrden: formatNumeroOrden(orden.numero_orden),
           tipoArticulo: orden.tipo_articulo,
@@ -137,7 +138,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto));
-      if (notificarPresupuesto && orden.cliente_telefono) {
+      if (notificarPresupuesto && (orden.cliente_telefono || orden.cliente_email)) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() });
         } catch (e) {
@@ -186,7 +187,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setError(null);
     try {
       await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
-      if (notificarRetiro && orden.cliente_telefono) {
+      if (notificarRetiro && (orden.cliente_telefono || orden.cliente_email)) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {

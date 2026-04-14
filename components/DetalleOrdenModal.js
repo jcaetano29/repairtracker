@@ -234,7 +234,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         }
       }
 
-      if (notificarRetiro && orden.cliente_email) {
+      // Only notify if the order doesn't need a return transfer
+      // (if it does, notification will be sent when the return transfer is received)
+      const needsRetorno = orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id;
+      if (!needsRetorno && notificarRetiro && orden.cliente_email) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {
@@ -352,6 +355,20 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <span>•</span>
               <span>{orden.dias_en_estado}d en este estado</span>
             </div>
+          </div>
+
+          {/* Ubicación actual */}
+          <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+            <span className="text-sm">📍</span>
+            <div>
+              <div className="text-[10px] text-indigo-400 font-semibold uppercase">Ubicación actual</div>
+              <div className="text-sm font-bold text-indigo-900">{orden.sucursal_nombre}</div>
+            </div>
+            {trasladoActivo && (
+              <div className="ml-auto">
+                <TrasladosBadge tipo={trasladoActivo.tipo} estado={trasladoActivo.estado} />
+              </div>
+            )}
           </div>
 
           {/* Sucursales info */}

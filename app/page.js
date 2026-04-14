@@ -172,6 +172,7 @@ export default function DashboardPage() {
         <TrasladosPanel
           sucursalId={isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id}
           isDueno={isDueno}
+          userSucursalId={session?.user?.sucursal_id}
         />
 
         {/* Filtros */}
@@ -302,9 +303,11 @@ export default function DashboardPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">
-                        {o.taller_nombre
-                          ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
-                          : <span className="text-slate-500">🏠 {o.sucursal_nombre}</span>
+                        {o.traslado_activo_id && o.traslado_activo_estado !== "recibido"
+                          ? <span className="text-blue-600">🚚 {o.traslado_activo_estado === "pendiente" ? "Pendiente envío" : "En tránsito"}</span>
+                          : o.taller_nombre
+                            ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
+                            : <span className="text-slate-500">🏠 {o.sucursal_nombre}</span>
                         }
                       </td>
                       <td className="px-4 py-3 font-semibold font-mono text-sm">
@@ -434,9 +437,11 @@ export default function DashboardPage() {
                             {o.tipo_articulo} — {o.marca || "S/M"}
                           </div>
                           <div className="text-[10px] mt-1">
-                            {o.taller_nombre
-                              ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
-                              : <span className="text-slate-400">🏠 {o.sucursal_nombre}</span>
+                            {o.traslado_activo_id && o.traslado_activo_estado !== "recibido"
+                              ? <span className="text-blue-600">🚚 {o.traslado_activo_estado === "pendiente" ? "Pendiente envío" : "En tránsito"}</span>
+                              : o.taller_nombre
+                                ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
+                                : <span className="text-slate-400">🏠 {o.sucursal_nombre}</span>
                             }
                           </div>
                           {retraso !== "none" && (

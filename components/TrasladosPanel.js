@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatNumeroOrden, formatFechaHora } from "@/lib/constants";
 
-export function TrasladosPanel({ sucursalId, isDueno }) {
+export function TrasladosPanel({ sucursalId, isDueno, userSucursalId }) {
   const [traslados, setTraslados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -102,13 +102,16 @@ export function TrasladosPanel({ sucursalId, isDueno }) {
                   {cliente?.nombre} — {orden?.tipo_articulo} {orden?.marca ? `(${orden.marca})` : ""}
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5">
+                  📍 {t.sucursal_origen_rel?.nombre} → {t.sucursal_destino_rel?.nombre}
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5">
                   Creado: {formatFechaHora(t.created_at)}
                   {t.fecha_salida && ` | Despachado: ${formatFechaHora(t.fecha_salida)}`}
                 </div>
               </div>
 
               <div className="flex-shrink-0">
-                {t.estado === "pendiente" && (
+                {t.estado === "pendiente" && (isDueno || userSucursalId === t.sucursal_origen) && (
                   <button
                     onClick={() => handleAction(t.id, "despachar")}
                     disabled={actionLoading === t.id}
@@ -117,7 +120,7 @@ export function TrasladosPanel({ sucursalId, isDueno }) {
                     {actionLoading === t.id ? "..." : "Despachar"}
                   </button>
                 )}
-                {t.estado === "en_transito" && (
+                {t.estado === "en_transito" && (isDueno || userSucursalId === t.sucursal_destino) && (
                   <button
                     onClick={() => handleAction(t.id, "recibir")}
                     disabled={actionLoading === t.id}

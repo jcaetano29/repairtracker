@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
 import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto } from "@/lib/data";
+import { formatMonto, monedaPrefix } from "@/lib/currency";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [showEntrega, setShowEntrega] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [monto, setMonto] = useState("");
+  const [moneda, setMoneda] = useState(orden.moneda || "UYU");
   const [tallerSelected, setTallerSelected] = useState("");
   const [metodoPago, setMetodoPago] = useState("efectivo");
   const [error, setError] = useState(null);
@@ -137,10 +139,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     if (!monto || parseFloat(monto) <= 0) return;
     setLoading(true);
     try {
-      await registrarPresupuesto(orden.id, parseFloat(monto));
+      await registrarPresupuesto(orden.id, parseFloat(monto), moneda);
       if (notificarPresupuesto && orden.cliente_email) {
         try {
-          await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() });
+          await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
         } catch (e) {
           console.error("[Notify] Error al enviar presupuesto:", e);
         }
@@ -296,7 +298,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
               {orden.monto_presupuesto && (
                 <span className="text-sm font-bold text-slate-900">
-                  ${Number(orden.monto_presupuesto).toLocaleString()} {orden.moneda}
+                  {formatMonto(orden.monto_presupuesto, orden.moneda)}
                 </span>
               )}
             </div>
@@ -337,15 +339,25 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showPresupuesto && (
             <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200 space-y-3">
               <div className="text-sm font-semibold text-cyan-900">Registrar presupuesto</div>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Monto en UYU"
-                value={monto}
-                onChange={(e) => setMonto(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
-              />
+              <div className="flex gap-2">
+                <select
+                  value={moneda}
+                  onChange={(e) => setMoneda(e.target.value)}
+                  className="px-2 py-2 border rounded-lg text-sm"
+                >
+                  <option value="UYU">$U</option>
+                  <option value="USD">US$</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Monto"
+                  value={monto}
+                  onChange={(e) => setMonto(e.target.value)}
+                  className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
               {orden.cliente_email && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
@@ -358,7 +370,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     <span className="font-semibold">Notificar al cliente por email</span>
                     {notificarPresupuesto && monto && (
                       <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
-                        {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString() })}
+                        {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) })}
                       </div>
                     )}
                   </div>

@@ -22,6 +22,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     notas_internas: "",
     nombre_articulo: "",
     monto_presupuesto: "",
+    moneda: "UYU",
     tipo_servicio_id: "",
     sucursal_id: "",
   });
@@ -112,6 +113,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         notas_internas: form.notas_internas,
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
+        moneda: form.moneda,
         tipo_servicio_id: form.tipo_servicio_id || null,
         sucursal_id: form.sucursal_id,
       });
@@ -360,8 +362,15 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Presupuesto (opcional)
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                <div className="flex gap-2">
+                  <select
+                    value={form.moneda}
+                    onChange={(e) => setForm({ ...form, moneda: e.target.value })}
+                    className="border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="UYU">$U</option>
+                    <option value="USD">US$</option>
+                  </select>
                   <input
                     type="number"
                     min="0"
@@ -369,7 +378,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.monto_presupuesto}
                     onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
                     placeholder="0.00"
-                    className="w-full border border-gray-300 rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-1">

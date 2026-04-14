@@ -10,6 +10,7 @@ import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
+import { formatMonto } from "@/lib/currency"
 import { getConfiguracion } from "@/lib/data/configuracion"
 
 export default function DashboardPage() {
@@ -294,7 +295,7 @@ export default function DashboardPage() {
                         }
                       </td>
                       <td className="px-4 py-3 font-semibold font-mono text-sm">
-                        {o.monto_presupuesto ? `$${Number(o.monto_presupuesto).toLocaleString()}` : "—"}
+                        {o.monto_presupuesto ? formatMonto(o.monto_presupuesto, o.moneda) : "—"}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center gap-1 justify-center">

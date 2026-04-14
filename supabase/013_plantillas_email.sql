@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS plantillas_email (
 INSERT INTO plantillas_email (tipo, asunto, cuerpo) VALUES
 ('PRESUPUESTO',
  'Presupuesto listo — Orden #{{numeroOrden}}',
- E'Hola {{clienteNombre}},\n\nTenemos el presupuesto listo para tu artículo.\n\nOrden: #{{numeroOrden}}\nArtículo: {{tipoArticulo}}\nPresupuesto: ${{monto}}\n\nPor favor, respondenos si querés continuar con la reparación.\n\nSaludos,\nRiviera Joyas'),
+ E'Hola {{clienteNombre}},\n\nTenemos el presupuesto listo para tu artículo.\n\nOrden: #{{numeroOrden}}\nArtículo: {{tipoArticulo}}\nPresupuesto: {{moneda}} {{monto}}\n\nPor favor, respondenos si querés continuar con la reparación.\n\nSaludos,\nRiviera Joyas'),
 ('LISTO_PARA_RETIRO',
  '¡Tu artículo está listo para retirar! — Orden #{{numeroOrden}}',
  E'Hola {{clienteNombre}},\n\nTu artículo ya está listo para que pases a buscarlo.\n\nOrden: #{{numeroOrden}}\nArtículo: {{tipoArticulo}}\n\nPodés consultar el estado en: {{trackingUrl}}\n\n¡Gracias por confiar en nosotros!\nRiviera Joyas'),

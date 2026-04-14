@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getReportesStats } from "@/lib/data";
+import { formatMonto } from "@/lib/currency";
 
 const ESTADOS_CONFIG = {
   INGRESADO:            { label: "Ingresado",            color: "#6366f1" },
@@ -20,6 +21,26 @@ function StatBox({ label, value, sub, color = "#6366f1" }) {
       <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">{label}</div>
       <div className="text-3xl font-extrabold" style={{ color }}>
         {value}
+      </div>
+      {sub && <div className="text-xs text-slate-500 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+function MoneyBox({ label, montos, sub, color = "#6366f1", compact = false }) {
+  const lines = [];
+  if (montos.UYU) lines.push(["UYU", montos.UYU]);
+  if (montos.USD) lines.push(["USD", montos.USD]);
+  if (lines.length === 0) lines.push(["UYU", 0]);
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-5">
+      <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">{label}</div>
+      <div className="space-y-0.5">
+        {lines.map(([m, v]) => (
+          <div key={m} className={`font-extrabold ${compact ? "text-xl" : "text-2xl"}`} style={{ color }}>
+            {formatMonto(Math.round(v), m)}
+          </div>
+        ))}
       </div>
       {sub && <div className="text-xs text-slate-500 mt-1">{sub}</div>}
     </div>
@@ -107,11 +128,12 @@ export default function ReportesPage() {
           value={stats.ordenesEntregadasEsteMes}
           color="#22c55e"
         />
-        <StatBox
+        <MoneyBox
           label="Valor presupuestado"
-          value={`$${Math.round(stats.ingresosMes).toLocaleString("es-UY")}`}
-          sub="UYU — entregadas este mes"
+          montos={stats.ingresosMes}
+          sub="entregadas este mes"
           color="#f59e0b"
+          compact
         />
         <StatBox
           label="Promedio resolución"
@@ -123,17 +145,22 @@ export default function ReportesPage() {
 
       {/* Second row: Revenue histórica + Ticket promedio */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatBox
+        <MoneyBox
           label="Ingresos históricos"
-          value={`$${Math.round(stats.ingresosHistoricos).toLocaleString("es-UY")}`}
-          sub="UYU — total facturado"
+          montos={stats.ingresosHistoricos}
+          sub="total facturado"
           color="#10b981"
+          compact
         />
-        <StatBox
+        <MoneyBox
           label="Ticket promedio"
-          value={stats.ticketPromedio !== null ? `$${stats.ticketPromedio.toLocaleString("es-UY")}` : "—"}
-          sub="UYU — por orden entregada"
+          montos={{
+            UYU: stats.ticketPromedio.UYU || 0,
+            USD: stats.ticketPromedio.USD || 0,
+          }}
+          sub="por orden entregada"
           color="#6366f1"
+          compact
         />
         <StatBox
           label="Órdenes con retraso"

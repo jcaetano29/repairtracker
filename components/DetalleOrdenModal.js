@@ -408,15 +408,19 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   </select>
                   <button
                     onClick={async () => {
+                      setLoading(true);
                       try {
                         await updateSucursalRetiro(orden.id, retiroId);
                         setEditingRetiro(false);
                         onUpdated();
                       } catch (e) {
                         setError(e.message);
+                      } finally {
+                        setLoading(false);
                       }
                     }}
-                    className="px-2 py-1 bg-indigo-500 text-white rounded text-[10px] font-semibold"
+                    disabled={loading}
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-[10px] font-semibold disabled:opacity-50"
                   >
                     OK
                   </button>

@@ -26,7 +26,13 @@ export async function POST(request) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
 
-    // Validate retorno origin matches current location (Fix 3)
+    // Only admin or employee at the order's current location can create retorno
+    const isAdmin = session.user?.role === "admin";
+    if (!isAdmin && session.user?.sucursal_id !== orden.sucursal_id) {
+      return NextResponse.json({ error: "Solo la sucursal actual puede crear traslado de retorno" }, { status: 403 });
+    }
+
+    // Validate retorno origin matches current location
     if (!orden.sucursal_id) {
       return NextResponse.json({ error: "Orden sin ubicación actual" }, { status: 400 });
     }

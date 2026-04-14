@@ -11,7 +11,15 @@ export async function GET(request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const sucursal_id = searchParams.get("sucursal_id") || undefined;
+    const isAdmin = session.user?.role === "admin";
+    const userSucursal = session.user?.sucursal_id;
+
+    // Non-admin can only query their own sucursal
+    let sucursal_id = searchParams.get("sucursal_id") || undefined;
+    if (!isAdmin && sucursal_id && sucursal_id !== userSucursal) {
+      return NextResponse.json({ error: "No autorizado para esta sucursal" }, { status: 403 });
+    }
+
     const traslados = await getTraslados({ sucursal_id });
     return NextResponse.json({ traslados });
   } catch (e) {

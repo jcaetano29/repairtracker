@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto } from "@/lib/data";
+import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
+import { getTrasladosByOrden } from "@/lib/traslados";
+import { TrasladosBadge } from "./TrasladosBadge";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [showRetiro, setShowRetiro] = useState(false);
   const [notificarRetiro, setNotificarRetiro] = useState(true);
   const [plantillas, setPlantillas] = useState({});
+  const [trasladosHistorial, setTrasladosHistorial] = useState([]);
+  const [sucursales, setSucursalesState] = useState([]);
+  const [editingRetiro, setEditingRetiro] = useState(false);
+  const [retiroId, setRetiroId] = useState(orden.sucursal_retiro_id || "");
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
@@ -53,16 +59,20 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [h, t, pRes] = await Promise.all([
+      const [h, t, pRes, trasladosData, sucursalesRes] = await Promise.all([
         getHistorial(orden.id),
         getTalleres(),
         fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
+        getTrasladosByOrden(orden.id),
+        fetch("/api/admin/sucursales").then(r => r.ok ? r.json() : Promise.resolve({ sucursales: [] })),
       ]);
       setHistorial(h);
       setTalleresState(t);
       const map = {};
       (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
       setPlantillas(map);
+      setTrasladosHistorial(trasladosData);
+      setSucursalesState(sucursalesRes.sucursales || []);
     } catch (e) {
       console.error(e);
     }
@@ -343,6 +353,66 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             </div>
           </div>
 
+          {/* Sucursales info */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">Recepción</div>
+              <div className="text-sm font-semibold text-slate-900">
+                {orden.sucursal_recepcion_nombre || orden.sucursal_nombre}
+              </div>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">Retiro</div>
+              {!editingRetiro ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-900">
+                    {orden.sucursal_retiro_nombre || orden.sucursal_nombre}
+                  </span>
+                  {orden.estado !== "ENTREGADO" && (
+                    <button
+                      onClick={() => setEditingRetiro(true)}
+                      className="text-[10px] text-indigo-500 hover:text-indigo-700"
+                    >
+                      Cambiar
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={retiroId}
+                    onChange={(e) => setRetiroId(e.target.value)}
+                    className="flex-1 px-2 py-1 border rounded text-xs"
+                  >
+                    {sucursales.filter(s => s.activo).map((s) => (
+                      <option key={s.id} value={s.id}>{s.nombre}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await updateSucursalRetiro(orden.id, retiroId);
+                        setEditingRetiro(false);
+                        onUpdated();
+                      } catch (e) {
+                        setError(e.message);
+                      }
+                    }}
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-[10px] font-semibold"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => { setEditingRetiro(false); setRetiroId(orden.sucursal_retiro_id || ""); }}
+                    className="px-2 py-1 border rounded text-[10px]"
+                  >
+                    X
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Asignar taller */}
           {showAsignar && (
             <div className="p-4 bg-purple-50 rounded-lg border border-purple-200 space-y-3">
@@ -585,6 +655,31 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Traslados historial */}
+          {trasladosHistorial.length > 0 && (
+            <div>
+              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+                Traslados
+              </div>
+              <div className="space-y-1.5">
+                {trasladosHistorial.map((t) => (
+                  <div key={t.id} className="flex items-center gap-2 text-xs">
+                    <span className="text-slate-400 w-24 flex-shrink-0">{formatFechaHora(t.created_at)}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">
+                      {t.tipo === "ida" ? "Ida" : "Retorno"}
+                    </span>
+                    <TrasladosBadge tipo={t.tipo} estado={t.estado} />
+                    {t.estado === "recibido" && t.fecha_recepcion && (
+                      <span className="text-slate-400">
+                        Recibido: {formatFechaHora(t.fecha_recepcion)}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

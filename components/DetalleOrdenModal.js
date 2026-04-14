@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro } from "@/lib/data";
+import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro, getSucursales } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
 import { getTrasladosByOrden } from "@/lib/traslados";
 import { TrasladosBadge } from "./TrasladosBadge";
@@ -64,7 +64,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         getTalleres(),
         fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
         getTrasladosByOrden(orden.id),
-        fetch("/api/admin/sucursales").then(r => r.ok ? r.json() : Promise.resolve({ sucursales: [] })),
+        getSucursales(),
       ]);
       setHistorial(h);
       setTalleresState(t);
@@ -72,7 +72,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
       setPlantillas(map);
       setTrasladosHistorial(trasladosData);
-      setSucursalesState(sucursalesRes.sucursales || []);
+      setSucursalesState(sucursalesRes || []);
     } catch (e) {
       console.error(e);
     }
@@ -230,6 +230,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           });
         } catch (e) {
           console.error("[Traslado] Error creating return transfer:", e);
+          setError("Orden marcada como lista, pero no se pudo crear el traslado de retorno.");
         }
       }
 

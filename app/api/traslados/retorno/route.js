@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { crearTraslado } from "@/lib/traslados";
+import { crearTraslado, getTrasladoActivo } from "@/lib/traslados";
 import { getOrden } from "@/lib/data";
 
 export async function POST(request) {
@@ -22,6 +22,12 @@ export async function POST(request) {
 
     if (orden.sucursal_retiro_id === orden.sucursal_id) {
       return NextResponse.json({ message: "No transfer needed" }, { status: 200 });
+    }
+
+    // Check if retorno already exists
+    const existing = await getTrasladoActivo(orden_id);
+    if (existing) {
+      return NextResponse.json({ message: "Transfer already exists", traslado: existing }, { status: 200 });
     }
 
     const traslado = await crearTraslado({

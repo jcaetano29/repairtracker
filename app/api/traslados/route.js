@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getTraslados, despacharTraslado, recibirTraslado } from "@/lib/traslados";
+import { getSupabaseClient } from "@/lib/supabase-client";
 
 export async function GET(request) {
   const session = await auth();
@@ -29,6 +30,27 @@ export async function PATCH(request) {
 
     if (!traslado_id || !["despachar", "recibir"].includes(accion)) {
       return NextResponse.json({ error: "traslado_id y accion (despachar|recibir) requeridos" }, { status: 400 });
+    }
+
+    // Fetch traslado to validate permissions
+    const { data: trasladoData, error: fetchErr } = await getSupabaseClient()
+      .from("traslados")
+      .select("sucursal_origen, sucursal_destino")
+      .eq("id", traslado_id)
+      .single();
+
+    if (fetchErr || !trasladoData) {
+      return NextResponse.json({ error: "Traslado no encontrado" }, { status: 404 });
+    }
+
+    const isAdmin = session.user?.role === "admin";
+    const userSucursal = session.user?.sucursal_id;
+
+    if (accion === "despachar" && !isAdmin && userSucursal !== trasladoData.sucursal_origen) {
+      return NextResponse.json({ error: "Solo la sucursal de origen puede despachar" }, { status: 403 });
+    }
+    if (accion === "recibir" && !isAdmin && userSucursal !== trasladoData.sucursal_destino) {
+      return NextResponse.json({ error: "Solo la sucursal de destino puede recibir" }, { status: 403 });
     }
 
     let traslado;

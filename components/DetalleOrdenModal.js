@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto } from "@/lib/data";
+import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro, getSucursales } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
+import { getTrasladosByOrden } from "@/lib/traslados";
+import { TrasladosBadge } from "./TrasladosBadge";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
@@ -23,9 +25,33 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [showRetiro, setShowRetiro] = useState(false);
   const [notificarRetiro, setNotificarRetiro] = useState(true);
   const [plantillas, setPlantillas] = useState({});
+  const [trasladosHistorial, setTrasladosHistorial] = useState([]);
+  const [sucursales, setSucursalesState] = useState([]);
+  const [editingRetiro, setEditingRetiro] = useState(false);
+  const [retiroId, setRetiroId] = useState(orden.sucursal_retiro_id || "");
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
+
+  // State transition blocking logic (Task 6)
+  const trasladoActivo = orden.traslado_activo_id ? {
+    id: orden.traslado_activo_id,
+    tipo: orden.traslado_activo_tipo,
+    estado: orden.traslado_activo_estado,
+  } : null;
+
+  const bloqueadoPorTraslado = trasladoActivo && (
+    (trasladoActivo.tipo === "ida" && ["pendiente", "en_transito"].includes(trasladoActivo.estado)) ||
+    (trasladoActivo.tipo === "retorno" && ["pendiente", "en_transito"].includes(trasladoActivo.estado))
+  );
+
+  const estadosBloqueados = [];
+  if (trasladoActivo?.tipo === "ida" && trasladoActivo.estado !== "recibido") {
+    estadosBloqueados.push(...Object.keys(ESTADOS));
+  }
+  if (trasladoActivo?.tipo === "retorno" && trasladoActivo.estado !== "recibido") {
+    estadosBloqueados.push("ENTREGADO");
+  }
 
   useEffect(() => {
     loadData();
@@ -33,16 +59,20 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [h, t, pRes] = await Promise.all([
+      const [h, t, pRes, trasladosData, sucursalesRes] = await Promise.all([
         getHistorial(orden.id),
         getTalleres(),
         fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
+        getTrasladosByOrden(orden.id),
+        getSucursales(),
       ]);
       setHistorial(h);
       setTalleresState(t);
       const map = {};
       (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
       setPlantillas(map);
+      setTrasladosHistorial(trasladosData);
+      setSucursalesState(sucursalesRes || []);
     } catch (e) {
       console.error(e);
     }
@@ -189,6 +219,21 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setError(null);
     try {
       await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
+
+      // Auto-create return transfer if pickup branch differs from current location (Task 5)
+      if (orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id) {
+        try {
+          await fetch("/api/traslados/retorno", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orden_id: orden.id }),
+          });
+        } catch (e) {
+          console.error("[Traslado] Error creating return transfer:", e);
+          setError("Orden marcada como lista, pero no se pudo crear el traslado de retorno.");
+        }
+      }
+
       if (notificarRetiro && orden.cliente_email) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
@@ -306,6 +351,66 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <span>{orden.dias_totales}d desde ingreso</span>
               <span>•</span>
               <span>{orden.dias_en_estado}d en este estado</span>
+            </div>
+          </div>
+
+          {/* Sucursales info */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">Recepción</div>
+              <div className="text-sm font-semibold text-slate-900">
+                {orden.sucursal_recepcion_nombre || orden.sucursal_nombre}
+              </div>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <div className="text-[10px] text-slate-400 font-semibold uppercase">Retiro</div>
+              {!editingRetiro ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-900">
+                    {orden.sucursal_retiro_nombre || orden.sucursal_nombre}
+                  </span>
+                  {orden.estado !== "ENTREGADO" && (
+                    <button
+                      onClick={() => setEditingRetiro(true)}
+                      className="text-[10px] text-indigo-500 hover:text-indigo-700"
+                    >
+                      Cambiar
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={retiroId}
+                    onChange={(e) => setRetiroId(e.target.value)}
+                    className="flex-1 px-2 py-1 border rounded text-xs"
+                  >
+                    {sucursales.filter(s => s.activo).map((s) => (
+                      <option key={s.id} value={s.id}>{s.nombre}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await updateSucursalRetiro(orden.id, retiroId);
+                        setEditingRetiro(false);
+                        onUpdated();
+                      } catch (e) {
+                        setError(e.message);
+                      }
+                    }}
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-[10px] font-semibold"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => { setEditingRetiro(false); setRetiroId(orden.sucursal_retiro_id || ""); }}
+                    className="px-2 py-1 border rounded text-[10px]"
+                  >
+                    X
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -480,6 +585,15 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             </div>
           )}
 
+          {/* Transfer blocking alert (Task 6) */}
+          {bloqueadoPorTraslado && (
+            <div className="p-3 rounded-lg text-sm border bg-blue-50 border-blue-200 text-blue-800">
+              {trasladoActivo.tipo === "ida"
+                ? "📦 Esta orden tiene un traslado pendiente. No se puede avanzar hasta que llegue al centro de reparación."
+                : "📦 Esta orden tiene un traslado de retorno pendiente. No se puede entregar hasta que llegue a la sucursal de retiro."}
+            </div>
+          )}
+
           {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
           {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
@@ -487,24 +601,26 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 Cambiar estado
               </div>
               <div className="flex flex-wrap gap-2">
-                {siguientes.map((s) => {
-                  const next = ESTADOS[s];
-                  return (
-                    <button
-                      key={s}
-                      onClick={() => handleCambiarEstado(s)}
-                      disabled={loading}
-                      className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
-                      style={{
-                        borderColor: next.color,
-                        backgroundColor: next.bg,
-                        color: next.color,
-                      }}
-                    >
-                      {next.icon} {orden.estado === "INGRESADO" && s === "ESPERANDO_APROBACION" ? "Presupuestar en local" : next.label}
-                    </button>
-                  );
-                })}
+                {siguientes
+                  .filter((s) => !estadosBloqueados.includes(s))
+                  .map((s) => {
+                    const next = ESTADOS[s];
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => handleCambiarEstado(s)}
+                        disabled={loading}
+                        className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                        style={{
+                          borderColor: next.color,
+                          backgroundColor: next.bg,
+                          color: next.color,
+                        }}
+                      >
+                        {next.icon} {orden.estado === "INGRESADO" && s === "ESPERANDO_APROBACION" ? "Presupuestar en local" : next.label}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -540,6 +656,31 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Traslados historial */}
+          {trasladosHistorial.length > 0 && (
+            <div>
+              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+                Traslados
+              </div>
+              <div className="space-y-1.5">
+                {trasladosHistorial.map((t) => (
+                  <div key={t.id} className="flex items-center gap-2 text-xs">
+                    <span className="text-slate-400 w-24 flex-shrink-0">{formatFechaHora(t.created_at)}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">
+                      {t.tipo === "ida" ? "Ida" : "Retorno"}
+                    </span>
+                    <TrasladosBadge tipo={t.tipo} estado={t.estado} />
+                    {t.estado === "recibido" && t.fecha_recepcion && (
+                      <span className="text-slate-400">
+                        Recibido: {formatFechaHora(t.fecha_recepcion)}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

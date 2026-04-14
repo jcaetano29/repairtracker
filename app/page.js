@@ -8,6 +8,8 @@ import { Badge } from "@/components/Badge"
 import { StatCard } from "@/components/StatCard"
 import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
+import { TrasladosBadge } from "@/components/TrasladosBadge"
+import { TrasladosPanel } from "@/components/TrasladosPanel"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
@@ -166,6 +168,12 @@ export default function DashboardPage() {
           <StatCard label="En Talleres" value={stats.enTaller} icon="🔧" color="#8b5cf6" description="Enviadas, en reparación o listas en taller" />
         </div>
 
+        {/* Traslados Panel */}
+        <TrasladosPanel
+          sucursalId={isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id}
+          isDueno={isDueno}
+        />
+
         {/* Filtros */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <input
@@ -286,7 +294,12 @@ export default function DashboardPage() {
                         <div className="text-[11px] text-slate-400">{o.marca || "—"}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge estado={o.estado} />
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge estado={o.estado} />
+                          {o.traslado_activo_id && (
+                            <TrasladosBadge tipo={o.traslado_activo_tipo} estado={o.traslado_activo_estado} />
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">
                         {o.taller_nombre
@@ -429,6 +442,11 @@ export default function DashboardPage() {
                           {retraso !== "none" && (
                             <div className="text-[10px] mt-1">
                               {retraso === "grave" ? "🔴 Retraso grave" : "⚠️ Retraso"}
+                            </div>
+                          )}
+                          {o.traslado_activo_id && (
+                            <div className="mt-1">
+                              <TrasladosBadge tipo={o.traslado_activo_tipo} estado={o.traslado_activo_estado} />
                             </div>
                           )}
                         </div>

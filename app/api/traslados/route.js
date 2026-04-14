@@ -42,22 +42,16 @@ export async function PATCH(request) {
         try {
           const { getOrden } = await import("@/lib/data");
           const { formatNumeroOrden } = await import("@/lib/constants");
+          const { sendNotification } = await import("@/lib/notifications");
           const orden = await getOrden(traslado.orden_id);
           if (orden?.cliente_email) {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-            await fetch(new URL("/api/notify", request.url).origin + "/api/notify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                type: "LISTO_PARA_RETIRO",
-                data: {
-                  clienteEmail: orden.cliente_email,
-                  clienteNombre: orden.cliente_nombre,
-                  numeroOrden: formatNumeroOrden(orden.numero_orden),
-                  tipoArticulo: orden.tipo_articulo,
-                  trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
-                },
-              }),
+            await sendNotification("LISTO_PARA_RETIRO", {
+              clienteEmail: orden.cliente_email,
+              clienteNombre: orden.cliente_nombre,
+              numeroOrden: formatNumeroOrden(orden.numero_orden),
+              tipoArticulo: orden.tipo_articulo,
+              trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
             });
           }
         } catch (e) {

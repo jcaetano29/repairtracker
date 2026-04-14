@@ -173,6 +173,7 @@ export default function DashboardPage() {
           sucursalId={isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id}
           isDueno={isDueno}
           userSucursalId={session?.user?.sucursal_id}
+          onAction={loadData}
         />
 
         {/* Filtros */}

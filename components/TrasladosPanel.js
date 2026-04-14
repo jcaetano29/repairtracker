@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatNumeroOrden, formatFechaHora } from "@/lib/constants";
 
-export function TrasladosPanel({ sucursalId, isDueno, userSucursalId }) {
+export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction }) {
   const [traslados, setTraslados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -37,6 +37,14 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId }) {
   async function handleAction(traslado_id, accion) {
     setActionLoading(traslado_id);
     setError(null);
+
+    // Optimistic UI: update local state immediately
+    setTraslados((prev) =>
+      accion === "despachar"
+        ? prev.map((t) => t.id === traslado_id ? { ...t, estado: "en_transito", fecha_salida: new Date().toISOString() } : t)
+        : prev.filter((t) => t.id !== traslado_id) // recibir = remove from active list
+    );
+
     try {
       const res = await fetch("/api/traslados", {
         method: "PATCH",
@@ -47,9 +55,13 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId }) {
         const data = await res.json();
         throw new Error(data.error || "Error");
       }
+      // Refresh panel + notify dashboard to reload
       await loadTraslados();
+      if (onAction) onAction();
     } catch (e) {
       setError(e.message);
+      // Revert optimistic update on error
+      await loadTraslados();
     } finally {
       setActionLoading(null);
     }

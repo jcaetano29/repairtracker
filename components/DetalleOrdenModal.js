@@ -27,6 +27,26 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
 
+  // State transition blocking logic (Task 6)
+  const trasladoActivo = orden.traslado_activo_id ? {
+    id: orden.traslado_activo_id,
+    tipo: orden.traslado_activo_tipo,
+    estado: orden.traslado_activo_estado,
+  } : null;
+
+  const bloqueadoPorTraslado = trasladoActivo && (
+    (trasladoActivo.tipo === "ida" && ["pendiente", "en_transito"].includes(trasladoActivo.estado)) ||
+    (trasladoActivo.tipo === "retorno" && ["pendiente", "en_transito"].includes(trasladoActivo.estado))
+  );
+
+  const estadosBloqueados = [];
+  if (trasladoActivo?.tipo === "ida" && trasladoActivo.estado !== "recibido") {
+    estadosBloqueados.push(...Object.keys(ESTADOS));
+  }
+  if (trasladoActivo?.tipo === "retorno" && trasladoActivo.estado !== "recibido") {
+    estadosBloqueados.push("ENTREGADO");
+  }
+
   useEffect(() => {
     loadData();
   }, [orden.id]);
@@ -189,6 +209,20 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setError(null);
     try {
       await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
+
+      // Auto-create return transfer if pickup branch differs from current location (Task 5)
+      if (orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id) {
+        try {
+          await fetch("/api/traslados/retorno", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orden_id: orden.id }),
+          });
+        } catch (e) {
+          console.error("[Traslado] Error creating return transfer:", e);
+        }
+      }
+
       if (notificarRetiro && orden.cliente_email) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
@@ -480,6 +514,15 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             </div>
           )}
 
+          {/* Transfer blocking alert (Task 6) */}
+          {bloqueadoPorTraslado && (
+            <div className="p-3 rounded-lg text-sm border bg-blue-50 border-blue-200 text-blue-800">
+              {trasladoActivo.tipo === "ida"
+                ? "📦 Esta orden tiene un traslado pendiente. No se puede avanzar hasta que llegue al centro de reparación."
+                : "📦 Esta orden tiene un traslado de retorno pendiente. No se puede entregar hasta que llegue a la sucursal de retiro."}
+            </div>
+          )}
+
           {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
           {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
@@ -487,24 +530,26 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 Cambiar estado
               </div>
               <div className="flex flex-wrap gap-2">
-                {siguientes.map((s) => {
-                  const next = ESTADOS[s];
-                  return (
-                    <button
-                      key={s}
-                      onClick={() => handleCambiarEstado(s)}
-                      disabled={loading}
-                      className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
-                      style={{
-                        borderColor: next.color,
-                        backgroundColor: next.bg,
-                        color: next.color,
-                      }}
-                    >
-                      {next.icon} {orden.estado === "INGRESADO" && s === "ESPERANDO_APROBACION" ? "Presupuestar en local" : next.label}
-                    </button>
-                  );
-                })}
+                {siguientes
+                  .filter((s) => !estadosBloqueados.includes(s))
+                  .map((s) => {
+                    const next = ESTADOS[s];
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => handleCambiarEstado(s)}
+                        disabled={loading}
+                        className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                        style={{
+                          borderColor: next.color,
+                          backgroundColor: next.bg,
+                          color: next.color,
+                        }}
+                      >
+                        {next.icon} {orden.estado === "INGRESADO" && s === "ESPERANDO_APROBACION" ? "Presupuestar en local" : next.label}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}

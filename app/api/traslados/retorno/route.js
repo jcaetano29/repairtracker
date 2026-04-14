@@ -15,9 +15,20 @@ export async function POST(request) {
       return NextResponse.json({ error: "orden_id requerido" }, { status: 400 });
     }
 
+    // Validate UUID format (Fix 13)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(orden_id)) {
+      return NextResponse.json({ error: "orden_id inválido" }, { status: 400 });
+    }
+
     const orden = await getOrden(orden_id);
     if (!orden) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
+    }
+
+    // Validate retorno origin matches current location (Fix 3)
+    if (!orden.sucursal_id) {
+      return NextResponse.json({ error: "Orden sin ubicación actual" }, { status: 400 });
     }
 
     if (orden.sucursal_retiro_id === orden.sucursal_id) {

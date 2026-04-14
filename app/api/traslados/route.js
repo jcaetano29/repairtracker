@@ -32,6 +32,12 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "traslado_id y accion (despachar|recibir) requeridos" }, { status: 400 });
     }
 
+    // Validate UUID format (Fix 13)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(traslado_id)) {
+      return NextResponse.json({ error: "traslado_id inválido" }, { status: 400 });
+    }
+
     // Fetch traslado to validate permissions
     const { data: trasladoData, error: fetchErr } = await getSupabaseClient()
       .from("traslados")

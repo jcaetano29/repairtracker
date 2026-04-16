@@ -24,7 +24,6 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     notas_internas: "",
     nombre_articulo: "",
     monto_presupuesto: "",
-    monto_presupuesto_taller: "",
     moneda: "UYU",
     tipo_servicio_id: "",
     sucursal_id: "",
@@ -144,7 +143,6 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         notas_internas: form.notas_internas,
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.en_garantia ? null : (form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null),
-        monto_presupuesto_taller: form.en_garantia ? null : (form.monto_presupuesto_taller ? parseFloat(form.monto_presupuesto_taller) : null),
         moneda: form.moneda,
         tipo_servicio_id: form.tipo_servicio_id || null,
         sucursal_id: form.sucursal_id,
@@ -525,7 +523,6 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       ...form,
                       en_garantia: checked,
                       monto_presupuesto: checked ? "" : form.monto_presupuesto,
-                      monto_presupuesto_taller: checked ? "" : form.monto_presupuesto_taller,
                     });
                   }}
                   className="h-4 w-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
@@ -535,35 +532,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 </label>
               </div>
 
-              {/* Presupuestos (opcionales) */}
+              {/* Presupuesto (opcional) */}
               <div className="mt-4 space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Presupuesto taller (opcional)
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={form.moneda}
-                      onChange={(e) => setForm({ ...form, moneda: e.target.value })}
-                      disabled={form.en_garantia}
-                      className={`border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
-                    >
-                      <option value="UYU">$U</option>
-                      <option value="USD">US$</option>
-                    </select>
-                    <input
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={form.monto_presupuesto_taller}
-                      onChange={(e) => setForm({ ...form, monto_presupuesto_taller: e.target.value })}
-                      placeholder="0.00"
-                      disabled={form.en_garantia}
-                      className={`flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">Lo que cobra el taller (uso interno).</p>
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Presupuesto cliente (opcional)

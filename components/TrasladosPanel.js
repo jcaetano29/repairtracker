@@ -80,7 +80,7 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, 
       <div className="flex items-center gap-2 mb-3">
         <span className="text-sm">🚚</span>
         <h3 className="text-sm font-bold text-slate-900">Traslados Activos</h3>
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
           {traslados.length}
         </span>
       </div>
@@ -108,20 +108,20 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, 
                   <span className="text-xs font-bold font-mono text-slate-900">
                     #{formatNumeroOrden(orden?.numero_orden)}
                   </span>
-                  <span className={`text-[10px] font-semibold ${estadoColor}`}>
+                  <span className={`text-xs font-semibold ${estadoColor}`}>
                     {estadoIcon} {estadoLabel}
                   </span>
-                  <span className="text-[10px] text-slate-400 px-1.5 py-0.5 bg-slate-100 rounded">
+                  <span className="text-xs text-slate-500 px-1.5 py-0.5 bg-slate-100 rounded">
                     {tipoLabel}
                   </span>
                 </div>
-                <div className="text-xs text-slate-600 mt-0.5">
+                <div className="text-sm text-slate-700 mt-0.5">
                   {cliente?.nombre} — {orden?.tipo_articulo} {orden?.marca ? `(${orden.marca})` : ""}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-500 mt-0.5">
                   📍 {t.sucursal_origen_rel?.nombre} → {t.sucursal_destino_rel?.nombre}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-500 mt-0.5">
                   Creado: {formatFechaHora(t.created_at)}
                   {t.fecha_salida && ` | Despachado: ${formatFechaHora(t.fecha_salida)}`}
                 </div>
@@ -132,16 +132,16 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, 
                   <button
                     onClick={() => handleAction(t.id, "despachar")}
                     disabled={actionLoading === t.id}
-                    className="px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-semibold hover:bg-orange-600 disabled:opacity-50"
+                    className="px-3 py-2.5 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600 disabled:opacity-50"
                   >
-                    {actionLoading === t.id ? "..." : "Despachar"}
+                    {actionLoading === t.id ? "..." : "Enviar"}
                   </button>
                 )}
                 {t.estado === "en_transito" && (isDueno || userSucursalId === t.sucursal_destino) && (
                   <button
                     onClick={() => handleAction(t.id, "recibir")}
                     disabled={actionLoading === t.id}
-                    className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-semibold hover:bg-blue-600 disabled:opacity-50"
+                    className="px-3 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 disabled:opacity-50"
                   >
                     {actionLoading === t.id ? "..." : "Recibir"}
                   </button>

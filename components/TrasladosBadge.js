@@ -27,7 +27,7 @@ export function TrasladosBadge({ tipo, estado }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${config.bg} ${config.border} ${config.text}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${config.bg} ${config.border} ${config.text}`}
     >
       {config.icon} {config.label}{suffix}
     </span>

@@ -13,7 +13,7 @@ export function StatCard({ label, value, icon, color, description }) {
         {value}
       </div>
       {description && (
-        <div className="text-[10px] text-slate-400 mt-1">{description}</div>
+        <div className="text-xs text-slate-500 mt-1">{description}</div>
       )}
     </div>
   );

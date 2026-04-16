@@ -132,7 +132,7 @@ export default function DashboardPage() {
             <span className="text-2xl">⌚</span>
             <div>
               <h1 className="text-lg font-bold text-white leading-tight">RepairTrack</h1>
-              <p className="text-[11px] text-slate-400">Gestión de Reparaciones</p>
+              <p className="text-sm text-slate-500">Gestión de Reparaciones</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -227,23 +227,23 @@ export default function DashboardPage() {
           <div className="ml-auto flex gap-1">
             <button
               onClick={() => setVista("kanban")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "kanban"
                   ? "bg-slate-900 text-white border-slate-900"
                   : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
               }`}
             >
-              ▥ Kanban
+              Tablero
             </button>
             <button
               onClick={() => setVista("tabla")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "tabla"
                   ? "bg-slate-900 text-white border-slate-900"
                   : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
               }`}
             >
-              ☰ Tabla
+              Lista
             </button>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"
+                        className="px-4 py-3 text-left text-sm font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -291,11 +291,11 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="font-semibold text-slate-900">{o.cliente_nombre}</div>
-                        <div className="text-[11px] text-slate-400">{o.cliente_telefono}</div>
+                        <div className="text-sm text-slate-500">{o.cliente_telefono}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-900">{o.tipo_articulo}</div>
-                        <div className="text-[11px] text-slate-400">{o.marca || "—"}</div>
+                        <div className="text-sm text-slate-500">{o.marca || "—"}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                   <button
                     key={p}
                     onClick={() => setPagina(p)}
-                    className={`w-8 h-8 text-xs font-medium rounded-lg border transition-colors ${
+                    className={`w-10 h-10 text-xs font-medium rounded-lg border transition-colors ${
                       p === pagina
                         ? "bg-slate-900 text-white border-slate-900"
                         : "border-slate-200 text-slate-600 hover:bg-slate-50"
@@ -408,7 +408,7 @@ export default function DashboardPage() {
                     <span>{config.icon}</span>
                     <span className="text-xs font-bold text-slate-900 truncate">{config.label}</span>
                     <span
-                      className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: config.bg, color: config.color }}
                     >
                       {enEstado.length}
@@ -433,22 +433,22 @@ export default function DashboardPage() {
                             <span className="text-xs font-bold font-mono text-slate-900">
                               #{formatNumeroOrden(o.numero_orden)}
                             </span>
-                            <span className="text-[10px] text-slate-400">{o.dias_en_estado}d</span>
+                            <span className="text-xs text-slate-500">{o.dias_en_estado}d</span>
                           </div>
                           <div className="text-xs font-semibold text-slate-700">{o.cliente_nombre}</div>
-                          <div className="text-[11px] text-slate-500">
+                          <div className="text-sm text-slate-600">
                             {o.tipo_articulo} — {o.marca || "S/M"}
                           </div>
-                          <div className="text-[10px] mt-1">
+                          <div className="text-xs mt-1">
                             {o.traslado_activo_id && o.traslado_activo_estado !== "recibido"
                               ? <span className="text-blue-600">🚚 {o.traslado_activo_estado === "pendiente" ? "Pendiente envío" : "En tránsito"}</span>
                               : o.taller_nombre
                                 ? <span className="text-purple-600">📍 {o.taller_nombre}</span>
-                                : <span className="text-slate-400">🏠 {o.sucursal_nombre}</span>
+                                : <span className="text-slate-500">🏠 {o.sucursal_nombre}</span>
                             }
                           </div>
                           {retraso !== "none" && (
-                            <div className="text-[10px] mt-1">
+                            <div className="text-xs mt-1">
                               {retraso === "grave" ? "🔴 Retraso grave" : "⚠️ Retraso"}
                             </div>
                           )}
@@ -461,7 +461,7 @@ export default function DashboardPage() {
                       )
                     })}
                     {enEstado.length === 0 && (
-                      <div className="py-8 text-center text-[11px] text-slate-300">Sin órdenes</div>
+                      <div className="py-8 text-center text-xs text-slate-400">Sin órdenes</div>
                     )}
                   </div>
                 </div>

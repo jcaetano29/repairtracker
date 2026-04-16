@@ -372,6 +372,12 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <span>{orden.dias_totales}d desde ingreso</span>
               <span>•</span>
               <span>{orden.dias_en_estado}d en este estado</span>
+              {orden.fecha_entrega_estimada && (
+                <>
+                  <span>•</span>
+                  <span>Entrega est.: {new Date(orden.fecha_entrega_estimada + "T12:00:00").toLocaleDateString("es-UY")}</span>
+                </>
+              )}
             </div>
           </div>
 

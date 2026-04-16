@@ -304,7 +304,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
         <div className="p-6 space-y-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-base text-red-700">{error}</div>
           )}
 
           {/* Alerta de retraso */}
@@ -323,7 +323,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Info */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50 p-3 rounded-lg">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">Cliente</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Cliente</div>
               <div className="text-sm font-bold text-slate-900">{orden.cliente_nombre}</div>
               <div className="text-xs text-slate-500">{orden.cliente_telefono}</div>
               {orden.cliente_documento && (
@@ -331,7 +331,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
             </div>
             <div className="bg-slate-50 p-3 rounded-lg">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">Artículo</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Artículo</div>
               <div className="text-sm font-bold text-slate-900">{orden.tipo_articulo}</div>
               <div className="text-xs text-slate-500">{orden.marca || "—"}</div>
               {orden.material && (
@@ -342,14 +342,14 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
             </div>
             <div className="bg-slate-50 p-3 rounded-lg col-span-2">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">Problema</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Problema</div>
               <div className="text-sm text-slate-900">{orden.problema_reportado}</div>
             </div>
           </div>
 
           {/* Estado actual */}
           <div>
-            <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">Estado actual</div>
+            <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Estado actual</div>
             <div className="flex items-center gap-3 flex-wrap">
               <Badge estado={orden.estado} size="md" />
               {orden.taller_nombre && (
@@ -385,7 +385,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
             <span className="text-sm">📍</span>
             <div>
-              <div className="text-[10px] text-indigo-400 font-semibold uppercase">Ubicación actual</div>
+              <div className="text-xs text-indigo-400 font-semibold uppercase">Ubicación actual</div>
               <div className="text-sm font-bold text-indigo-900">{orden.sucursal_nombre}</div>
             </div>
             {trasladoActivo && (
@@ -398,13 +398,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Sucursales info */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50 p-3 rounded-lg">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">Recepción</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Recepción</div>
               <div className="text-sm font-semibold text-slate-900">
                 {orden.sucursal_recepcion_nombre || orden.sucursal_nombre}
               </div>
             </div>
             <div className="bg-slate-50 p-3 rounded-lg">
-              <div className="text-[10px] text-slate-400 font-semibold uppercase">Retiro</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Retiro</div>
               {!editingRetiro ? (
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-slate-900">
@@ -413,7 +413,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   {orden.estado !== "ENTREGADO" && (
                     <button
                       onClick={() => setEditingRetiro(true)}
-                      className="text-[10px] text-indigo-500 hover:text-indigo-700"
+                      className="text-xs text-indigo-500 hover:text-indigo-700"
                     >
                       Cambiar
                     </button>
@@ -444,13 +444,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                       }
                     }}
                     disabled={loading}
-                    className="px-2 py-1 bg-indigo-500 text-white rounded text-[10px] font-semibold disabled:opacity-50"
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-xs font-semibold disabled:opacity-50"
                   >
                     OK
                   </button>
                   <button
                     onClick={() => { setEditingRetiro(false); setRetiroId(orden.sucursal_retiro_id || ""); }}
-                    className="px-2 py-1 border rounded text-[10px]"
+                    className="px-2 py-1 border rounded text-xs"
                   >
                     X
                   </button>
@@ -475,10 +475,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               </select>
               <div className="flex gap-2">
                 <button onClick={handleAsignarTaller} disabled={!tallerSelected || loading}
-                  className="flex-1 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  className="flex-1 py-3 bg-purple-600 text-white rounded-lg text-base font-semibold disabled:opacity-50">
                   {loading ? "..." : "Confirmar envío"}
                 </button>
-                <button onClick={() => setShowAsignar(false)} className="px-4 py-2 border rounded-lg text-sm">
+                <button onClick={() => setShowAsignar(false)} className="px-4 py-3 border rounded-lg text-base">
                   Cancelar
                 </button>
               </div>
@@ -543,10 +543,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
               <div className="flex gap-2">
                 <button onClick={handlePresupuesto} disabled={!monto || loading}
-                  className="flex-1 py-2 bg-cyan-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  className="flex-1 py-3 bg-cyan-600 text-white rounded-lg text-base font-semibold disabled:opacity-50">
                   {loading ? "..." : "Guardar presupuesto"}
                 </button>
-                <button onClick={() => setShowPresupuesto(false)} className="px-4 py-2 border rounded-lg text-sm">
+                <button onClick={() => setShowPresupuesto(false)} className="px-4 py-3 border rounded-lg text-base">
                   Cancelar
                 </button>
               </div>
@@ -574,10 +574,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               </select>
               <div className="flex gap-2">
                 <button onClick={handleEntrega} disabled={loading}
-                  className="flex-1 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  className="flex-1 py-3 bg-green-600 text-white rounded-lg text-base font-semibold disabled:opacity-50">
                   {loading ? "..." : "✓ Confirmar entrega"}
                 </button>
-                <button onClick={() => setShowEntrega(false)} className="px-4 py-2 border rounded-lg text-sm">
+                <button onClick={() => setShowEntrega(false)} className="px-4 py-3 border rounded-lg text-base">
                   Cancelar
                 </button>
               </div>
@@ -608,10 +608,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
               <div className="flex gap-2">
                 <button onClick={handleRetiro} disabled={loading}
-                  className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  className="flex-1 py-3 bg-emerald-600 text-white rounded-lg text-base font-semibold disabled:opacity-50">
                   {loading ? "..." : "✓ Confirmar listo para retiro"}
                 </button>
-                <button onClick={() => setShowRetiro(false)} className="px-4 py-2 border rounded-lg text-sm">
+                <button onClick={() => setShowRetiro(false)} className="px-4 py-3 border rounded-lg text-base">
                   Cancelar
                 </button>
               </div>
@@ -621,14 +621,14 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Aprobar / Rechazar presupuesto */}
           {orden.estado === "ESPERANDO_APROBACION" && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
-              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Decisión del presupuesto
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleAprobar}
                   disabled={loading}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                  className="px-4 py-3 rounded-lg text-base font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
                   style={{ borderColor: "#3b82f6", backgroundColor: "#eff6ff", color: "#3b82f6" }}
                 >
                   ✓ Aprobar presupuesto
@@ -636,7 +636,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 <button
                   onClick={handleRechazar}
                   disabled={loading}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                  className="px-4 py-3 rounded-lg text-base font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
                   style={{ borderColor: "#ef4444", backgroundColor: "#fef2f2", color: "#ef4444" }}
                 >
                   ✗ Rechazar
@@ -657,7 +657,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
           {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
-              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Cambiar estado
               </div>
               <div className="flex flex-wrap gap-2">
@@ -670,7 +670,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                         key={s}
                         onClick={() => handleCambiarEstado(s)}
                         disabled={loading}
-                        className="px-4 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
+                        className="px-4 py-3 rounded-lg text-base font-semibold border-2 transition-colors hover:opacity-80 disabled:opacity-50"
                         style={{
                           borderColor: next.color,
                           backgroundColor: next.bg,
@@ -722,7 +722,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Traslados historial */}
           {trasladosHistorial.length > 0 && (
             <div>
-              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Traslados
               </div>
               <div className="space-y-1.5">
@@ -747,7 +747,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {/* Historial */}
           {historial.length > 0 && (
             <div>
-              <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Historial
               </div>
               <div className="space-y-1.5">

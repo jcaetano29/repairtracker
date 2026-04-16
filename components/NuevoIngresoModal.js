@@ -193,7 +193,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
         <div className="p-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-base text-red-700">
               {error}
             </div>
           )}
@@ -202,7 +202,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           {step === 1 && !creandoCliente && (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Buscar cliente por nombre o teléfono
                 </label>
                 <input
@@ -264,7 +264,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 ← Volver a buscar
               </button>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Cédula / RUT *
                 </label>
                 <input
@@ -277,7 +277,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Nombre *
                 </label>
                 <input
@@ -289,7 +289,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Teléfono *
                 </label>
                 <input
@@ -301,7 +301,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Email *
                 </label>
                 <div className="relative">
@@ -327,7 +327,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                         input.setSelectionRange(pos + 1, pos + 1);
                       }, 0);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 text-sm font-mono px-1.5 py-0.5 rounded hover:bg-indigo-50 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 text-base font-mono px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                     tabIndex={-1}
                   >
                     @
@@ -337,7 +337,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               <button
                 onClick={handleCrearCliente}
                 disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || !nuevoCliente.documento || loading}
-                className="w-full py-3 bg-indigo-500 text-white rounded-lg font-semibold text-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-indigo-500 text-white rounded-lg font-semibold text-base hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creando..." : "Crear cliente y continuar →"}
               </button>
@@ -368,7 +368,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {/* Sucursal */}
               <div>
-                <label htmlFor="sucursal_id" className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label htmlFor="sucursal_id" className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Sucursal *
                 </label>
                 {session?.user?.role === "admin" ? (
@@ -403,9 +403,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     id="trasladar"
                     checked={trasladar}
                     onChange={(e) => setTrasladar(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
+                    className="h-5 w-5 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
                   />
-                  <label htmlFor="trasladar" className="text-sm text-slate-700">
+                  <label htmlFor="trasladar" className="text-base text-slate-700">
                     Trasladar a {centroDestino.nombre}
                   </label>
                 </div>
@@ -413,7 +413,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {/* Tipo de artículo */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Tipo de artículo
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -421,7 +421,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     <button
                       key={t}
                       onClick={() => setForm({ ...form, tipo_articulo: t })}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.tipo_articulo === t
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                           : "border-slate-200 text-slate-600 hover:border-slate-300"
@@ -452,7 +452,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {/* Material */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Material
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -461,7 +461,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       key={m.value}
                       type="button"
                       onClick={() => setForm({ ...form, material: form.material === m.value ? "" : m.value, material_otro: "" })}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.material === m.value
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                           : "border-slate-200 text-slate-600 hover:border-slate-300"
@@ -493,7 +493,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Peso */}
               {form.material && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     Peso (gramos){form.material === "oro" ? " *" : ""}
                   </label>
                   <input
@@ -525,9 +525,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       monto_presupuesto: checked ? "" : form.monto_presupuesto,
                     });
                   }}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
+                  className="h-5 w-5 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
                 />
-                <label htmlFor="en_garantia" className="text-sm text-slate-700">
+                <label htmlFor="en_garantia" className="text-base text-slate-700">
                   En garantía (sin costo)
                 </label>
               </div>
@@ -565,7 +565,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {/* Fecha de entrega estimada */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Fecha de entrega estimada (opcional)
                 </label>
                 <input
@@ -578,7 +578,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Marca
                 </label>
                 <select
@@ -595,7 +595,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               {form.marca === "__otra__" && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     Especificar marca
                   </label>
                   <input
@@ -610,20 +610,20 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Problema reportado *
                 </label>
                 <textarea
                   placeholder="Describa el problema..."
                   value={form.problema_reportado}
                   onChange={(e) => setForm({ ...form, problema_reportado: e.target.value })}
-                  rows={3}
+                  rows={4}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-y"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Notas internas (opcional)
                 </label>
                 <input
@@ -637,7 +637,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               {tiposServicio.length > 0 && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                     Tipo de servicio (opcional)
                   </label>
                   <select
@@ -661,7 +661,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               <button
                 onClick={handleSubmit}
                 disabled={!form.problema_reportado || !form.sucursal_id || loading}
-                className="w-full py-3 bg-indigo-500 text-white rounded-lg font-bold text-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-indigo-500 text-white rounded-lg font-bold text-base hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Registrando..." : "✓ Registrar Ingreso"}
               </button>

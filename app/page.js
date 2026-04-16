@@ -84,9 +84,9 @@ export default function DashboardPage() {
     loadData()
   }, [loadData])
 
-  // Auto-refresh cada 30 segundos
+  // Auto-refresh cada 5 segundos
   useEffect(() => {
-    const interval = setInterval(loadData, 30000)
+    const interval = setInterval(loadData, 5000)
     return () => clearInterval(interval)
   }, [loadData])
 

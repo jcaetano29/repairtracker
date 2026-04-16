@@ -12,7 +12,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   const [clienteQuery, setClienteQuery] = useState("");
   const [clientesEncontrados, setClientesEncontrados] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
-  const [nuevoCliente, setNuevoCliente] = useState({ nombre: "", telefono: "", email: "" });
+  const [nuevoCliente, setNuevoCliente] = useState({ nombre: "", telefono: "", email: "", documento: "" });
   const [creandoCliente, setCreandoCliente] = useState(false);
   const [form, setForm] = useState({
     tipo_articulo: "Reloj",
@@ -77,7 +77,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
-    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.email.trim()) return;
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.email.trim() || !nuevoCliente.documento.trim()) return;
     setLoading(true);
     try {
       const cliente = await crearCliente(nuevoCliente);
@@ -208,7 +208,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors"
                     >
                       <div className="font-semibold text-sm text-slate-900">{c.nombre}</div>
-                      <div className="text-xs text-slate-500">{c.telefono}</div>
+                      <div className="text-xs text-slate-500">{c.telefono} {c.documento ? `• ${c.documento}` : ""}</div>
                     </button>
                   ))}
                 </div>
@@ -238,10 +238,22 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </button>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-                  Nombre *
+                  Cédula / RUT *
                 </label>
                 <input
                   ref={inputRef}
+                  type="text"
+                  placeholder="Ej: 1.234.567-8"
+                  value={nuevoCliente.documento}
+                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, documento: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  Nombre *
+                </label>
+                <input
                   type="text"
                   placeholder="Nombre completo"
                   value={nuevoCliente.nombre}
@@ -275,7 +287,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <button
                 onClick={handleCrearCliente}
-                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || loading}
+                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || !nuevoCliente.documento || loading}
                 className="w-full py-3 bg-indigo-500 text-white rounded-lg font-semibold text-sm hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creando..." : "Crear cliente y continuar →"}

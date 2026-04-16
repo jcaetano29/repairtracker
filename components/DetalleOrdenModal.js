@@ -324,6 +324,9 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <div className="text-[10px] text-slate-400 font-semibold uppercase">Cliente</div>
               <div className="text-sm font-bold text-slate-900">{orden.cliente_nombre}</div>
               <div className="text-xs text-slate-500">{orden.cliente_telefono}</div>
+              {orden.cliente_documento && (
+                <div className="text-xs text-slate-500">Doc: {orden.cliente_documento}</div>
+              )}
             </div>
             <div className="bg-slate-50 p-3 rounded-lg">
               <div className="text-[10px] text-slate-400 font-semibold uppercase">Artículo</div>

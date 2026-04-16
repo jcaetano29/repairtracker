@@ -14,7 +14,7 @@ export default async function SeguimientoPage({ params }) {
   // Only select fields needed for the public tracking page — no internal data
   const { data: orden, error } = await getSupabaseAdmin()
     .from("ordenes")
-    .select("numero_orden, tipo_articulo, marca, material, material_otro, peso_gramos, estado, fecha_ingreso, fecha_envio_taller, fecha_aprobacion, fecha_listo, fecha_entrega, tracking_token, clientes(nombre), talleres(nombre)")
+    .select("numero_orden, tipo_articulo, marca, material, material_otro, peso_gramos, estado, fecha_ingreso, fecha_envio_taller, fecha_aprobacion, fecha_listo, fecha_entrega, fecha_entrega_estimada, tracking_token, clientes(nombre), talleres(nombre)")
     .eq("tracking_token", token)
     .single();
 
@@ -81,6 +81,12 @@ export default async function SeguimientoPage({ params }) {
               <span className="text-slate-400 w-24 flex-shrink-0">Ingreso</span>
               <span className="text-slate-700">{formatFecha(orden.fecha_ingreso)}</span>
             </div>
+            {orden.fecha_entrega_estimada && (
+              <div className="flex gap-2">
+                <span className="text-slate-400 w-24 flex-shrink-0">Entrega est.</span>
+                <span className="text-slate-700">{formatFecha(orden.fecha_entrega_estimada)}</span>
+              </div>
+            )}
           </div>
         </div>
 

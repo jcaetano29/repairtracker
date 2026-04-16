@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { TIPOS_ARTICULO } from "@/lib/constants";
+import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales } from "@/lib/data";
 import { sanitizePhone } from "@/lib/utils";
 
@@ -25,6 +25,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     moneda: "UYU",
     tipo_servicio_id: "",
     sucursal_id: "",
+    material: "",
+    material_otro: "",
+    peso_gramos: "",
   });
   const [tiposServicio, setTiposServicio] = useState([]);
   const [sucursales, setSucursales] = useState([]);
@@ -101,6 +104,16 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       return;
     }
 
+    if (form.material === "oro" && !form.peso_gramos) {
+      setError("El peso es obligatorio para artículos de oro.");
+      return;
+    }
+
+    if (form.material === "otro" && !form.material_otro.trim()) {
+      setError("Especificá el material.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -116,6 +129,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         moneda: form.moneda,
         tipo_servicio_id: form.tipo_servicio_id || null,
         sucursal_id: form.sucursal_id,
+        material: form.material || null,
+        material_otro: form.material === "otro" ? form.material_otro : null,
+        peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
       });
       onCreated(orden);
       onClose();
@@ -354,6 +370,67 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     autoFocus
                   />
+                </div>
+              )}
+
+              {/* Material */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  Material
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {MATERIALES.map((m) => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, material: form.material === m.value ? "" : m.value, material_otro: "" })}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        form.material === m.value
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                          : "border-slate-200 text-slate-600 hover:border-slate-300"
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Material otro - texto libre */}
+              {form.material === "otro" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    ¿Qué material es?
+                  </label>
+                  <input
+                    type="text"
+                    value={form.material_otro}
+                    onChange={(e) => setForm({ ...form, material_otro: e.target.value })}
+                    placeholder="Ej: Titanio, Platino..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+              )}
+
+              {/* Peso */}
+              {form.material && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                    Peso (gramos){form.material === "oro" ? " *" : ""}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.peso_gramos}
+                    onChange={(e) => setForm({ ...form, peso_gramos: e.target.value })}
+                    placeholder="0.00"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  {form.material === "oro" && (
+                    <p className="text-xs text-amber-600 mt-1">Obligatorio para artículos de oro.</p>
+                  )}
                 </div>
               )}
 

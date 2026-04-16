@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
+import { getCentrosReparacion } from "@/lib/traslados";
 import { sanitizePhone } from "@/lib/utils";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
@@ -35,6 +36,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   const [tiposServicio, setTiposServicio] = useState([]);
   const [sucursales, setSucursales] = useState([]);
   const [marcas, setMarcas] = useState([]);
+  const [centrosReparacion, setCentrosReparacion] = useState([]);
+  const [trasladar, setTrasladar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
@@ -52,6 +55,10 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
   useEffect(() => {
     getMarcas().then(setMarcas).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    getCentrosReparacion().then(setCentrosReparacion).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -144,6 +151,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         material_otro: form.material === "otro" ? form.material_otro : null,
         peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
         en_garantia: form.en_garantia,
+        forzar_traslado_a: trasladar ? centroDestino?.id : null,
       });
       onCreated(orden);
       onClose();
@@ -153,6 +161,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       setLoading(false);
     }
   }
+
+  // Check if user's sucursal is a repair center with another center available
+  const userSucursalId = form.sucursal_id;
+  const esCentroUsuario = centrosReparacion.some((c) => c.id === userSucursalId);
+  const centroDestino = esCentroUsuario
+    ? centrosReparacion.find((c) => c.id !== userSucursalId)
+    : null;
 
   return (
     <div
@@ -379,6 +394,22 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   </div>
                 )}
               </div>
+
+              {/* Trasladar a otro centro */}
+              {centroDestino && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="trasladar"
+                    checked={trasladar}
+                    onChange={(e) => setTrasladar(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
+                  />
+                  <label htmlFor="trasladar" className="text-sm text-slate-700">
+                    Trasladar a {centroDestino.nombre}
+                  </label>
+                </div>
+              )}
 
               {/* Tipo de artículo */}
               <div>

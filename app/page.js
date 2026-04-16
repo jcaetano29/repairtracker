@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [pagina, setPagina] = useState(1)
   const [totalOrdenes, setTotalOrdenes] = useState(0)
   const [umbrales, setUmbrales] = useState({})
+  const [trasladosRefresh, setTrasladosRefresh] = useState(0)
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -174,6 +175,7 @@ export default function DashboardPage() {
           isDueno={isDueno}
           userSucursalId={session?.user?.sucursal_id}
           onAction={loadData}
+          refreshSignal={trasladosRefresh}
         />
 
         {/* Filtros */}
@@ -473,7 +475,7 @@ export default function DashboardPage() {
       {showNuevo && (
         <NuevoIngresoModal
           onClose={() => setShowNuevo(false)}
-          onCreated={() => loadData()}
+          onCreated={() => { loadData(); setTrasladosRefresh((n) => n + 1); }}
         />
       )}
       {selectedOrden && (

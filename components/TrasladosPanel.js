@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatNumeroOrden, formatFechaHora } from "@/lib/constants";
 
-export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction }) {
+export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, refreshSignal }) {
   const [traslados, setTraslados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -30,9 +30,14 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction }
   }, [loadTraslados]);
 
   useEffect(() => {
-    const interval = setInterval(loadTraslados, 30000);
+    const interval = setInterval(loadTraslados, 5000);
     return () => clearInterval(interval);
   }, [loadTraslados]);
+
+  // Reload immediately when parent signals a change
+  useEffect(() => {
+    if (refreshSignal) loadTraslados();
+  }, [refreshSignal, loadTraslados]);
 
   async function handleAction(traslado_id, accion) {
     setActionLoading(traslado_id);

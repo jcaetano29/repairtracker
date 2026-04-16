@@ -38,6 +38,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
+  const emailRef = useRef(null);
 
   useEffect(() => {
     getTiposServicio().then(setTiposServicio).catch(() => {});
@@ -288,13 +289,35 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Email *
                 </label>
-                <input
-                  type="email"
-                  placeholder="email@ejemplo.com"
-                  value={nuevoCliente.email}
-                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
+                <div className="relative">
+                  <input
+                    ref={emailRef}
+                    type="email"
+                    placeholder="email@ejemplo.com"
+                    value={nuevoCliente.email}
+                    onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
+                    className="w-full px-3 py-2.5 pr-10 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = emailRef.current;
+                      if (!input) return;
+                      const pos = input.selectionStart ?? input.value.length;
+                      const val = input.value;
+                      const newVal = val.slice(0, pos) + "@" + val.slice(pos);
+                      setNuevoCliente({ ...nuevoCliente, email: newVal });
+                      setTimeout(() => {
+                        input.focus();
+                        input.setSelectionRange(pos + 1, pos + 1);
+                      }, 0);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 text-sm font-mono px-1.5 py-0.5 rounded hover:bg-indigo-50 transition-colors"
+                    tabIndex={-1}
+                  >
+                    @
+                  </button>
+                </div>
               </div>
               <button
                 onClick={handleCrearCliente}

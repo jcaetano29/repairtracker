@@ -37,40 +37,40 @@ export default async function SeguimientoPage({ params }) {
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
           <h1 className="text-lg font-bold text-slate-900 mt-2">RepairTrack</h1>
-          <p className="text-sm text-slate-500">Seguimiento de orden</p>
+          <p className="text-base text-slate-500">Seguimiento de orden</p>
         </div>
 
         {/* Order card */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-4">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Orden</div>
+              <div className="text-sm text-slate-500 font-semibold uppercase tracking-wider">Orden</div>
               <div className="text-3xl font-extrabold text-slate-900 font-mono">
                 #{formatNumeroOrden(orden.numero_orden)}
               </div>
             </div>
             <div
-              className="px-3 py-1.5 rounded-full text-xs font-bold"
+              className="px-4 py-2 rounded-full text-sm font-bold"
               style={{ backgroundColor: estadoConfig.bg, color: estadoConfig.color }}
             >
               {estadoConfig.icon} {estadoConfig.label}
             </div>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="space-y-3 text-base">
             <div className="flex gap-2">
-              <span className="text-slate-400 w-24 flex-shrink-0">Cliente</span>
+              <span className="text-slate-500 w-24 flex-shrink-0">Cliente</span>
               <span className="font-semibold text-slate-900">{orden.clientes?.nombre}</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-slate-400 w-24 flex-shrink-0">Artículo</span>
+              <span className="text-slate-500 w-24 flex-shrink-0">Artículo</span>
               <span className="text-slate-700">
                 {orden.tipo_articulo}{orden.marca ? ` — ${orden.marca}` : ""}
               </span>
             </div>
             {orden.material && (
               <div className="flex gap-2">
-                <span className="text-slate-400 w-24 flex-shrink-0">Material</span>
+                <span className="text-slate-500 w-24 flex-shrink-0">Material</span>
                 <span className="text-slate-700">
                   {orden.material === "otro" ? orden.material_otro : orden.material.charAt(0).toUpperCase() + orden.material.slice(1)}
                   {orden.peso_gramos != null ? ` — ${orden.peso_gramos} g` : ""}
@@ -78,12 +78,12 @@ export default async function SeguimientoPage({ params }) {
               </div>
             )}
             <div className="flex gap-2">
-              <span className="text-slate-400 w-24 flex-shrink-0">Ingreso</span>
+              <span className="text-slate-500 w-24 flex-shrink-0">Ingreso</span>
               <span className="text-slate-700">{formatFecha(orden.fecha_ingreso)}</span>
             </div>
             {orden.fecha_entrega_estimada && (
               <div className="flex gap-2">
-                <span className="text-slate-400 w-24 flex-shrink-0">Entrega est.</span>
+                <span className="text-slate-500 w-24 flex-shrink-0">Entrega est.</span>
                 <span className="text-slate-700">{formatFecha(orden.fecha_entrega_estimada)}</span>
               </div>
             )}
@@ -93,29 +93,37 @@ export default async function SeguimientoPage({ params }) {
         {/* Actionable message for states requiring customer action */}
         {orden.estado === "ESPERANDO_APROBACION" && (
           <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 mb-4">
-            <div className="text-sm font-bold text-orange-800 mb-1">📞 Su aprobación es necesaria</div>
-            <p className="text-sm text-orange-700">
+            <div className="text-base font-bold text-orange-800 mb-2">📞 Su aprobación es necesaria</div>
+            <p className="text-base text-orange-700">
               Hemos evaluado su artículo y tenemos un presupuesto listo. Por favor contáctenos para aprobarlo y continuar con la reparación.
             </p>
           </div>
         )}
         {orden.estado === "RECHAZADO" && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4">
-            <div className="text-sm font-bold text-red-800 mb-1">✗ Presupuesto rechazado</div>
-            <p className="text-sm text-red-700">
+            <div className="text-base font-bold text-red-800 mb-2">✗ Presupuesto rechazado</div>
+            <p className="text-base text-red-700">
               El presupuesto no fue aprobado. Su artículo está listo para retirar. Contáctenos para coordinar la devolución.
+            </p>
+          </div>
+        )}
+        {orden.estado === "LISTO_PARA_RETIRO" && (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-4">
+            <div className="text-base font-bold text-green-800 mb-2">🎉 Su artículo está listo</div>
+            <p className="text-base text-green-700">
+              Puede pasar a retirarlo cuando le sea conveniente.
             </p>
           </div>
         )}
 
         {/* Timeline */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">Progreso</div>
-          <div className="space-y-3">
+          <div className="text-sm text-slate-500 font-semibold uppercase tracking-wider mb-4">Progreso</div>
+          <div className="space-y-4">
             {timeline.map((step, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
                     step.done
                       ? "bg-indigo-500 text-white"
                       : "bg-slate-100 text-slate-300"
@@ -124,11 +132,11 @@ export default async function SeguimientoPage({ params }) {
                   {step.done ? "✓" : "○"}
                 </div>
                 <div className="flex-1">
-                  <div className={`text-sm font-semibold ${step.done ? "text-slate-900" : "text-slate-300"}`}>
+                  <div className={`text-base font-semibold ${step.done ? "text-slate-900" : "text-slate-300"}`}>
                     {step.label}
                   </div>
                   {step.fecha && (
-                    <div className="text-xs text-slate-400">{formatFecha(step.fecha)}</div>
+                    <div className="text-sm text-slate-500">{formatFecha(step.fecha)}</div>
                   )}
                 </div>
               </div>

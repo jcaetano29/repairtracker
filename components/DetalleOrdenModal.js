@@ -29,6 +29,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [sucursales, setSucursalesState] = useState([]);
   const [editingRetiro, setEditingRetiro] = useState(false);
   const [retiroId, setRetiroId] = useState(orden.sucursal_retiro_id || "");
+  const [montoTaller, setMontoTaller] = useState("");
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
@@ -124,6 +125,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     // (siempre mostrar para permitir notificar por email, incluso si ya hay monto)
     if (nuevoEstado === "ESPERANDO_APROBACION") {
       if (orden.monto_presupuesto) setMonto(String(orden.monto_presupuesto));
+      if (orden.monto_presupuesto_taller) setMontoTaller(String(orden.monto_presupuesto_taller));
       setShowPresupuesto(true);
       return;
     }
@@ -169,7 +171,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     if (!monto || parseFloat(monto) <= 0) return;
     setLoading(true);
     try {
-      await registrarPresupuesto(orden.id, parseFloat(monto), moneda);
+      await registrarPresupuesto(orden.id, parseFloat(monto), moneda, montoTaller ? parseFloat(montoTaller) : null);
       if (notificarPresupuesto && orden.cliente_email) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
@@ -354,9 +356,16 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 <span className="text-xs text-purple-600">📍 {orden.taller_nombre}</span>
               )}
               {orden.monto_presupuesto && (
-                <span className="text-sm font-bold text-slate-900">
-                  {formatMonto(orden.monto_presupuesto, orden.moneda)}
-                </span>
+                <div className="text-sm">
+                  <span className="font-bold text-slate-900">
+                    Cliente: {formatMonto(orden.monto_presupuesto, orden.moneda)}
+                  </span>
+                  {orden.monto_presupuesto_taller && (
+                    <span className="text-xs text-slate-500 ml-2">
+                      (Taller: {formatMonto(orden.monto_presupuesto_taller, orden.moneda)})
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex gap-3 mt-2 text-xs text-slate-400">
@@ -474,24 +483,39 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showPresupuesto && (
             <div className="p-4 bg-cyan-50 rounded-lg border border-cyan-200 space-y-3">
               <div className="text-sm font-semibold text-cyan-900">Registrar presupuesto</div>
-              <div className="flex gap-2">
-                <select
-                  value={moneda}
-                  onChange={(e) => setMoneda(e.target.value)}
-                  className="px-2 py-2 border rounded-lg text-sm"
-                >
-                  <option value="UYU">$U</option>
-                  <option value="USD">US$</option>
-                </select>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Presupuesto taller</label>
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  placeholder="Monto"
-                  value={monto}
-                  onChange={(e) => setMonto(e.target.value)}
-                  className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                  placeholder="Monto del taller"
+                  value={montoTaller}
+                  onChange={(e) => setMontoTaller(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                 />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Presupuesto cliente</label>
+                <div className="flex gap-2">
+                  <select
+                    value={moneda}
+                    onChange={(e) => setMoneda(e.target.value)}
+                    className="px-2 py-2 border rounded-lg text-sm"
+                  >
+                    <option value="UYU">$U</option>
+                    <option value="USD">US$</option>
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Monto"
+                    value={monto}
+                    onChange={(e) => setMonto(e.target.value)}
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                  />
+                </div>
               </div>
               {orden.cliente_email && (
                 <label className="flex items-start gap-2 cursor-pointer">

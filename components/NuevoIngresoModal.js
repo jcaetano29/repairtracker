@@ -22,6 +22,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     notas_internas: "",
     nombre_articulo: "",
     monto_presupuesto: "",
+    monto_presupuesto_taller: "",
     moneda: "UYU",
     tipo_servicio_id: "",
     sucursal_id: "",
@@ -126,6 +127,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         notas_internas: form.notas_internas,
         nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
         monto_presupuesto: form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null,
+        monto_presupuesto_taller: form.monto_presupuesto_taller ? parseFloat(form.monto_presupuesto_taller) : null,
         moneda: form.moneda,
         tipo_servicio_id: form.tipo_servicio_id || null,
         sucursal_id: form.sucursal_id,
@@ -446,33 +448,58 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 </div>
               )}
 
-              {/* Presupuesto (optional) */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Presupuesto (opcional)
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={form.moneda}
-                    onChange={(e) => setForm({ ...form, moneda: e.target.value })}
-                    className="border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="UYU">$U</option>
-                    <option value="USD">US$</option>
-                  </select>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.monto_presupuesto}
-                    onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
-                    placeholder="0.00"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+              {/* Presupuestos (opcionales) */}
+              <div className="mt-4 space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Presupuesto taller (opcional)
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={form.moneda}
+                      onChange={(e) => setForm({ ...form, moneda: e.target.value })}
+                      className="border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="UYU">$U</option>
+                      <option value="USD">US$</option>
+                    </select>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.monto_presupuesto_taller}
+                      onChange={(e) => setForm({ ...form, monto_presupuesto_taller: e.target.value })}
+                      placeholder="0.00"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Lo que cobra el taller (uso interno).</p>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  Completá si ya tenés el monto. Podés dejarlo vacío y cargarlo después.
-                </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Presupuesto cliente (opcional)
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={form.moneda}
+                      onChange={(e) => setForm({ ...form, moneda: e.target.value })}
+                      className="border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="UYU">$U</option>
+                      <option value="USD">US$</option>
+                    </select>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.monto_presupuesto}
+                      onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
+                      placeholder="0.00"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>
+                </div>
               </div>
 
               <div>

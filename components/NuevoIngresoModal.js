@@ -32,6 +32,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     material_otro: "",
     peso_gramos: "",
     en_garantia: false,
+    fecha_entrega_estimada: "",
   });
   const [tiposServicio, setTiposServicio] = useState([]);
   const [sucursales, setSucursales] = useState([]);
@@ -151,6 +152,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         material_otro: form.material === "otro" ? form.material_otro : null,
         peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
         en_garantia: form.en_garantia,
+        fecha_entrega_estimada: form.fecha_entrega_estimada || null,
         forzar_traslado_a: trasladar ? centroDestino?.id : null,
       });
       onCreated(orden);
@@ -589,6 +591,20 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>
                 </div>
+              </div>
+
+              {/* Fecha de entrega estimada */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  Fecha de entrega estimada (opcional)
+                </label>
+                <input
+                  type="date"
+                  value={form.fecha_entrega_estimada}
+                  onChange={(e) => setForm({ ...form, fecha_entrega_estimada: e.target.value })}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
               </div>
 
               <div>

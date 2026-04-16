@@ -27,6 +27,7 @@ export default function AdminLayout({ children }) {
               { href: "/admin/configuracion", label: "⚙️ Configuración" },
               { href: "/admin/tipos-servicio", label: "⚙️ Tipos de servicio" },
               { href: "/admin/talleres", label: "🏪 Talleres" },
+              { href: "/admin/marcas", label: "🏷️ Marcas" },
               { href: "/admin/usuarios", label: "👤 Usuarios" },
               { href: "/admin/sucursales", label: "🏢 Sucursales" },
               { href: "/admin/reportes", label: "📊 Reportes" },

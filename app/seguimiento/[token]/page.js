@@ -73,7 +73,7 @@ export default async function SeguimientoPage({ params }) {
                 <span className="text-slate-400 w-24 flex-shrink-0">Material</span>
                 <span className="text-slate-700">
                   {orden.material === "otro" ? orden.material_otro : orden.material.charAt(0).toUpperCase() + orden.material.slice(1)}
-                  {orden.peso_gramos ? ` — ${orden.peso_gramos} g` : ""}
+                  {orden.peso_gramos != null ? ` — ${orden.peso_gramos} g` : ""}
                 </span>
               </div>
             )}

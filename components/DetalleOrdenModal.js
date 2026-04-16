@@ -332,7 +332,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               {orden.material && (
                 <div className="text-xs text-slate-500 mt-1">
                   Material: {orden.material === "otro" ? orden.material_otro : orden.material.charAt(0).toUpperCase() + orden.material.slice(1)}
-                  {orden.peso_gramos ? ` — ${orden.peso_gramos} g` : ""}
+                  {orden.peso_gramos != null ? ` — ${orden.peso_gramos} g` : ""}
                 </div>
               )}
             </div>

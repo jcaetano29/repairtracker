@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
-import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales } from "@/lib/data";
+import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
 import { sanitizePhone } from "@/lib/utils";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
@@ -17,6 +17,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
     tipo_articulo: "Reloj",
     marca: "",
+    marca_otra: "",
     modelo: "",
     problema_reportado: "",
     notas_internas: "",
@@ -32,6 +33,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   });
   const [tiposServicio, setTiposServicio] = useState([]);
   const [sucursales, setSucursales] = useState([]);
+  const [marcas, setMarcas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
@@ -44,6 +46,10 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     getSucursales()
       .then((data) => setSucursales(data.filter((s) => s.activo)))
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    getMarcas().then(setMarcas).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -118,10 +124,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     setLoading(true);
     setError(null);
     try {
+      const marcaFinal = form.marca === "__otra__" ? form.marca_otra : form.marca;
       const orden = await crearOrden({
         cliente_id: clienteSeleccionado.id,
         tipo_articulo: form.tipo_articulo,
-        marca: form.marca,
+        marca: marcaFinal,
         modelo: form.modelo,
         problema_reportado: form.problema_reportado,
         notas_internas: form.notas_internas,
@@ -506,15 +513,33 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Marca
                 </label>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Ej: Casio, Tissot, Oro 18k..."
+                <select
                   value={form.marca}
                   onChange={(e) => setForm({ ...form, marca: e.target.value })}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
+                >
+                  <option value="">Seleccionar marca...</option>
+                  {marcas.map((m) => (
+                    <option key={m.id} value={m.nombre}>{m.nombre}</option>
+                  ))}
+                  <option value="__otra__">Otra</option>
+                </select>
               </div>
+              {form.marca === "__otra__" && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                    Especificar marca
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nombre de la marca..."
+                    value={form.marca_otra}
+                    onChange={(e) => setForm({ ...form, marca_otra: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    autoFocus
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">

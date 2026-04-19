@@ -39,12 +39,11 @@ export async function GET() {
     const { data: retirarData, error: retirarErr } = await retirarQuery
     if (retirarErr) throw retirarErr
 
-    // "Listo para envio" — LISTO_PARA_ENVIO (always has taller_id), no active traslado
+    // "Listo para envio" — LISTO_PARA_ENVIO, no active traslado
     let llevarQuery = supabase
       .from("v_ordenes_dashboard")
       .select("id, numero_orden, tipo_articulo, marca, modelo, taller_id, taller_nombre, sucursal_nombre, dias_en_estado, traslado_activo_id")
       .eq("estado", "LISTO_PARA_ENVIO")
-      .not("taller_id", "is", null)
       .is("traslado_activo_id", null)
 
     if (!isAdmin && sucursalId) {

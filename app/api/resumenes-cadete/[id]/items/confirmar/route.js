@@ -39,7 +39,7 @@ export async function POST(request, { params }) {
 
     if (item.tipo === "orden" && item.orden_id && item.subtipo) {
       if (item.subtipo === "llevar_a_taller") {
-        // INGRESADO → EN_TALLER (cadete delivered to workshop)
+        // LISTO_PARA_ENVIO → EN_TALLER (cadete delivered to workshop)
         await cambiarEstado(item.orden_id, "EN_TALLER", {
           fecha_envio_taller: new Date().toISOString(),
         })

@@ -46,6 +46,28 @@ const PLANTILLA_LABELS = {
  * @param {Array} plantillas - Array of plantillas from server
  */
 export default function ConfiguracionClient({ configuracion, plantillasEmail = [] }) {
+  const [nombreNegocio, setNombreNegocio] = useState(configuracion.nombre_negocio || "")
+  const [nombreLoading, setNombreLoading] = useState(false)
+
+  async function handleSaveNombre() {
+    if (!nombreNegocio.trim()) return
+    setNombreLoading(true)
+    try {
+      const res = await fetch("/api/configuracion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clave: "nombre_negocio", valor: nombreNegocio.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Error al guardar")
+      toast.success("Nombre del negocio actualizado")
+    } catch (e) {
+      toast.error(e.message)
+    } finally {
+      setNombreLoading(false)
+    }
+  }
+
   // Track local state for each threshold row: { umbral_key: { leve, grave, loading } }
   const [rows, setRows] = useState(() => {
     const initial = {}
@@ -193,6 +215,33 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
 
   return (
     <div className="space-y-6">
+      {/* Nombre del negocio */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Nombre del Negocio</h2>
+        <p className="text-sm text-slate-600 mb-3">Este nombre aparece en los tickets de ingreso impresos.</p>
+        <div className="flex gap-2 max-w-md">
+          <input
+            type="text"
+            value={nombreNegocio}
+            onChange={(e) => setNombreNegocio(e.target.value)}
+            disabled={nombreLoading}
+            placeholder="Ej: Joyería López"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100"
+          />
+          <button
+            onClick={handleSaveNombre}
+            disabled={!nombreNegocio.trim() || nombreLoading}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              nombreNegocio.trim() && !nombreLoading
+                ? "bg-indigo-500 hover:bg-indigo-600 text-white"
+                : "bg-slate-200 text-slate-500 cursor-not-allowed"
+            }`}
+          >
+            {nombreLoading ? "Guardando..." : "Guardar"}
+          </button>
+        </div>
+      </div>
+
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
           Configuración de Umbrales de Retraso

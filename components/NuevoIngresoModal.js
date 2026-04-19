@@ -6,6 +6,8 @@ import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
 import { getCentrosReparacion } from "@/lib/traslados";
 import { sanitizePhone } from "@/lib/utils";
+import { generarTicketIngreso } from "@/lib/ticket";
+import { getConfiguracion } from "@/lib/data/configuracion";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const { data: session } = useSession()
@@ -153,6 +155,18 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         fecha_entrega_estimada: form.fecha_entrega_estimada || null,
         forzar_traslado_a: trasladar ? centroDestino?.id : null,
       });
+      // Generate intake ticket PDF
+      try {
+        const config = await getConfiguracion()
+        generarTicketIngreso(
+          { ...orden, fecha_entrega_estimada: form.fecha_entrega_estimada || null },
+          clienteSeleccionado,
+          config.nombre_negocio || "RepairTrack"
+        )
+      } catch (ticketErr) {
+        console.error("Error generando ticket:", ticketErr)
+      }
+
       onCreated(orden);
       onClose();
     } catch (e) {

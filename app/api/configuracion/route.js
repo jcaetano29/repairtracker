@@ -65,6 +65,7 @@ export async function POST(request) {
     "umbral_listo_en_taller",
     "umbral_listo_para_retiro",
     "umbral_entregado",
+    "nombre_negocio",
   ]
 
   // Validate clave and valor are present
@@ -82,43 +83,42 @@ export async function POST(request) {
     )
   }
 
-  if (!valor) {
+  if (valor === undefined || valor === null) {
     return NextResponse.json(
       { error: "valor is required" },
       { status: 400 }
     )
   }
 
-  // Validate valor has leve and grave properties
-  if (valor.leve === undefined || valor.grave === undefined) {
-    return NextResponse.json(
-      { error: "valor must have leve and grave properties" },
-      { status: 400 }
-    )
-  }
+  // Umbral claves require leve/grave validation
+  if (clave.startsWith("umbral_")) {
+    if (valor.leve === undefined || valor.grave === undefined) {
+      return NextResponse.json(
+        { error: "valor must have leve and grave properties" },
+        { status: 400 }
+      )
+    }
 
-  // Validate leve and grave are integers
-  if (!Number.isInteger(valor.leve) || !Number.isInteger(valor.grave)) {
-    return NextResponse.json(
-      { error: "leve and grave must be integer values" },
-      { status: 400 }
-    )
-  }
+    if (!Number.isInteger(valor.leve) || !Number.isInteger(valor.grave)) {
+      return NextResponse.json(
+        { error: "leve and grave must be integer values" },
+        { status: 400 }
+      )
+    }
 
-  // Validate leve and grave are non-negative
-  if (valor.leve < 0 || valor.grave < 0) {
-    return NextResponse.json(
-      { error: "leve and grave must be non-negative" },
-      { status: 400 }
-    )
-  }
+    if (valor.leve < 0 || valor.grave < 0) {
+      return NextResponse.json(
+        { error: "leve and grave must be non-negative" },
+        { status: 400 }
+      )
+    }
 
-  // Validate leve < grave when grave > 0
-  if (valor.grave > 0 && valor.leve >= valor.grave) {
-    return NextResponse.json(
-      { error: "leve must be less than grave when grave > 0" },
-      { status: 400 }
-    )
+    if (valor.grave > 0 && valor.leve >= valor.grave) {
+      return NextResponse.json(
+        { error: "leve must be less than grave when grave > 0" },
+        { status: 400 }
+      )
+    }
   }
 
   // Prepare update data
@@ -129,11 +129,10 @@ export async function POST(request) {
     actualizado_por: session.user.id,
   }
 
-  // Update in database
+  // Upsert in database
   const { data, error } = await getSupabaseAdmin()
     .from("configuracion")
-    .update(updateData)
-    .eq("clave", clave)
+    .upsert({ clave, ...updateData }, { onConflict: "clave" })
     .select()
     .single()
 

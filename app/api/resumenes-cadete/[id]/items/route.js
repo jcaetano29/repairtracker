@@ -1,7 +1,7 @@
 // app/api/resumenes-cadete/[id]/items/route.js
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import { getItemsResumen, addItemTraslado, addItemAdHoc, deleteItem, swapItemOrder } from "@/lib/cadete"
+import { getItemsResumen, addItemTraslado, addItemAdHoc, addItemOrden, deleteItem, swapItemOrder } from "@/lib/cadete"
 
 async function verifyStaff() {
   const session = await auth()
@@ -40,7 +40,7 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { tipo, traslado_id, descripcion } = body
+  const { tipo, traslado_id, descripcion, orden_id, subtipo } = body
 
   if (tipo === "traslado" && !traslado_id) {
     return NextResponse.json({ error: "traslado_id es requerido para tipo traslado" }, { status: 400 })
@@ -48,13 +48,18 @@ export async function POST(request, { params }) {
   if (tipo === "ad_hoc" && !descripcion) {
     return NextResponse.json({ error: "descripcion es requerida para tipo ad_hoc" }, { status: 400 })
   }
-  if (!["traslado", "ad_hoc"].includes(tipo)) {
-    return NextResponse.json({ error: "tipo must be 'traslado' or 'ad_hoc'" }, { status: 400 })
+  if (tipo === "orden" && (!orden_id || !subtipo)) {
+    return NextResponse.json({ error: "orden_id y subtipo son requeridos para tipo orden" }, { status: 400 })
+  }
+  if (!["traslado", "ad_hoc", "orden"].includes(tipo)) {
+    return NextResponse.json({ error: "tipo must be 'traslado', 'ad_hoc', or 'orden'" }, { status: 400 })
   }
 
   try {
     const item = tipo === "traslado"
       ? await addItemTraslado(id, traslado_id)
+      : tipo === "orden"
+      ? await addItemOrden(id, orden_id, subtipo)
       : await addItemAdHoc(id, descripcion)
     return NextResponse.json({ item })
   } catch (e) {

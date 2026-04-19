@@ -7,6 +7,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
   const [resumenes, setResumenes] = useState([])
   const [cadetes, setCadetes] = useState([])
   const [traslados, setTraslados] = useState([])
+  const [ordenesPendientes, setOrdenesPendientes] = useState({ retirar_de_taller: [], llevar_a_taller: [] })
   const [loading, setLoading] = useState(true)
   const [selectedResumen, setSelectedResumen] = useState(null)
   const [items, setItems] = useState([])
@@ -73,10 +74,20 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
     }
   }
 
+  async function loadOrdenesPendientes() {
+    try {
+      const res = await fetch("/api/resumenes-cadete/ordenes-pendientes")
+      const data = await res.json()
+      setOrdenesPendientes(data || { retirar_de_taller: [], llevar_a_taller: [] })
+    } catch {
+      setOrdenesPendientes({ retirar_de_taller: [], llevar_a_taller: [] })
+    }
+  }
+
   async function handleSelectResumen(resumen) {
     setSelectedResumen(resumen)
     setError(null)
-    await Promise.all([loadItems(resumen.id), loadTraslados()])
+    await Promise.all([loadItems(resumen.id), loadTraslados(), loadOrdenesPendientes()])
   }
 
   async function handleCreate(e) {
@@ -145,8 +156,22 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ tipo: "traslado", traslado_id: trasladoId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
-      await loadItems(selectedResumen.id)
-      await loadData()
+      await Promise.all([loadItems(selectedResumen.id), loadData()])
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleAddOrden(ordenId, subtipo) {
+    setError(null)
+    try {
+      const res = await fetch(`/api/resumenes-cadete/${selectedResumen.id}/items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: "orden", orden_id: ordenId, subtipo }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
     } catch (e) {
       setError(e.message)
     }
@@ -164,8 +189,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
       })
       if (!res.ok) throw new Error((await res.json()).error)
       setAdHocText("")
-      await loadItems(selectedResumen.id)
-      await loadData()
+      await Promise.all([loadItems(selectedResumen.id), loadData()])
     } catch (e) {
       setError(e.message)
     }
@@ -180,8 +204,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ item_id: itemId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
-      await loadItems(selectedResumen.id)
-      await loadData()
+      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
     } catch (e) {
       setError(e.message)
     }
@@ -211,9 +234,89 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
     }
   }
 
-  // Items already added (to filter traslado selector)
+  // Filter out already-added items
   const addedTrasladoIds = new Set(items.filter((i) => i.tipo === "traslado").map((i) => i.traslado_id))
   const availableTraslados = traslados.filter((t) => !addedTrasladoIds.has(t.id))
+  const addedOrdenKeys = new Set(items.filter((i) => i.tipo === "orden").map((i) => `${i.orden_id}:${i.subtipo}`))
+  const availableRetirar = (ordenesPendientes.retirar_de_taller || []).filter((o) => !addedOrdenKeys.has(`${o.id}:retirar_de_taller`))
+  const availableLlevar = (ordenesPendientes.llevar_a_taller || []).filter((o) => !addedOrdenKeys.has(`${o.id}:llevar_a_taller`))
+
+  function renderItemBadge(item) {
+    if (item.tipo === "traslado") {
+      return (
+        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+          item.traslado_tipo === "ida" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+        }`}>
+          {item.traslado_tipo === "ida" ? "LLEVAR" : "RETIRAR"}
+        </span>
+      )
+    }
+    if (item.tipo === "orden") {
+      return (
+        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+          item.subtipo === "retirar_de_taller" ? "bg-teal-100 text-teal-700" : "bg-purple-100 text-purple-700"
+        }`}>
+          {item.subtipo === "retirar_de_taller" ? "RETIRAR TALLER" : "LLEVAR TALLER"}
+        </span>
+      )
+    }
+    return <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">TAREA</span>
+  }
+
+  function renderItemDetail(item) {
+    if (item.tipo === "traslado") {
+      return (
+        <>
+          <span className="text-sm text-slate-700 ml-2">
+            {[item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")}
+          </span>
+          <span className="text-xs text-slate-500 ml-2">
+            {item.sucursal_origen_nombre} → {item.sucursal_destino_nombre}
+          </span>
+        </>
+      )
+    }
+    if (item.tipo === "orden") {
+      return (
+        <>
+          <span className="text-sm text-slate-700 ml-2">
+            #{String(item.numero_orden).padStart(4, "0")} — {[item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")}
+          </span>
+          <span className="text-xs text-slate-500 ml-2">
+            {item.subtipo === "retirar_de_taller"
+              ? `Retirar de ${item.orden_taller_nombre}`
+              : `Llevar a ${item.orden_taller_nombre} (desde ${item.orden_sucursal_nombre})`}
+          </span>
+        </>
+      )
+    }
+    return <span className="text-sm text-slate-700 ml-2">{item.descripcion}</span>
+  }
+
+  function renderOrdenCard(orden, subtipo) {
+    const label = subtipo === "retirar_de_taller" ? "Retirar de" : "Llevar a"
+    return (
+      <div key={orden.id} className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200 text-sm">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold font-mono text-slate-900">#{String(orden.numero_orden).padStart(4, "0")}</span>
+            <span className="text-slate-700">{[orden.tipo_articulo, orden.marca, orden.modelo].filter(Boolean).join(" — ")}</span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5">
+            {label} <span className="font-semibold text-slate-600">{orden.taller_nombre}</span>
+            <span className="mx-1">|</span>
+            Ubicacion: {orden.sucursal_nombre}
+            <span className="mx-1">|</span>
+            {orden.dias_en_estado}d en estado
+          </div>
+        </div>
+        <button
+          onClick={() => handleAddOrden(orden.id, subtipo)}
+          className="px-2.5 py-1 text-xs bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 flex-shrink-0 ml-2"
+        >+ Agregar</button>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -243,91 +346,95 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 ← Volver a resumenes
               </button>
 
-              <h3 className="text-sm font-bold text-slate-700 mb-1">
+              <h3 className="text-sm font-bold text-slate-700 mb-4">
                 {selectedResumen.nombre || "Sin nombre"} — {selectedResumen.cadete_username}
               </h3>
 
-              {/* Items list */}
+              {/* Current items list */}
               {loadingItems ? (
                 <div className="text-center py-8 text-slate-400 text-sm">Cargando items...</div>
               ) : (
                 <div className="space-y-2 mb-6">
                   {items.length === 0 && (
-                    <p className="text-sm text-slate-400 py-4 text-center">Sin items. Agrega traslados o tareas.</p>
+                    <p className="text-sm text-slate-400 py-4 text-center">Sin items. Selecciona ordenes, traslados o agrega tareas.</p>
                   )}
                   {items.map((item, idx) => (
                     <div key={item.item_id} className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
-                      {/* Reorder buttons */}
                       <div className="flex flex-col gap-0.5">
-                        <button
-                          onClick={() => handleMoveItem(idx, -1)}
-                          disabled={idx === 0}
-                          className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-20"
-                        >▲</button>
-                        <button
-                          onClick={() => handleMoveItem(idx, 1)}
-                          disabled={idx === items.length - 1}
-                          className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-20"
-                        >▼</button>
+                        <button onClick={() => handleMoveItem(idx, -1)} disabled={idx === 0}
+                          className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-20">▲</button>
+                        <button onClick={() => handleMoveItem(idx, 1)} disabled={idx === items.length - 1}
+                          className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-20">▼</button>
                       </div>
-
                       <div className="flex-1 min-w-0">
-                        {item.tipo === "traslado" ? (
-                          <div>
-                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                              item.traslado_tipo === "ida"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}>
-                              {item.traslado_tipo === "ida" ? "LLEVAR" : "RETIRAR"}
-                            </span>
-                            <span className="text-sm text-slate-700 ml-2">
-                              {[item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")}
-                            </span>
-                            <span className="text-xs text-slate-500 ml-2">
-                              {item.sucursal_origen_nombre} → {item.sucursal_destino_nombre}
-                            </span>
-                          </div>
-                        ) : (
-                          <div>
-                            <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">TAREA</span>
-                            <span className="text-sm text-slate-700 ml-2">{item.descripcion}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center flex-wrap gap-1">
+                          {renderItemBadge(item)}
+                          {renderItemDetail(item)}
+                        </div>
                       </div>
-
-                      <button
-                        onClick={() => handleDeleteItem(item.item_id)}
-                        className="text-xs text-red-500 hover:text-red-700 flex-shrink-0"
-                      >Eliminar</button>
+                      <button onClick={() => handleDeleteItem(item.item_id)}
+                        className="text-xs text-red-500 hover:text-red-700 flex-shrink-0">Eliminar</button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Add traslado */}
+              {/* === CATEGORIZED ORDER SECTIONS === */}
+
+              {/* Para retirar de taller */}
+              {availableRetirar.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                    Para retirar de taller ({availableRetirar.length})
+                  </h4>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {availableRetirar.map((o) => renderOrdenCard(o, "retirar_de_taller"))}
+                  </div>
+                </div>
+              )}
+
+              {/* Para llevar a taller */}
+              {availableLlevar.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                    Para llevar a taller ({availableLlevar.length})
+                  </h4>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {availableLlevar.map((o) => renderOrdenCard(o, "llevar_a_taller"))}
+                  </div>
+                </div>
+              )}
+
+              {/* Traslados entre sucursales */}
               {availableTraslados.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Agregar traslado</h4>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                  <h4 className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                    Traslados entre sucursales ({availableTraslados.length})
+                  </h4>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {availableTraslados.map((t) => (
-                      <div key={t.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-slate-200 text-sm">
-                        <div>
-                          <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                            t.tipo === "ida" ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
-                          }`}>
-                            {t.tipo === "ida" ? "IDA" : "RETORNO"}
-                          </span>
-                          <span className="ml-2 text-slate-700">
-                            #{String(t.ordenes?.numero_orden).padStart(4, "0")} — {t.ordenes?.tipo_articulo} {t.ordenes?.marca || ""}
-                          </span>
-                          <span className="text-xs text-slate-400 ml-2">
+                      <div key={t.id} className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200 text-sm">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                              t.tipo === "ida" ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                            }`}>
+                              {t.tipo === "ida" ? "IDA" : "RETORNO"}
+                            </span>
+                            <span className="text-slate-700">
+                              #{String(t.ordenes?.numero_orden).padStart(4, "0")} — {t.ordenes?.tipo_articulo} {t.ordenes?.marca || ""}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500 mt-0.5">
                             {t.sucursal_origen_rel?.nombre} → {t.sucursal_destino_rel?.nombre}
-                          </span>
+                          </div>
                         </div>
                         <button
                           onClick={() => handleAddTraslado(t.id)}
-                          className="px-2 py-1 text-xs bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                          className="px-2.5 py-1 text-xs bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 flex-shrink-0 ml-2"
                         >+ Agregar</button>
                       </div>
                     ))}
@@ -335,9 +442,12 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 </div>
               )}
 
-              {/* Add ad-hoc */}
+              {/* Agregar tarea ad-hoc */}
               <div>
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Agregar tarea</h4>
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                  Agregar tarea manual
+                </h4>
                 <form onSubmit={handleAddAdHoc} className="flex gap-2">
                   <input
                     type="text"
@@ -367,7 +477,6 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 >+ Nuevo resumen</button>
               </div>
 
-              {/* Create form */}
               {showCreate && (
                 <form onSubmit={handleCreate} className="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -403,7 +512,6 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 </form>
               )}
 
-              {/* Resumenes table */}
               {resumenes.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 text-sm">
                   No hay resumenes creados. Crea uno para asignar tareas a un cadete.
@@ -418,10 +526,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                       }`}
                     >
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => handleSelectResumen(r)}
-                        >
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleSelectResumen(r)}>
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-slate-900">{r.nombre || "Sin nombre"}</span>
                             {!r.activo && (
@@ -433,18 +538,13 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleSelectResumen(r)}
-                            className="px-3 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium"
-                          >Editar</button>
-                          <button
-                            onClick={() => handleToggleActivo(r)}
+                          <button onClick={() => handleSelectResumen(r)}
+                            className="px-3 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium">Editar</button>
+                          <button onClick={() => handleToggleActivo(r)}
                             className="px-3 py-1.5 text-xs border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"
                           >{r.activo ? "Desactivar" : "Activar"}</button>
-                          <button
-                            onClick={() => handleDeleteResumen(r.id)}
-                            className="px-3 py-1.5 text-xs text-red-500 hover:text-red-700 font-medium"
-                          >Eliminar</button>
+                          <button onClick={() => handleDeleteResumen(r.id)}
+                            className="px-3 py-1.5 text-xs text-red-500 hover:text-red-700 font-medium">Eliminar</button>
                         </div>
                       </div>
                     </div>

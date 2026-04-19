@@ -170,6 +170,48 @@ export default function CadetePage() {
                   )
                 }
 
+                if (item.tipo === "orden") {
+                  const action = item.subtipo === "retirar_de_taller" ? "Retirar de" : "Llevar a"
+                  const destination = item.orden_taller_nombre
+                  const article = [item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")
+                  return (
+                    <div
+                      key={item.item_id}
+                      onClick={() => toggleCheck(item.item_id)}
+                      className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
+                        isChecked
+                          ? "border-green-300 bg-green-50/50 opacity-60"
+                          : "border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                          isChecked
+                            ? "bg-green-500 border-green-500 text-white"
+                            : "border-slate-300"
+                        }`}>
+                          {isChecked && <span className="text-xs font-bold">✓</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              item.subtipo === "retirar_de_taller"
+                                ? "bg-teal-100 text-teal-700"
+                                : "bg-purple-100 text-purple-700"
+                            }`}>
+                              {item.subtipo === "retirar_de_taller" ? "↓ RETIRAR" : "↑ LLEVAR"}
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold text-slate-900">{article || "Articulo"}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {action} <span className="font-semibold text-slate-700">{destination}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+
                 // Ad-hoc item
                 return (
                   <div

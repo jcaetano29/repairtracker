@@ -10,6 +10,7 @@ import { NuevoIngresoModal } from "@/components/NuevoIngresoModal"
 import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
 import { TrasladosBadge } from "@/components/TrasladosBadge"
 import { TrasladosPanel } from "@/components/TrasladosPanel"
+import { ResumenCadetePanel } from "@/components/ResumenCadetePanel"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
@@ -38,6 +39,7 @@ export default function DashboardPage() {
   const [totalOrdenes, setTotalOrdenes] = useState(0)
   const [umbrales, setUmbrales] = useState({})
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
+  const [showResumenCadete, setShowResumenCadete] = useState(false)
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -141,6 +143,12 @@ export default function DashboardPage() {
               className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
             >
               + Nuevo Ingreso
+            </button>
+            <button
+              onClick={() => setShowResumenCadete(true)}
+              className="px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
+            >
+              🚚 Cadete
             </button>
             {isDueno && (
               <Link
@@ -486,6 +494,9 @@ export default function DashboardPage() {
           isDueno={isDueno}
           umbrales={umbrales}
         />
+      )}
+      {showResumenCadete && (
+        <ResumenCadetePanel onClose={() => setShowResumenCadete(false)} />
       )}
     </div>
   )

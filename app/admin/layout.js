@@ -6,13 +6,13 @@ export default function AdminLayout({ children }) {
       {/* Admin header */}
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <span className="text-2xl">⌚</span>
             <div>
               <h1 className="text-lg font-bold text-white leading-tight">RepairTrack</h1>
               <p className="text-[11px] text-slate-400">Panel de administración</p>
             </div>
-          </div>
+          </Link>
           <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-2">
             ← Volver al dashboard
           </Link>

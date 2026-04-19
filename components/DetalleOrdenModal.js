@@ -116,8 +116,8 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function handleCambiarEstado(nuevoEstado) {
-    // Si va a taller, mostrar selector
-    if (nuevoEstado === "EN_TALLER") {
+    // Si va a taller (listo para envio), mostrar selector
+    if (nuevoEstado === "LISTO_PARA_ENVIO") {
       setShowAsignar(true);
       return;
     }

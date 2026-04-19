@@ -39,12 +39,11 @@ export async function GET() {
     const { data: retirarData, error: retirarErr } = await retirarQuery
     if (retirarErr) throw retirarErr
 
-    // "Para llevar a taller" — INGRESADO with external taller assigned, no active traslado
+    // "Ordenes ingresadas" — INGRESADO, no active traslado (cadete can take to taller)
     let llevarQuery = supabase
       .from("v_ordenes_dashboard")
       .select("id, numero_orden, tipo_articulo, marca, modelo, taller_id, taller_nombre, sucursal_nombre, dias_en_estado, traslado_activo_id")
       .eq("estado", "INGRESADO")
-      .not("taller_id", "is", null)
       .is("traslado_activo_id", null)
 
     if (!isAdmin && sucursalId) {

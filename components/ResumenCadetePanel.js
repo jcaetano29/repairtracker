@@ -320,6 +320,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
 
   function renderOrdenCard(orden, subtipo) {
     const label = subtipo === "retirar_de_taller" ? "Retirar de" : "Llevar a"
+    const tallerDisplay = orden.taller_nombre || "Sin taller asignado"
     return (
       <div key={orden.id} className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200 text-sm">
         <div className="flex-1 min-w-0">
@@ -328,7 +329,10 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
             <span className="text-slate-700">{[orden.tipo_articulo, orden.marca, orden.modelo].filter(Boolean).join(" — ")}</span>
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
-            {label} <span className="font-semibold text-slate-600">{orden.taller_nombre}</span>
+            {orden.taller_nombre
+              ? <>{label} <span className="font-semibold text-slate-600">{orden.taller_nombre}</span></>
+              : <span className="text-amber-600 font-medium">Sin taller asignado</span>
+            }
             <span className="mx-1">|</span>
             Ubicacion: {orden.sucursal_nombre}
             <span className="mx-1">|</span>
@@ -440,7 +444,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 <div className="mb-4">
                   <h4 className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                    Para llevar a taller ({availableLlevar.length})
+                    Ordenes ingresadas ({availableLlevar.length})
                   </h4>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {availableLlevar.map((o) => renderOrdenCard(o, "llevar_a_taller"))}

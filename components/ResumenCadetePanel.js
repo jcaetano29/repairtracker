@@ -21,7 +21,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
   // Ad-hoc form
   const [adHocText, setAdHocText] = useState("")
 
-  // Error/success
+  // Error
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -93,17 +93,26 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
   async function handleCreate(e) {
     e.preventDefault()
     setError(null)
+    const selectedCadeteId = newCadeteId
     try {
       const res = await fetch("/api/resumenes-cadete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cadete_id: newCadeteId, nombre: newNombre || undefined }),
+        body: JSON.stringify({ cadete_id: selectedCadeteId, nombre: newNombre || undefined }),
       })
-      if (!res.ok) throw new Error((await res.json()).error)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      const resumen = data.resumen
       setShowCreate(false)
       setNewCadeteId("")
       setNewNombre("")
       await loadData()
+      // Go straight to item selection with the new resumen
+      const cadete = cadetes.find((c) => c.id === selectedCadeteId)
+      handleSelectResumen({
+        ...resumen,
+        cadete_username: cadete?.username || "—",
+      })
     } catch (e) {
       setError(e.message)
     }
@@ -200,6 +209,22 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
     try {
       const res = await fetch(`/api/resumenes-cadete/${selectedResumen.id}/items`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: itemId }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleConfirmItem(itemId) {
+    if (!confirm("¿Confirmar que el cadete completo esta tarea? Esto actualizara el estado de la orden.")) return
+    setError(null)
+    try {
+      const res = await fetch(`/api/resumenes-cadete/${selectedResumen.id}/items/confirmar`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ item_id: itemId }),
       })
@@ -339,12 +364,20 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
           ) : selectedResumen ? (
             /* Item management view */
             <div>
-              <button
-                onClick={() => { setSelectedResumen(null); setItems([]) }}
-                className="text-sm text-indigo-600 hover:text-indigo-800 mb-4 flex items-center gap-1"
-              >
-                ← Volver a resumenes
-              </button>
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => { setSelectedResumen(null); setItems([]) }}
+                  className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                >
+                  ← Volver a resumenes
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600"
+                >
+                  Guardar edicion
+                </button>
+              </div>
 
               <h3 className="text-sm font-bold text-slate-700 mb-4">
                 {selectedResumen.nombre || "Sin nombre"} — {selectedResumen.cadete_username}
@@ -372,8 +405,16 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                           {renderItemDetail(item)}
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteItem(item.item_id)}
-                        className="text-xs text-red-500 hover:text-red-700 flex-shrink-0">Eliminar</button>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {item.tipo === "orden" && (
+                          <button onClick={() => handleConfirmItem(item.item_id)}
+                            className="px-2.5 py-1 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium">
+                            Confirmar
+                          </button>
+                        )}
+                        <button onClick={() => handleDeleteItem(item.item_id)}
+                          className="px-2.5 py-1 text-xs text-red-500 hover:text-red-700">Eliminar</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -506,7 +547,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
-                    <button type="submit" disabled={!newCadeteId} className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 disabled:opacity-40">Crear</button>
+                    <button type="submit" disabled={!newCadeteId} className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 disabled:opacity-40">Crear y seleccionar items</button>
                     <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600">Cancelar</button>
                   </div>
                 </form>

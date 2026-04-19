@@ -1,7 +1,7 @@
 // app/api/resumenes-cadete/[id]/items/route.js
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import { getItemsResumen, addItemTraslado, addItemAdHoc, addItemOrden, deleteItem, swapItemOrder } from "@/lib/cadete"
+import { getItemsResumen, addItemTraslado, addItemAdHoc, addItemOrden, deleteItem, deactivateIfEmpty, swapItemOrder } from "@/lib/cadete"
 
 async function verifyStaff() {
   const session = await auth()
@@ -87,6 +87,11 @@ export async function DELETE(request, { params }) {
 
   try {
     await deleteItem(item_id)
+
+    // Auto-deactivate resumen if no items left
+    const { id: resumenId } = await params
+    await deactivateIfEmpty(resumenId)
+
     return NextResponse.json({ ok: true })
   } catch (e) {
     console.error("[/api/resumenes-cadete/[id]/items] DELETE error:", e)

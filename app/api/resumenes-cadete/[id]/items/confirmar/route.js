@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import { getSupabaseClient } from "@/lib/supabase-client"
 import { cambiarEstado } from "@/lib/data"
-import { deleteItem } from "@/lib/cadete"
+import { deleteItem, deactivateIfEmpty } from "@/lib/cadete"
 
 export async function POST(request, { params }) {
   const session = await auth()
@@ -53,6 +53,10 @@ export async function POST(request, { params }) {
 
     // Remove item from resumen
     await deleteItem(item_id)
+
+    // Auto-deactivate resumen if no items left
+    const { id: resumenId } = await params
+    await deactivateIfEmpty(resumenId)
 
     return NextResponse.json({ ok: true })
   } catch (e) {

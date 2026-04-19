@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 
-export function ResumenCadetePanel({ onClose }) {
+export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
   const [resumenes, setResumenes] = useState([])
   const [cadetes, setCadetes] = useState([])
   const [traslados, setTraslados] = useState([])
@@ -32,14 +32,14 @@ export function ResumenCadetePanel({ onClose }) {
     try {
       const [resRes, cadRes] = await Promise.all([
         fetch("/api/resumenes-cadete"),
-        fetch("/api/admin/usuarios"),
+        fetch("/api/resumenes-cadete/cadetes"),
       ])
 
       const { resumenes: resData } = await resRes.json()
-      const { users } = await cadRes.json()
+      const { cadetes: cadData } = await cadRes.json()
 
       setResumenes(resData || [])
-      setCadetes((users || []).filter((u) => u.role === "cadete"))
+      setCadetes(cadData || [])
     } catch (e) {
       setError(e.message)
     } finally {
@@ -62,7 +62,10 @@ export function ResumenCadetePanel({ onClose }) {
 
   async function loadTraslados() {
     try {
-      const res = await fetch("/api/traslados")
+      const url = !isDueno && sucursalId
+        ? `/api/traslados?sucursal_id=${sucursalId}`
+        : "/api/traslados"
+      const res = await fetch(url)
       const data = await res.json()
       setTraslados(Array.isArray(data) ? data : data.traslados || [])
     } catch {

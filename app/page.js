@@ -496,7 +496,7 @@ export default function DashboardPage() {
         />
       )}
       {showResumenCadete && (
-        <ResumenCadetePanel onClose={() => setShowResumenCadete(false)} />
+        <ResumenCadetePanel onClose={() => setShowResumenCadete(false)} isDueno={isDueno} sucursalId={session?.user?.sucursal_id} />
       )}
     </div>
   )

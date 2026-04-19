@@ -26,7 +26,11 @@ export default function LoginPage() {
       setError("Usuario o contraseña incorrectos")
       setLoading(false)
     } else {
-      router.push("/")
+      // Fetch session to determine role-based redirect
+      const res = await fetch("/api/auth/session")
+      const session = await res.json()
+      const dest = session?.user?.role === "cadete" ? "/cadete" : "/"
+      router.push(dest)
       router.refresh()
     }
   }

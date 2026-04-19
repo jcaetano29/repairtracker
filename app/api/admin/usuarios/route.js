@@ -50,11 +50,11 @@ export async function POST(request) {
   if (!/^[a-zA-Z0-9_]{1,50}$/.test(username)) {
     return NextResponse.json({ error: "Username must be alphanumeric (max 50 chars)" }, { status: 400 })
   }
-  if (!["employee", "admin"].includes(role)) {
+  if (!["employee", "admin", "cadete"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
-  if (role === "employee" && !sucursal_id) {
-    return NextResponse.json({ error: "sucursal_id es requerido para employees" }, { status: 400 })
+  if ((role === "employee" || role === "cadete") && !sucursal_id) {
+    return NextResponse.json({ error: "sucursal_id es requerido para employees y cadetes" }, { status: 400 })
   }
   if (password.length < 6 || password.length > 128) {
     return NextResponse.json({ error: "Password must be 6-128 characters" }, { status: 400 })
@@ -64,7 +64,7 @@ export async function POST(request) {
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .insert({ username, password_hash, role, sucursal_id: role === "employee" ? sucursal_id : null })
+    .insert({ username, password_hash, role, sucursal_id: (role === "employee" || role === "cadete") ? sucursal_id : null })
 
   if (error) {
     if (error.code === "23505") {
@@ -139,13 +139,13 @@ export async function PATCH(request) {
   if (userId === session.user.id) {
     return NextResponse.json({ error: "No podés cambiar tu propio rol" }, { status: 400 })
   }
-  if (!["employee", "admin"].includes(role)) {
+  if (!["employee", "admin", "cadete"].includes(role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 })
   }
 
   const { error } = await getSupabaseAdmin()
     .from("usuarios")
-    .update({ role, sucursal_id: role === "employee" ? (sucursal_id ?? null) : null })
+    .update({ role, sucursal_id: (role === "employee" || role === "cadete") ? (sucursal_id ?? null) : null })
     .eq("id", userId)
 
   if (error) {

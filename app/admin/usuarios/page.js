@@ -153,11 +153,12 @@ export default function UsuariosPage() {
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
               >
                 <option value="employee">Employee</option>
+                <option value="cadete">Cadete</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
           </div>
-          {form.role === "employee" && (
+          {(form.role === "employee" || form.role === "cadete") && (
             <div className="mt-4">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                 Sucursal
@@ -226,11 +227,12 @@ export default function UsuariosPage() {
                       className="px-2 py-0.5 rounded-full text-xs font-semibold border-0 cursor-pointer focus:ring-2 focus:ring-indigo-500/20 bg-transparent"
                     >
                       <option value="employee">Employee</option>
+                      <option value="cadete">Cadete</option>
                       <option value="admin">Admin</option>
                     </select>
                   </td>
                   <td className="px-4 py-3 text-slate-600 text-xs">
-                    {u.role === "employee" ? (u.sucursales?.nombre ?? "—") : <span className="text-slate-400">Todas</span>}
+                    {(u.role === "employee" || u.role === "cadete") ? (u.sucursales?.nombre ?? "—") : <span className="text-slate-400">Todas</span>}
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs">
                     {new Date(u.created_at).toLocaleDateString("es-UY")}

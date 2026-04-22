@@ -9,6 +9,7 @@ export default function CadetePage() {
   const [resumenes, setResumenes] = useState([])
   const [loading, setLoading] = useState(true)
   const [checked, setChecked] = useState({})
+  const [nombreNegocio, setNombreNegocio] = useState("")
 
   // Load checked state from localStorage
   useEffect(() => {
@@ -58,6 +59,14 @@ export default function CadetePage() {
 
   useEffect(() => { loadResumenes() }, [loadResumenes])
 
+  // Load business name
+  useEffect(() => {
+    fetch("/api/configuracion")
+      .then((r) => r.json())
+      .then((d) => setNombreNegocio(d.configuracion?.nombre_negocio || ""))
+      .catch(() => {})
+  }, [])
+
   // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(loadResumenes, 30000)
@@ -69,7 +78,8 @@ export default function CadetePage() {
     const destination = item.traslado_tipo === "ida"
       ? item.sucursal_destino_nombre
       : item.sucursal_origen_nombre
-    const article = [item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")
+    const numOrden = item.numero_orden ? `#${String(item.numero_orden).padStart(4, "0")} — ` : ""
+    const article = numOrden + [item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")
     return { action, destination, article }
   }
 
@@ -81,7 +91,7 @@ export default function CadetePage() {
           <a href="/cadete" className="flex items-center gap-3">
             <span className="text-2xl">🚚</span>
             <div>
-              <h1 className="text-lg font-bold text-white leading-tight">RepairTrack</h1>
+              <h1 className="text-lg font-bold text-white leading-tight">{nombreNegocio || "RepairTrack"}</h1>
               <p className="text-sm text-slate-400">
                 {session?.user?.username ? `Cadete: ${session.user.username}` : "Cadete"}
               </p>
@@ -206,6 +216,9 @@ export default function CadetePage() {
                           <p className="text-xs text-slate-500 mt-0.5">
                             {action} <span className="font-semibold text-slate-700">{destination}</span>
                           </p>
+                          {item.orden_taller_direccion && (
+                            <p className="text-xs text-slate-400 mt-0.5">{item.orden_taller_direccion}</p>
+                          )}
                         </div>
                       </div>
                     </div>

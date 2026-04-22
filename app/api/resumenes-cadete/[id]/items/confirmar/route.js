@@ -38,13 +38,30 @@ export async function POST(request, { params }) {
     }
 
     if (item.tipo === "orden" && item.orden_id && item.subtipo) {
+      // Fetch current order state to validate transition
+      const { data: orden, error: ordenErr } = await getSupabaseClient()
+        .from("ordenes")
+        .select("estado")
+        .eq("id", item.orden_id)
+        .single()
+
+      if (ordenErr) throw ordenErr
+
+      const expectedStates = item.subtipo === "llevar_a_taller"
+        ? ["LISTO_PARA_ENVIO"]
+        : ["LISTO_EN_TALLER"]
+
+      if (!expectedStates.includes(orden.estado)) {
+        return NextResponse.json({
+          error: `No se puede confirmar: la orden esta en estado ${orden.estado}, se esperaba ${expectedStates.join(" o ")}`
+        }, { status: 409 })
+      }
+
       if (item.subtipo === "llevar_a_taller") {
-        // LISTO_PARA_ENVIO → EN_TALLER (cadete delivered to workshop)
         await cambiarEstado(item.orden_id, "EN_TALLER", {
           fecha_envio_taller: new Date().toISOString(),
         })
       } else if (item.subtipo === "retirar_de_taller") {
-        // LISTO_EN_TALLER → LISTO_PARA_RETIRO (cadete picked up from workshop)
         await cambiarEstado(item.orden_id, "LISTO_PARA_RETIRO", {
           fecha_listo: new Date().toISOString(),
         })

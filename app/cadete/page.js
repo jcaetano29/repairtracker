@@ -10,6 +10,7 @@ export default function CadetePage() {
   const [loading, setLoading] = useState(true)
   const [checked, setChecked] = useState({})
   const [nombreNegocio, setNombreNegocio] = useState("")
+  const [error, setError] = useState(null)
 
   // Load checked state from localStorage
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function CadetePage() {
       })
     } catch (e) {
       console.error("Error cargando resumenes:", e)
+      setError("Error al cargar tareas. Intente recargar la pagina.")
     } finally {
       setLoading(false)
     }
@@ -111,7 +113,18 @@ export default function CadetePage() {
           <div className="text-center py-20 text-slate-400">Cargando...</div>
         )}
 
-        {!loading && resumenes.length === 0 && (
+        {!loading && error && (
+          <div className="text-center py-20">
+            <span className="text-4xl block mb-3">⚠️</span>
+            <p className="text-red-600 text-sm font-medium">{error}</p>
+            <button
+              onClick={() => { setError(null); setLoading(true); loadResumenes() }}
+              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm"
+            >Reintentar</button>
+          </div>
+        )}
+
+        {!loading && !error && resumenes.length === 0 && (
           <div className="text-center py-20">
             <span className="text-4xl block mb-3">📋</span>
             <p className="text-slate-500 text-sm">No tenes tareas asignadas</p>
@@ -148,7 +161,7 @@ export default function CadetePage() {
                       onClick={() => toggleCheck(item.item_id)}
                       className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50/50 opacity-60"
+                          ? "border-green-300 bg-green-50"
                           : "border-slate-200"
                       }`}
                     >
@@ -190,7 +203,7 @@ export default function CadetePage() {
                       onClick={() => toggleCheck(item.item_id)}
                       className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50/50 opacity-60"
+                          ? "border-green-300 bg-green-50"
                           : "border-slate-200"
                       }`}
                     >
@@ -232,7 +245,7 @@ export default function CadetePage() {
                     onClick={() => toggleCheck(item.item_id)}
                     className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                       isChecked
-                        ? "border-green-300 bg-green-50/50 opacity-60"
+                        ? "border-green-300 bg-green-50"
                         : "border-slate-200"
                     }`}
                   >

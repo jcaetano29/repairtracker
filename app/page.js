@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [umbrales, setUmbrales] = useState({})
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
   const [showResumenCadete, setShowResumenCadete] = useState(false)
+  const [nombreNegocio, setNombreNegocio] = useState("")
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -84,12 +85,19 @@ export default function DashboardPage() {
   }, [isDueno])
 
   useEffect(() => {
+    fetch("/api/configuracion")
+      .then((r) => r.json())
+      .then((d) => setNombreNegocio(d.configuracion?.nombre_negocio || ""))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
     loadData()
   }, [loadData])
 
-  // Auto-refresh cada 5 segundos
+  // Auto-refresh cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(loadData, 5000)
+    const interval = setInterval(loadData, 30000)
     return () => clearInterval(interval)
   }, [loadData])
 
@@ -133,7 +141,7 @@ export default function DashboardPage() {
           <a href="/" className="flex items-center gap-3 cursor-pointer">
             <span className="text-2xl">⌚</span>
             <div>
-              <h1 className="text-lg font-bold text-white leading-tight">RepairTrack</h1>
+              <h1 className="text-lg font-bold text-white leading-tight">{nombreNegocio || "RepairTrack"}</h1>
               <p className="text-sm text-slate-500">Gestión de Reparaciones</p>
             </div>
           </a>

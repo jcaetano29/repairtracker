@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -10,6 +10,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [nombreNegocio, setNombreNegocio] = useState("")
+
+  useEffect(() => {
+    fetch("/api/configuracion")
+      .then((r) => r.json())
+      .then((d) => setNombreNegocio(d.configuracion?.nombre_negocio || ""))
+      .catch(() => {})
+  }, [])
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -40,7 +48,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
-          <h1 className="text-xl font-bold text-slate-900 mt-2">RepairTrack</h1>
+          <h1 className="text-xl font-bold text-slate-900 mt-2">{nombreNegocio || "RepairTrack"}</h1>
           <p className="text-sm text-slate-500">Iniciá sesión para continuar</p>
         </div>
 

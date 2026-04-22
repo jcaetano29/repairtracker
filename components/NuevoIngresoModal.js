@@ -533,6 +533,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   checked={form.en_garantia}
                   onChange={(e) => {
                     const checked = e.target.checked;
+                    if (checked && form.monto_presupuesto) {
+                      if (!confirm("Se borrara el presupuesto ingresado. ¿Continuar?")) return;
+                    }
                     setForm({
                       ...form,
                       en_garantia: checked,

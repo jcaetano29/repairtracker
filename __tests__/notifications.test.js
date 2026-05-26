@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { interpolate } from '@/lib/notifications'
 
-// Mocks para sendEmail y sendWhatsApp
+// Mocks
 const mockSendEmail = vi.fn()
 const mockSendWhatsApp = vi.fn()
 
@@ -12,18 +12,22 @@ vi.mock('@/lib/notifications/whatsapp', () => ({
   sendWhatsApp: (...args) => mockSendWhatsApp(...args),
 }))
 
-// Mock Supabase admin para devolver plantillas
+// Mock Supabase admin
 const mockEmailRow = { asunto: 'Asunto {{numeroOrden}}', cuerpo: 'Hola {{clienteNombre}}' }
-const mockWaRow = { mensaje: 'WA {{clienteNombre}}' }
+const mockMetaRow = {
+  template_name: 'presupuesto_listo',
+  language_code: 'es_AR',
+  param_keys: ['clienteNombre', 'numeroOrden', 'tipoArticulo', 'moneda', 'monto'],
+}
 
 vi.mock('@/lib/supabase-admin', () => ({
   getSupabaseAdmin: () => ({
     from: (table) => ({
-      select: () => ({
+      select: (cols) => ({
         eq: () => ({
           single: () => {
             if (table === 'plantillas_email') return Promise.resolve({ data: mockEmailRow, error: null })
-            if (table === 'plantillas_whatsapp') return Promise.resolve({ data: mockWaRow, error: null })
+            if (table === 'plantillas_whatsapp_meta') return Promise.resolve({ data: mockMetaRow, error: null })
             return Promise.resolve({ data: null, error: null })
           },
         }),
@@ -55,7 +59,7 @@ describe('sendNotification', () => {
     mockSendEmail.mockReset()
     mockSendWhatsApp.mockReset()
     mockSendEmail.mockResolvedValue()
-    mockSendWhatsApp.mockResolvedValue()
+    mockSendWhatsApp.mockResolvedValue('wamid.abc123')
   })
 
   it('envía por email si hay clienteEmail', async () => {
@@ -72,15 +76,21 @@ describe('sendNotification', () => {
     })
   })
 
-  it('envía por WhatsApp si hay clienteTelefono', async () => {
+  it('envía por WhatsApp con template y parámetros posicionales', async () => {
     const { sendNotification } = await import('@/lib/notifications')
     await sendNotification('PRESUPUESTO', {
       clienteTelefono: '099123456',
       clienteNombre: 'Ana',
+      numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
     })
     expect(mockSendWhatsApp).toHaveBeenCalledWith({
       to: '099123456',
-      body: 'WA Ana',
+      templateName: 'presupuesto_listo',
+      languageCode: 'es_AR',
+      parameters: ['Ana', '123', 'Reloj', 'UYU', '3500'],
     })
   })
 
@@ -91,6 +101,9 @@ describe('sendNotification', () => {
       clienteTelefono: '099',
       clienteNombre: 'Ana',
       numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
     })
     expect(mockSendEmail).toHaveBeenCalled()
     expect(mockSendWhatsApp).toHaveBeenCalled()
@@ -112,6 +125,9 @@ describe('sendNotification', () => {
       clienteTelefono: '099',
       clienteNombre: 'Ana',
       numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
     })
     expect(mockSendWhatsApp).toHaveBeenCalled()
     err.mockRestore()

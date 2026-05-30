@@ -6,7 +6,7 @@ export const metadata = {
 
 const ULTIMA_ACTUALIZACION = "30 de mayo de 2026"
 const RESPONSABLE = "RepairTracker"
-const CONTACTO_EMAIL = "joacocaetano@gmail.com"
+const CONTACTO_EMAIL = "contacto@rivierajoyas.com.uy"
 
 export default function PrivacyPolicyPage() {
   return (

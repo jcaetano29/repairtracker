@@ -172,7 +172,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto), moneda, montoTaller ? parseFloat(montoTaller) : null);
-      if (notificarPresupuesto && orden.cliente_email) {
+      if (notificarPresupuesto && (orden.cliente_email || orden.cliente_telefono)) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
         } catch (e) {
@@ -239,7 +239,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       // Only notify if the order doesn't need a return transfer
       // (if it does, notification will be sent when the return transfer is received)
       const needsRetorno = orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id;
-      if (!needsRetorno && notificarRetiro && orden.cliente_email) {
+      if (!needsRetorno && notificarRetiro && (orden.cliente_email || orden.cliente_telefono)) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {
@@ -523,7 +523,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   />
                 </div>
               </div>
-              {orden.cliente_email && (
+              {(orden.cliente_email || orden.cliente_telefono) && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -532,7 +532,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por email</span>
+                    <span className="font-semibold">Notificar al cliente por WhatsApp{orden.cliente_email ? " y email" : ""}</span>
                     {notificarPresupuesto && monto && (
                       <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
                         {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) })}
@@ -588,7 +588,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showRetiro && (
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
               <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
-              {orden.cliente_email && (
+              {(orden.cliente_email || orden.cliente_telefono) && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -597,7 +597,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por email</span>
+                    <span className="font-semibold">Notificar al cliente por WhatsApp{orden.cliente_email ? " y email" : ""}</span>
                     {notificarRetiro && (
                       <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
                         {buildPreview("LISTO_PARA_RETIRO")}

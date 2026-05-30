@@ -83,8 +83,7 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc pl-6 space-y-1">
               <li>Gestionar internamente las órdenes de reparación y su trazabilidad.</li>
               <li>
-                Notificar al cliente sobre el avance de su reparación a través de WhatsApp, correo
-                electrónico u otros canales habilitados.
+                Notificar al cliente sobre el avance de su reparación a través de WhatsApp.
               </li>
               <li>Coordinar traslados entre sucursales y talleres externos.</li>
               <li>Generar reportes operativos y estadísticas internas del negocio.</li>
@@ -118,9 +117,6 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>
                 <strong>Vercel</strong> — proveedor de hosting de la Aplicación.
-              </li>
-              <li>
-                <strong>Resend</strong> — proveedor de envío de correos electrónicos transaccionales.
               </li>
               <li>
                 <strong>Talleres externos</strong> contratados por el comercio, exclusivamente con
@@ -183,9 +179,9 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-2">
             <h3 className="text-lg font-bold text-slate-900">10. Transferencias internacionales</h3>
             <p>
-              Algunos proveedores (Meta, Supabase, Vercel, Resend) pueden procesar datos fuera del
-              país del comercio. En todos los casos se trata de proveedores con políticas de
-              cumplimiento internacional (GDPR, LGPD, entre otras).
+              Algunos proveedores (Meta, Supabase, Vercel) pueden procesar datos fuera del país del
+              comercio. En todos los casos se trata de proveedores con políticas de cumplimiento
+              internacional (GDPR, LGPD, entre otras).
             </p>
           </section>
 

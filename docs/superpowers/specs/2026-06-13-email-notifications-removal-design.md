@@ -31,7 +31,7 @@ Como efecto colateral, el teléfono del cliente pasa a ser **requerido** al crea
 
 ### Archivos a modificar
 
-- `lib/notifications/index.js` — eliminar `sendViaEmail`, eliminar import de `sendEmail`, eliminar `Promise.allSettled`. `sendNotification` queda llamando directo a `sendViaWhatsApp`. La función `interpolate()` se mantiene (la usa la lógica de WhatsApp si interpolara, o se puede borrar si no se usa — verificar en plan).
+- `lib/notifications/index.js` — eliminar `sendViaEmail`, eliminar import de `sendEmail`, eliminar `Promise.allSettled`. `sendNotification` queda llamando directo a `sendViaWhatsApp`. Eliminar también `export function interpolate()` — solo la usaba `sendViaEmail`; el path de WhatsApp no interpola strings (manda parámetros posicionales a Meta).
 - `app/api/notify/route.js` — sin cambios de firma. Sigue aceptando `data.clienteEmail` en el body sin romper, pero `sendNotification` lo ignora.
 - `app/api/cron/recordatorios/route.js` — eliminar el path de email (si lo tiene). La inserción a `notificaciones_enviadas` con `canal='email'` se borra.
 - `app/api/traslados/route.js` — sacar el campo `clienteEmail` del payload que se pasa a `sendNotification`.

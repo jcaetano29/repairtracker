@@ -24,7 +24,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [notificarPresupuesto, setNotificarPresupuesto] = useState(false);
   const [showRetiro, setShowRetiro] = useState(false);
   const [notificarRetiro, setNotificarRetiro] = useState(true);
-  const [plantillas, setPlantillas] = useState({});
   const [trasladosHistorial, setTrasladosHistorial] = useState([]);
   const [sucursales, setSucursalesState] = useState([]);
   const [editingRetiro, setEditingRetiro] = useState(false);
@@ -60,36 +59,19 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [h, t, pRes, trasladosData, sucursalesRes] = await Promise.all([
+      const [h, t, trasladosData, sucursalesRes] = await Promise.all([
         getHistorial(orden.id),
         getTalleres(),
-        fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
         getTrasladosByOrden(orden.id),
         getSucursales(),
       ]);
       setHistorial(h);
       setTalleresState(t);
-      const map = {};
-      (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
-      setPlantillas(map);
       setTrasladosHistorial(trasladosData);
       setSucursalesState(sucursalesRes || []);
     } catch (e) {
       console.error(e);
     }
-  }
-
-  function buildPreview(tipo, extras = {}) {
-    const template = plantillas[tipo] || "";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-    const vars = {
-      clienteNombre: orden.cliente_nombre,
-      numeroOrden: formatNumeroOrden(orden.numero_orden),
-      tipoArticulo: orden.tipo_articulo,
-      trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
-      ...extras,
-    };
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
   }
 
   async function triggerNotify(type, extras = {}) {
@@ -101,7 +83,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         type,
         data: {
           clienteTelefono: orden.cliente_telefono,
-          clienteEmail: orden.cliente_email,
           clienteNombre: orden.cliente_nombre,
           numeroOrden: formatNumeroOrden(orden.numero_orden),
           tipoArticulo: orden.tipo_articulo,
@@ -122,7 +103,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       return;
     }
     // Si pasa a ESPERANDO_APROBACION, mostrar panel de presupuesto
-    // (siempre mostrar para permitir notificar por email, incluso si ya hay monto)
+    // (siempre mostrar para permitir notificar por WhatsApp, incluso si ya hay monto)
     if (nuevoEstado === "ESPERANDO_APROBACION") {
       if (orden.monto_presupuesto) setMonto(String(orden.monto_presupuesto));
       if (orden.monto_presupuesto_taller) setMontoTaller(String(orden.monto_presupuesto_taller));
@@ -172,7 +153,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     try {
       await registrarPresupuesto(orden.id, parseFloat(monto), moneda, montoTaller ? parseFloat(montoTaller) : null);
-      if (notificarPresupuesto && (orden.cliente_email || orden.cliente_telefono)) {
+      if (notificarPresupuesto && orden.cliente_telefono) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
         } catch (e) {
@@ -239,7 +220,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       // Only notify if the order doesn't need a return transfer
       // (if it does, notification will be sent when the return transfer is received)
       const needsRetorno = orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id;
-      if (!needsRetorno && notificarRetiro && (orden.cliente_email || orden.cliente_telefono)) {
+      if (!needsRetorno && notificarRetiro && orden.cliente_telefono) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {
@@ -523,7 +504,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   />
                 </div>
               </div>
-              {(orden.cliente_email || orden.cliente_telefono) && (
+              {orden.cliente_telefono && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -532,12 +513,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp{orden.cliente_email ? " y email" : ""}</span>
-                    {notificarPresupuesto && monto && (
-                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
-                        {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) })}
-                      </div>
-                    )}
+                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
                   </div>
                 </label>
               )}
@@ -588,7 +564,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showRetiro && (
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
               <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
-              {(orden.cliente_email || orden.cliente_telefono) && (
+              {orden.cliente_telefono && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -597,12 +573,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     className="mt-0.5 rounded border-slate-300"
                   />
                   <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp{orden.cliente_email ? " y email" : ""}</span>
-                    {notificarRetiro && (
-                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
-                        {buildPreview("LISTO_PARA_RETIRO")}
-                      </div>
-                    )}
+                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
                   </div>
                 </label>
               )}

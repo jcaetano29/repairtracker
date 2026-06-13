@@ -80,10 +80,10 @@ export async function PATCH(request) {
           const { formatNumeroOrden } = await import("@/lib/constants");
           const { sendNotification } = await import("@/lib/notifications");
           const orden = await getOrden(traslado.orden_id);
-          if (orden?.cliente_email) {
+          if (orden?.cliente_telefono) {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
             await sendNotification("LISTO_PARA_RETIRO", {
-              clienteEmail: orden.cliente_email,
+              clienteTelefono: orden.cliente_telefono,
               clienteNombre: orden.cliente_nombre,
               numeroOrden: formatNumeroOrden(orden.numero_orden),
               tipoArticulo: orden.tipo_articulo,

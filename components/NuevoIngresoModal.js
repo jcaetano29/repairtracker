@@ -95,7 +95,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
-    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.email.trim() || !nuevoCliente.documento.trim()) return;
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.documento.trim()) return;
     setLoading(true);
     try {
       const cliente = await crearCliente(nuevoCliente);
@@ -316,7 +316,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-                  Email *
+                  Email
                 </label>
                 <div className="relative">
                   <input
@@ -350,7 +350,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <button
                 onClick={handleCrearCliente}
-                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || !nuevoCliente.documento || loading}
+                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.documento || loading}
                 className="w-full py-3.5 bg-indigo-500 text-white rounded-lg font-semibold text-base hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creando..." : "Crear cliente y continuar →"}
@@ -670,7 +670,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     ))}
                   </select>
                   <p className="text-xs text-slate-400 mt-1">
-                    Si seleccionás un servicio, el cliente recibirá un recordatorio por email cuando sea hora de renovarlo.
+                    Si seleccionás un servicio, el cliente recibirá un recordatorio por WhatsApp cuando sea hora de renovarlo.
                   </p>
                 </div>
               )}

@@ -26,7 +26,6 @@ const ESTADO_ORDER = [
  * Users can edit leve/grave values and save them to the API.
  *
  * @param {Object} configuracion - Configuration object mapping clave to {leve, grave}
- * @param {Array} plantillas - Array of plantillas from server
  */
 export default function ConfiguracionClient({ configuracion }) {
   const [nombreNegocio, setNombreNegocio] = useState(configuracion.nombre_negocio || "")

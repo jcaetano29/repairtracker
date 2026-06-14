@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import { COUNTRIES, parsePhone } from "@/lib/countries"
-import { sanitizePhone } from "@/lib/utils"
 
 function ChevronDown({ className }) {
   return (
@@ -74,15 +73,13 @@ export default function PhoneInput({
   function handleCountrySelect(newCountry) {
     setCountry(newCountry)
     setOpen(false)
-    // Emit even when number is empty so the parent sees the new prefix.
-    // If you prefer "no number = no value", change to: number === "" ? "" : newCountry.dial + number
-    emit(newCountry.dial + number)
+    emit(number === "" ? "" : newCountry.dial + number)
   }
 
   function handleNumberChange(e) {
-    const cleaned = sanitizePhone(e.target.value)
+    // Digits only — the dial prefix lives in the selector. Allowing "+" here would produce values like "598+99".
+    const cleaned = e.target.value.replace(/\D/g, "")
     setNumber(cleaned)
-    // Clearing the input emits "" so the parent matches the previous behavior of an empty <input>.
     emit(cleaned === "" ? "" : country.dial + cleaned)
   }
 

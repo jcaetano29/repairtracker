@@ -7,7 +7,6 @@ import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursal
 import { getCentrosReparacion } from "@/lib/traslados";
 import PhoneInput from "@/components/PhoneInput";
 import { generarTicketIngreso } from "@/lib/ticket";
-import { getConfiguracion } from "@/lib/data/configuracion";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const { data: session } = useSession()
@@ -155,9 +154,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
         fecha_entrega_estimada: form.fecha_entrega_estimada || null,
         forzar_traslado_a: trasladar ? centroDestino?.id : null,
       });
-      // Generate intake ticket PDF
+      // Generate intake ticket PDF. Reads go through the API route because the
+      // configuracion table has admin-only RLS on SELECT.
       try {
-        const config = await getConfiguracion()
+        const config = await fetch("/api/configuracion")
+          .then((r) => r.json())
+          .then((d) => d.configuracion || {})
+          .catch(() => ({}))
         generarTicketIngreso(
           { ...orden, fecha_entrega_estimada: form.fecha_entrega_estimada || null },
           clienteSeleccionado,

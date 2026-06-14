@@ -60,7 +60,12 @@ export default function ReportesPage() {
       .then(d => setSucursales(d.sucursales || []))
       .catch(() => {});
 
-    getReportesStats({ sucursal_id: filtroSucursal })
+    // configuracion has admin-only RLS on SELECT → reads must go through the API.
+    fetch("/api/configuracion")
+      .then((r) => r.json())
+      .then((d) => d.configuracion || {})
+      .catch(() => ({}))
+      .then((umbrales) => getReportesStats(umbrales, { sucursal_id: filtroSucursal }))
       .then(setStats)
       .catch(() => setError("Error cargando reportes"))
       .finally(() => setLoading(false));

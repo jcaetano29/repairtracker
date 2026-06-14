@@ -14,7 +14,6 @@ import { ResumenCadetePanel } from "@/components/ResumenCadetePanel"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
-import { getConfiguracion } from "@/lib/data/configuracion"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -50,8 +49,12 @@ export default function DashboardPage() {
     try {
       const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
 
-      // Load configuracion first so we can pass it to getStats
-      const configuracionData = await getConfiguracion()
+      // Load configuracion first so we can pass it to getStats. Reads go through
+      // the API route because the configuracion table has admin-only RLS on SELECT.
+      const configuracionData = await fetch("/api/configuracion")
+        .then((r) => r.json())
+        .then((d) => d.configuracion || {})
+        .catch(() => ({}))
 
       const [{ data: ordenesData, count: ordenesCount }, statsData, talleresData] = await Promise.all([
         getOrdenes({
@@ -71,6 +74,7 @@ export default function DashboardPage() {
       setStatsState(statsData)
       setTalleresState(talleresData)
       setUmbrales(configuracionData)
+      setNombreNegocio(configuracionData.nombre_negocio || "")
     } catch (e) {
       console.error("Error cargando datos:", e)
     } finally {
@@ -83,13 +87,6 @@ export default function DashboardPage() {
       getSucursales().then(setSucursales).catch(() => {})
     }
   }, [isDueno])
-
-  useEffect(() => {
-    fetch("/api/configuracion")
-      .then((r) => r.json())
-      .then((d) => setNombreNegocio(d.configuracion?.nombre_negocio || ""))
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     loadData()

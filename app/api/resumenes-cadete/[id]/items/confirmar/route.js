@@ -2,7 +2,7 @@
 // Confirms a cadete item: updates order state and removes item from resumen
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import { getSupabaseClient } from "@/lib/supabase-client"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { cambiarEstado } from "@/lib/data"
 import { deleteItem, deactivateIfEmpty } from "@/lib/cadete"
 
@@ -26,7 +26,7 @@ export async function POST(request, { params }) {
 
   try {
     // Fetch the item to determine what state change to make
-    const { data: item, error: fetchErr } = await getSupabaseClient()
+    const { data: item, error: fetchErr } = await getSupabaseAdmin()
       .from("items_resumen_cadete")
       .select("id, tipo, subtipo, orden_id, traslado_id")
       .eq("id", item_id)
@@ -39,7 +39,7 @@ export async function POST(request, { params }) {
 
     if (item.tipo === "orden" && item.orden_id && item.subtipo) {
       // Fetch current order state to validate transition
-      const { data: orden, error: ordenErr } = await getSupabaseClient()
+      const { data: orden, error: ordenErr } = await getSupabaseAdmin()
         .from("ordenes")
         .select("estado")
         .eq("id", item.orden_id)

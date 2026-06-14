@@ -150,13 +150,16 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function handlePresupuesto() {
-    if (!monto || parseFloat(monto) <= 0) return;
+    const montoNum = parseFloat(monto);
+    if (!Number.isFinite(montoNum) || montoNum <= 0) return;
+    const montoTallerNum = parseFloat(montoTaller);
+    const montoTallerSafe = Number.isFinite(montoTallerNum) && montoTallerNum > 0 ? montoTallerNum : null;
     setLoading(true);
     try {
-      await registrarPresupuesto(orden.id, parseFloat(monto), moneda, montoTaller ? parseFloat(montoTaller) : null);
+      await registrarPresupuesto(orden.id, montoNum, moneda, montoTallerSafe);
       if (notificarPresupuesto && orden.cliente_telefono) {
         try {
-          await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
+          await triggerNotify("PRESUPUESTO", { monto: montoNum.toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
         } catch (e) {
           console.error("[Notify] Error al enviar presupuesto:", e);
         }
@@ -238,9 +241,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function handleEntrega() {
+    const montoNum = parseFloat(monto);
+    const montoFinal = Number.isFinite(montoNum) && montoNum > 0 ? montoNum : orden.monto_presupuesto;
     setLoading(true);
     try {
-      await entregarAlCliente(orden.id, monto ? parseFloat(monto) : orden.monto_presupuesto, metodoPago);
+      await entregarAlCliente(orden.id, montoFinal, metodoPago);
       onUpdated();
       onClose();
     } catch (e) {

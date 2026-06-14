@@ -17,7 +17,7 @@ describe('sendWhatsApp', () => {
   it('sends a template message with correct payload', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ messages: [{ id: 'wamid.abc123' }] }),
+      text: () => Promise.resolve(JSON.stringify({ messages: [{ id: 'wamid.abc123' }] })),
     })
     vi.stubGlobal('fetch', mockFetch)
 
@@ -75,7 +75,7 @@ describe('sendWhatsApp', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
-      json: () => Promise.resolve({ error: { code: 100 } }),
+      text: () => Promise.resolve(JSON.stringify({ error: { code: 100 } })),
     }))
     const { sendWhatsApp } = await import('@/lib/notifications/whatsapp')
     await expect(

@@ -274,18 +274,16 @@ describe("POST /api/configuracion", () => {
 
     getSupabaseAdmin.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: {
-                  clave: "umbral_ingresado",
-                  valor: { leve: 0, grave: 0 },
-                  actualizado_en: "2026-04-10T00:00:00Z",
-                  actualizado_por: "user-123",
-                },
-                error: null,
-              }),
+        upsert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: {
+                clave: "umbral_ingresado",
+                valor: { leve: 0, grave: 0 },
+                actualizado_en: "2026-04-10T00:00:00Z",
+                actualizado_por: "user-123",
+              },
+              error: null,
             }),
           }),
         }),
@@ -336,24 +334,22 @@ describe("POST /api/configuracion", () => {
       user: { role: "admin", id: "user-123" },
     })
 
-    const mockUpdateFn = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: {
-              clave: "umbral_ingresado",
-              valor: { leve: 2, grave: 5 },
-              actualizado_en: "2026-04-10T12:00:00Z",
-              actualizado_por: "user-123",
-            },
-            error: null,
-          }),
+    const mockUpsertFn = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: {
+            clave: "umbral_ingresado",
+            valor: { leve: 2, grave: 5 },
+            actualizado_en: "2026-04-10T12:00:00Z",
+            actualizado_por: "user-123",
+          },
+          error: null,
         }),
       }),
     })
 
     getSupabaseAdmin.mockReturnValue({
-      from: vi.fn().mockReturnValue({ update: mockUpdateFn }),
+      from: vi.fn().mockReturnValue({ upsert: mockUpsertFn }),
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -367,12 +363,13 @@ describe("POST /api/configuracion", () => {
     const response = await POST(request)
     const json = await response.json()
 
-    // Verify the update was called with actualizado_en
-    expect(mockUpdateFn).toHaveBeenCalledWith(
+    // Verify the upsert was called with actualizado_en
+    expect(mockUpsertFn).toHaveBeenCalledWith(
       expect.objectContaining({
         valor: { leve: 2, grave: 5 },
         actualizado_en: expect.any(String),
-      })
+      }),
+      expect.any(Object)
     )
 
     expect(response.status).toBe(200)
@@ -388,24 +385,22 @@ describe("POST /api/configuracion", () => {
       user: { role: "admin", id: "user-456" },
     })
 
-    const mockUpdateFn = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: {
-              clave: "umbral_ingresado",
-              valor: { leve: 3, grave: 6 },
-              actualizado_en: "2026-04-10T12:00:00Z",
-              actualizado_por: "user-456",
-            },
-            error: null,
-          }),
+    const mockUpsertFn = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: {
+            clave: "umbral_ingresado",
+            valor: { leve: 3, grave: 6 },
+            actualizado_en: "2026-04-10T12:00:00Z",
+            actualizado_por: "user-456",
+          },
+          error: null,
         }),
       }),
     })
 
     getSupabaseAdmin.mockReturnValue({
-      from: vi.fn().mockReturnValue({ update: mockUpdateFn }),
+      from: vi.fn().mockReturnValue({ upsert: mockUpsertFn }),
     })
 
     const request = new Request("http://localhost/api/configuracion", {
@@ -419,11 +414,12 @@ describe("POST /api/configuracion", () => {
     const response = await POST(request)
     const json = await response.json()
 
-    // Verify the update was called with actualizado_por
-    expect(mockUpdateFn).toHaveBeenCalledWith(
+    // Verify the upsert was called with actualizado_por
+    expect(mockUpsertFn).toHaveBeenCalledWith(
       expect.objectContaining({
         actualizado_por: "user-456",
-      })
+      }),
+      expect.any(Object)
     )
 
     expect(json.data.actualizado_por).toBe("user-456")
@@ -439,18 +435,16 @@ describe("POST /api/configuracion", () => {
 
     getSupabaseAdmin.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: {
-                  clave: "umbral_ingresado",
-                  valor: { leve: 2, grave: 5 },
-                  actualizado_en: "2026-04-10T00:00:00Z",
-                  actualizado_por: "user-123",
-                },
-                error: null,
-              }),
+        upsert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: {
+                clave: "umbral_ingresado",
+                valor: { leve: 2, grave: 5 },
+                actualizado_en: "2026-04-10T00:00:00Z",
+                actualizado_por: "user-123",
+              },
+              error: null,
             }),
           }),
         }),
@@ -507,13 +501,11 @@ describe("POST /api/configuracion", () => {
 
     getSupabaseAdmin.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: null,
-                error: { message: "Database error" },
-              }),
+        upsert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: null,
+              error: { message: "Database error" },
             }),
           }),
         }),

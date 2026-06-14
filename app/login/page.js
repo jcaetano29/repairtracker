@@ -24,22 +24,33 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const result = await signIn("credentials", {
-      username,
-      password,
-      redirect: false,
-    })
+    try {
+      const result = await signIn("credentials", {
+        username,
+        password,
+        redirect: false,
+      })
 
-    if (result?.error) {
-      setError("Usuario o contraseña incorrectos")
-      setLoading(false)
-    } else {
+      if (result?.error) {
+        setError("Usuario o contraseña incorrectos")
+        setLoading(false)
+        return
+      }
+
       // Fetch session to determine role-based redirect
-      const res = await fetch("/api/auth/session")
-      const session = await res.json()
+      let session = null
+      try {
+        const res = await fetch("/api/auth/session")
+        if (res.ok) session = await res.json()
+      } catch {
+        // Network error reading session — fall back to default redirect.
+      }
       const dest = session?.user?.role === "cadete" ? "/cadete" : "/"
       router.push(dest)
       router.refresh()
+    } catch (err) {
+      setError(err?.message || "Error al iniciar sesión")
+      setLoading(false)
     }
   }
 

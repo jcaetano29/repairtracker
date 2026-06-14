@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getTraslados, despacharTraslado, recibirTraslado } from "@/lib/traslados";
-import { getSupabaseClient } from "@/lib/supabase-client";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET(request) {
   const session = await auth();
@@ -47,7 +47,7 @@ export async function PATCH(request) {
     }
 
     // Fetch traslado to validate permissions
-    const { data: trasladoData, error: fetchErr } = await getSupabaseClient()
+    const { data: trasladoData, error: fetchErr } = await getSupabaseAdmin()
       .from("traslados")
       .select("sucursal_origen, sucursal_destino")
       .eq("id", traslado_id)

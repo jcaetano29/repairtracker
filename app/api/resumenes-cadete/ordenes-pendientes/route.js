@@ -1,7 +1,7 @@
 // app/api/resumenes-cadete/ordenes-pendientes/route.js
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import { getSupabaseClient } from "@/lib/supabase-client"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 export async function GET() {
   const session = await auth()
@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const supabase = getSupabaseClient()
+  const supabase = getSupabaseAdmin()
   const isAdmin = session.user.role === "admin"
   const sucursalId = session.user.sucursal_id
 

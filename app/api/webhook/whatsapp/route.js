@@ -26,6 +26,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json()
+    console.log("[Webhook WhatsApp] Payload recibido:", JSON.stringify(body))
     const entries = body.entry ?? []
 
     for (const entry of entries) {
@@ -33,6 +34,7 @@ export async function POST(request) {
       for (const change of changes) {
         const statuses = change.value?.statuses ?? []
         for (const status of statuses) {
+          console.log("[Webhook WhatsApp] Status:", JSON.stringify(status))
           await processStatus(status)
         }
       }

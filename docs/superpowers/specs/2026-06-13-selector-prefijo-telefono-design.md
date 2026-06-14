@@ -128,7 +128,7 @@ Esta estrategia cubre los casos:
 ```
 
 - Wrapper exterior: `flex border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500` (coincide con el estilo de inputs del proyecto).
-- Botón del selector: `<button type="button">` con `flex items-center gap-2 px-3 border-r border-slate-200`. Contiene la bandera SVG (`className="w-5 h-auto rounded-sm"`), el `+dial` y un `<ChevronDown size={14} />` de `lucide-react`.
+- Botón del selector: `<button type="button">` con `flex items-center gap-2 px-3 border-r border-slate-200`. Contiene la bandera SVG (`className="w-5 h-auto rounded-sm"`), el `+dial` y un chevron SVG inline (`<svg viewBox="0 0 12 12" className="w-3 h-3 text-slate-400">` con un path `M2 4 L6 8 L10 4`). No se introduce `lucide-react` (no está en el repo).
 - Input numérico: `<input type="tel" inputMode="numeric">` ocupa el resto, sin borde propio (`flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent`).
 - El botón es `aria-haspopup="listbox"` y `aria-expanded={open}`, con `aria-label="Seleccionar país"`.
 

@@ -7,6 +7,7 @@ import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, 
 import { formatMonto, monedaPrefix } from "@/lib/currency";
 import { getTrasladosByOrden } from "@/lib/traslados";
 import { TrasladosBadge } from "./TrasladosBadge";
+import { renderPlantilla } from "@/lib/plantillas-preview";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
@@ -505,17 +506,30 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 </div>
               </div>
               {orden.cliente_telefono && (
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificarPresupuesto}
-                    onChange={(e) => setNotificarPresupuesto(e.target.checked)}
-                    className="mt-0.5 rounded border-slate-300"
-                  />
-                  <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
-                  </div>
-                </label>
+                <>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notificarPresupuesto}
+                      onChange={(e) => setNotificarPresupuesto(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300"
+                    />
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    </div>
+                  </label>
+                  {notificarPresupuesto && (
+                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                      {renderPlantilla("PRESUPUESTO", {
+                        clienteNombre: orden.cliente_nombre,
+                        numeroOrden: formatNumeroOrden(orden.numero_orden),
+                        tipoArticulo: orden.tipo_articulo,
+                        moneda: monedaPrefix(moneda),
+                        monto: monto ? parseFloat(monto).toLocaleString("es-UY") : "",
+                      })}
+                    </pre>
+                  )}
+                </>
               )}
               <div className="flex gap-2">
                 <button onClick={handlePresupuesto} disabled={!monto || loading}
@@ -565,17 +579,31 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
               <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
               {orden.cliente_telefono && (
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificarRetiro}
-                    onChange={(e) => setNotificarRetiro(e.target.checked)}
-                    className="mt-0.5 rounded border-slate-300"
-                  />
-                  <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por WhatsApp</span>
-                  </div>
-                </label>
+                <>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notificarRetiro}
+                      onChange={(e) => setNotificarRetiro(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300"
+                    />
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    </div>
+                  </label>
+                  {notificarRetiro && (
+                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                      {renderPlantilla("LISTO_PARA_RETIRO", {
+                        clienteNombre: orden.cliente_nombre,
+                        numeroOrden: formatNumeroOrden(orden.numero_orden),
+                        tipoArticulo: orden.tipo_articulo,
+                        trackingUrl: orden.tracking_token
+                          ? `${process.env.NEXT_PUBLIC_APP_URL || ""}/seguimiento/${orden.tracking_token}`
+                          : "",
+                      })}
+                    </pre>
+                  )}
+                </>
               )}
               <div className="flex gap-2">
                 <button onClick={handleRetiro} disabled={loading}

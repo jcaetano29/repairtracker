@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
 import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
 import { getCentrosReparacion } from "@/lib/traslados";
-import { sanitizePhone } from "@/lib/utils";
+import PhoneInput from "@/components/PhoneInput";
 import { generarTicketIngreso } from "@/lib/ticket";
 import { getConfiguracion } from "@/lib/data/configuracion";
 
@@ -306,12 +306,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Teléfono *
                 </label>
-                <input
-                  type="tel"
-                  placeholder="099 123 456"
+                <PhoneInput
                   value={nuevoCliente.telefono}
-                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: sanitizePhone(e.target.value) })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  onChange={(v) => setNuevoCliente({ ...nuevoCliente, telefono: v })}
+                  placeholder="99 123 456"
+                  required
                 />
               </div>
               <div>

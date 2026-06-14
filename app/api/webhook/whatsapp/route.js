@@ -60,7 +60,9 @@ async function processStatus(status) {
   const updateData = { ...mapping }
 
   if (status.status === "failed") {
-    updateData.error = status.errors?.[0]?.title ?? "Unknown error"
+    const err = status.errors?.[0]
+    updateData.error = err?.title ?? "Unknown error"
+    console.error(`[WHATSAPP_DELIVERY_FAILED] code=${err?.code} title="${err?.title}" message="${err?.message}" details="${err?.error_data?.details}"`)
   }
 
   const { error } = await getSupabaseAdmin()

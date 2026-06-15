@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getTiposServicio, crearTipoServicio, updateTipoServicio, deleteTipoServicio } from "@/lib/data";
+import { getTiposServicio } from "@/lib/data";
+
+// tipos_servicio writes are admin-only at the RLS level — they go through
+// /api/admin/tipos-servicio.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
 
 export default function TiposServicioPage() {
   const [tipos, setTipos] = useState([]);
@@ -27,9 +36,17 @@ export default function TiposServicioPage() {
     setError(null);
     try {
       if (editingId) {
-        await updateTipoServicio(editingId, form);
+        await jsonFetch(`/api/admin/tipos-servicio/${editingId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
       } else {
-        await crearTipoServicio(form);
+        await jsonFetch("/api/admin/tipos-servicio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
       }
       setShowNew(false);
       setEditingId(null);
@@ -43,7 +60,7 @@ export default function TiposServicioPage() {
   async function handleDelete(id) {
     if (!confirm("¿Eliminar este tipo de servicio?")) return;
     try {
-      await deleteTipoServicio(id);
+      await jsonFetch(`/api/admin/tipos-servicio/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
       setError(e.message);

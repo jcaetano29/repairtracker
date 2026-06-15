@@ -3,8 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
-import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
+import { getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
 import { getCentrosReparacion } from "@/lib/traslados";
+
+// clientes/ordenes are admin-only — writes/searches go via /api.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
 import PhoneInput from "@/components/PhoneInput";
 import { generarTicketIngreso } from "@/lib/ticket";
 
@@ -82,8 +90,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     setBuscando(true);
     const timer = setTimeout(async () => {
       try {
-        const results = await buscarClientes(clienteQuery.trim());
-        setClientesEncontrados(results);
+        const { clientes } = await jsonFetch(`/api/clientes?q=${encodeURIComponent(clienteQuery.trim())}`);
+        setClientesEncontrados(clientes || []);
       } catch (e) {
         console.error("Error buscando clientes:", e);
       } finally {
@@ -97,7 +105,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.documento.trim()) return;
     setLoading(true);
     try {
-      const cliente = await crearCliente(nuevoCliente);
+      const { cliente } = await jsonFetch("/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoCliente),
+      });
       setClienteSeleccionado(cliente);
       setCreandoCliente(false);
       setStep(2);
@@ -135,24 +147,28 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     setError(null);
     try {
       const marcaFinal = form.marca === "__otra__" ? form.marca_otra : form.marca;
-      const orden = await crearOrden({
-        cliente_id: clienteSeleccionado.id,
-        tipo_articulo: form.tipo_articulo,
-        marca: marcaFinal,
-        modelo: form.modelo,
-        problema_reportado: form.problema_reportado,
-        notas_internas: form.notas_internas,
-        nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
-        monto_presupuesto: form.en_garantia ? null : (form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null),
-        moneda: form.moneda,
-        tipo_servicio_id: form.tipo_servicio_id || null,
-        sucursal_id: form.sucursal_id,
-        material: form.material || null,
-        material_otro: form.material === "otro" ? form.material_otro : null,
-        peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
-        en_garantia: form.en_garantia,
-        fecha_entrega_estimada: form.fecha_entrega_estimada || null,
-        forzar_traslado_a: trasladar ? centroDestino?.id : null,
+      const { orden } = await jsonFetch("/api/ordenes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cliente_id: clienteSeleccionado.id,
+          tipo_articulo: form.tipo_articulo,
+          marca: marcaFinal,
+          modelo: form.modelo,
+          problema_reportado: form.problema_reportado,
+          notas_internas: form.notas_internas,
+          nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
+          monto_presupuesto: form.en_garantia ? null : (form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null),
+          moneda: form.moneda,
+          tipo_servicio_id: form.tipo_servicio_id || null,
+          sucursal_id: form.sucursal_id,
+          material: form.material || null,
+          material_otro: form.material === "otro" ? form.material_otro : null,
+          peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
+          en_garantia: form.en_garantia,
+          fecha_entrega_estimada: form.fecha_entrega_estimada || null,
+          forzar_traslado_a: trasladar ? centroDestino?.id : null,
+        }),
       });
       // Generate intake ticket PDF. Reads go through the API route because the
       // configuracion table has admin-only RLS on SELECT.

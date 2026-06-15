@@ -12,7 +12,7 @@ import { TrasladosBadge } from "@/components/TrasladosBadge"
 import { TrasladosPanel } from "@/components/TrasladosPanel"
 import { ResumenCadetePanel } from "@/components/ResumenCadetePanel"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
-import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
+import { getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
 
 export default function DashboardPage() {
@@ -49,29 +49,30 @@ export default function DashboardPage() {
     try {
       const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
 
-      // Load configuracion first so we can pass it to getStats. Reads go through
-      // the API route because the configuracion table has admin-only RLS on SELECT.
-      const configuracionData = await fetch("/api/configuracion")
-        .then((r) => r.json())
-        .then((d) => d.configuracion || {})
-        .catch(() => ({}))
+      // ordenes/stats/configuracion go through API routes (locked tables: admin-only RLS).
+      const ordenesParams = new URLSearchParams()
+      if (filtroEstado) ordenesParams.set("estado", filtroEstado)
+      if (filtroTaller) ordenesParams.set("taller_id", filtroTaller)
+      if (debouncedBusqueda) ordenesParams.set("busqueda", debouncedBusqueda)
+      if (filtroEstado === "ENTREGADO") ordenesParams.set("incluirEntregados", "true")
+      if (sucursalFiltro) ordenesParams.set("sucursal_id", sucursalFiltro)
+      ordenesParams.set("page", String(pagina))
+      ordenesParams.set("limit", "20")
 
-      const [{ data: ordenesData, count: ordenesCount }, statsData, talleresData] = await Promise.all([
-        getOrdenes({
-          estado: filtroEstado,
-          taller_id: filtroTaller,
-          busqueda: debouncedBusqueda || undefined,
-          incluirEntregados: filtroEstado === "ENTREGADO",
-          sucursal_id: sucursalFiltro,
-          page: pagina,
-          limit: 20,
-        }),
-        getStats(configuracionData, { sucursal_id: sucursalFiltro }),
+      const statsParams = new URLSearchParams()
+      if (sucursalFiltro) statsParams.set("sucursal_id", sucursalFiltro)
+
+      const [configResp, ordenesResp, statsResp, talleresData] = await Promise.all([
+        fetch("/api/configuracion").then((r) => r.json()).catch(() => ({})),
+        fetch(`/api/ordenes?${ordenesParams}`).then((r) => r.ok ? r.json() : { data: [], count: 0 }).catch(() => ({ data: [], count: 0 })),
+        fetch(`/api/stats?${statsParams}`).then((r) => r.ok ? r.json() : { stats: {} }).catch(() => ({ stats: {} })),
         getTalleres(),
       ])
-      setOrdenes(ordenesData)
-      setTotalOrdenes(ordenesCount)
-      setStatsState(statsData)
+
+      const configuracionData = configResp.configuracion || {}
+      setOrdenes(ordenesResp.data || [])
+      setTotalOrdenes(ordenesResp.count || 0)
+      setStatsState(statsResp.stats || { activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 })
       setTalleresState(talleresData)
       setUmbrales(configuracionData)
       setNombreNegocio(configuracionData.nombre_negocio || "")

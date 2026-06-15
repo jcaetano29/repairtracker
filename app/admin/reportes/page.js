@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getReportesStats } from "@/lib/data";
 import { formatMonto } from "@/lib/currency";
 
 const ESTADOS_CONFIG = {
@@ -60,12 +59,14 @@ export default function ReportesPage() {
       .then(d => setSucursales(d.sucursales || []))
       .catch(() => {});
 
-    // configuracion has admin-only RLS on SELECT → reads must go through the API.
-    fetch("/api/configuracion")
-      .then((r) => r.json())
-      .then((d) => d.configuracion || {})
-      .catch(() => ({}))
-      .then((umbrales) => getReportesStats(umbrales, { sucursal_id: filtroSucursal }))
+    const params = new URLSearchParams();
+    if (filtroSucursal) params.set("sucursal_id", filtroSucursal);
+
+    fetch(`/api/reportes?${params}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Error cargando reportes");
+        return r.json();
+      })
       .then(setStats)
       .catch(() => setError("Error cargando reportes"))
       .finally(() => setLoading(false));

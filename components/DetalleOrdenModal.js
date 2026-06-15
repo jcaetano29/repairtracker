@@ -3,9 +3,23 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro, getSucursales } from "@/lib/data";
+import { getTalleres, getSucursales } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
-import { getTrasladosByOrden } from "@/lib/traslados";
+
+// ordenes/clientes/historial_estados are admin-only — all writes/reads go via /api.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
+async function postEstado(ordenId, body) {
+  return jsonFetch(`/api/ordenes/${ordenId}/estado`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+}
 import { TrasladosBadge } from "./TrasladosBadge";
 import { renderPlantilla } from "@/lib/plantillas-preview";
 
@@ -60,15 +74,15 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [h, t, trasladosData, sucursalesRes] = await Promise.all([
-        getHistorial(orden.id),
+      const [historialRes, talleresData, trasladosRes, sucursalesRes] = await Promise.all([
+        jsonFetch(`/api/ordenes/${orden.id}/historial`).catch(() => ({ historial: [] })),
         getTalleres(),
-        getTrasladosByOrden(orden.id),
+        jsonFetch(`/api/ordenes/${orden.id}/traslados`).catch(() => ({ traslados: [] })),
         getSucursales(),
       ]);
-      setHistorial(h);
-      setTalleresState(t);
-      setTrasladosHistorial(trasladosData);
+      setHistorial(historialRes.historial || []);
+      setTalleresState(talleresData);
+      setTrasladosHistorial(trasladosRes.traslados || []);
       setSucursalesState(sucursalesRes || []);
     } catch (e) {
       console.error(e);
@@ -125,7 +139,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await cambiarEstado(orden.id, nuevoEstado);
+      await postEstado(orden.id, { action: "cambiar", nuevo_estado: nuevoEstado });
       onUpdated();
       onClose();
     } catch (e) {
@@ -139,7 +153,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     if (!tallerSelected) return;
     setLoading(true);
     try {
-      await asignarTaller(orden.id, tallerSelected);
+      await postEstado(orden.id, { action: "asignar_taller", taller_id: tallerSelected });
       onUpdated();
       onClose();
     } catch (e) {
@@ -156,7 +170,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     const montoTallerSafe = Number.isFinite(montoTallerNum) && montoTallerNum > 0 ? montoTallerNum : null;
     setLoading(true);
     try {
-      await registrarPresupuesto(orden.id, montoNum, moneda, montoTallerSafe);
+      await postEstado(orden.id, { action: "presupuesto", monto: montoNum, moneda, monto_taller: montoTallerSafe });
       if (notificarPresupuesto && orden.cliente_telefono) {
         try {
           await triggerNotify("PRESUPUESTO", { monto: montoNum.toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
@@ -177,7 +191,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await aprobarPresupuesto(orden.id);
+      await postEstado(orden.id, { action: "aprobar" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -191,7 +205,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await rechazarPresupuesto(orden.id);
+      await postEstado(orden.id, { action: "rechazar" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -205,7 +219,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
+      await postEstado(orden.id, { action: "cambiar", nuevo_estado: "LISTO_PARA_RETIRO" });
 
       // Auto-create return transfer if pickup branch differs from current location (Task 5)
       if (orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id) {
@@ -245,7 +259,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     const montoFinal = Number.isFinite(montoNum) && montoNum > 0 ? montoNum : orden.monto_presupuesto;
     setLoading(true);
     try {
-      await entregarAlCliente(orden.id, montoFinal, metodoPago);
+      await postEstado(orden.id, { action: "entregar", monto_final: montoFinal, metodo_pago: metodoPago });
       onUpdated();
       onClose();
     } catch (e) {
@@ -259,7 +273,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await deleteOrden(orden.id);
+      await jsonFetch(`/api/ordenes/${orden.id}`, { method: "DELETE" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -421,7 +435,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     onClick={async () => {
                       setLoading(true);
                       try {
-                        await updateSucursalRetiro(orden.id, retiroId);
+                        await jsonFetch(`/api/ordenes/${orden.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ sucursal_retiro_id: retiroId }),
+                        });
                         setEditingRetiro(false);
                         onUpdated();
                       } catch (e) {

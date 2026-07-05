@@ -36,7 +36,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [tallerSelected, setTallerSelected] = useState("");
   const [metodoPago, setMetodoPago] = useState("efectivo");
   const [error, setError] = useState(null);
-  const [notificarPresupuesto, setNotificarPresupuesto] = useState(false);
+  const [notificarPresupuesto, setNotificarPresupuesto] = useState(true);
   const [showRetiro, setShowRetiro] = useState(false);
   const [notificarRetiro, setNotificarRetiro] = useState(true);
   const [trasladosHistorial, setTrasladosHistorial] = useState([]);

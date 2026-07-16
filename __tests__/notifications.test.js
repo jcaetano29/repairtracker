@@ -9,7 +9,7 @@ vi.mock('@/lib/notifications/whatsapp', () => ({
 
 // Mock Supabase admin — only plantillas_whatsapp_meta is queried now
 const mockMetaRow = {
-  template_name: 'presupuesto_ready',
+  template_name: 'presupuesto_ready_v2',
   language_code: 'en',
   param_keys: ['clienteNombre', 'numeroOrden', 'tipoArticulo', 'moneda', 'monto'],
 }
@@ -49,7 +49,7 @@ describe('sendNotification', () => {
     })
     expect(mockSendWhatsApp).toHaveBeenCalledWith({
       to: '59899123456',
-      templateName: 'presupuesto_ready',
+      templateName: 'presupuesto_ready_v2',
       languageCode: 'en',
       parameters: ['Ana', '123', 'Reloj', 'UYU', '3500'],
     })
@@ -76,7 +76,7 @@ describe('sendNotification', () => {
     expect(mockSendWhatsApp).toHaveBeenCalledOnce()
     expect(mockSendWhatsApp).toHaveBeenCalledWith({
       to: '59899123456',
-      templateName: 'presupuesto_ready',
+      templateName: 'presupuesto_ready_v2',
       languageCode: 'en',
       parameters: ['Ana', '123', 'Reloj', 'UYU', '3500'],
     })

@@ -236,13 +236,14 @@ export default function ConfiguracionClient({ configuracion }) {
                   <td className="px-4 py-4 text-center">
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={row.leve === "" ? "" : row.leve}
                       onChange={(e) =>
                         handleInputChange(clave, "leve", e.target.value)
                       }
                       disabled={row.loading}
-                      className="w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 
@@ -250,13 +251,14 @@ export default function ConfiguracionClient({ configuracion }) {
                   <td className="px-4 py-4 text-center">
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={row.grave === "" ? "" : row.grave}
                       onChange={(e) =>
                         handleInputChange(clave, "grave", e.target.value)
                       }
                       disabled={row.loading}
-                      className="w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 

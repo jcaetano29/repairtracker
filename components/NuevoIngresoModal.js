@@ -530,12 +530,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   </label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     min="0"
                     step="0.01"
                     value={form.peso_gramos}
                     onChange={(e) => setForm({ ...form, peso_gramos: e.target.value })}
                     placeholder="0.00"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="no-spinner w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                   {form.material === "oro" && (
                     <p className="text-xs text-amber-600 mt-1">Obligatorio para artículos de oro.</p>
@@ -585,13 +586,14 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     </select>
                     <input
                       type="number"
+                      inputMode="decimal"
                       min="0"
                       step="any"
                       value={form.monto_presupuesto}
                       onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
                       placeholder="0.00"
                       disabled={form.en_garantia}
-                      className={`flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`no-spinner flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>

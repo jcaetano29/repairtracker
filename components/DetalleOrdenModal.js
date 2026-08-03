@@ -498,12 +498,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 <label className="block text-xs text-slate-500 mb-1">Presupuesto taller</label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   min="0"
                   step="0.01"
                   placeholder="Monto del taller"
                   value={montoTaller}
                   onChange={(e) => setMontoTaller(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
                 />
               </div>
               <div>
@@ -519,12 +520,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   </select>
                   <input
                     type="number"
+                    inputMode="decimal"
                     min="0"
                     step="0.01"
                     placeholder="Monto"
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                    className="no-spinner flex-1 px-3 py-2 border rounded-lg text-sm"
                   />
                 </div>
               </div>
@@ -572,12 +574,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <div className="text-sm font-semibold text-green-900">Registrar entrega</div>
               <input
                 type="number"
+                inputMode="decimal"
                 min="0"
                 step="0.01"
                 placeholder={`Monto final (${orden.monto_presupuesto || ""})`}
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
+                className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
               />
               <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg text-sm">

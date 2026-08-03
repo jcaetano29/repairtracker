@@ -407,16 +407,16 @@ export default function DashboardPage() {
 
         {/* Vista Kanban */}
         {!loading && vista === "kanban" && (
-          <div className="flex gap-2 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
             {estadosActivos.map(([estado, config]) => {
               const enEstado = ordenes.filter((o) => o.estado === estado)
               return (
                 <div
                   key={estado}
-                  className="flex-1 min-w-0 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(100vh-220px)]"
+                  className="min-w-0 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(50vh-40px)]"
                 >
                   <div
-                    className="px-2.5 py-3 flex items-center gap-1.5 border-b-2"
+                    className="px-3.5 py-3 flex items-center gap-2 border-b-2"
                     style={{ borderBottomColor: config.color }}
                   >
                     <span>{config.icon}</span>

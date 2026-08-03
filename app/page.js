@@ -40,6 +40,9 @@ export default function DashboardPage() {
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
   const [showResumenCadete, setShowResumenCadete] = useState(false)
   const [nombreNegocio, setNombreNegocio] = useState("")
+  // Kanban: overrides manuales de colapso por estado (persistido). Sin override, se
+  // auto-colapsan las columnas vacías. { [estado]: true(colapsada)/false(expandida) }
+  const [colOverrides, setColOverrides] = useState({})
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -103,6 +106,28 @@ export default function DashboardPage() {
   useEffect(() => {
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current) }
   }, [])
+
+  // Cargar overrides de colapso del kanban desde localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("kanbanColOverrides")
+      if (saved) setColOverrides(JSON.parse(saved))
+    } catch { /* noop */ }
+  }, [])
+
+  // Colapsada = override manual si existe; si no, auto-colapsar cuando está vacía
+  function isColCollapsed(estado, count) {
+    return estado in colOverrides ? colOverrides[estado] : count === 0
+  }
+
+  function toggleCol(estado, count) {
+    setColOverrides((prev) => {
+      const collapsed = estado in prev ? prev[estado] : count === 0
+      const next = { ...prev, [estado]: !collapsed }
+      try { localStorage.setItem("kanbanColOverrides", JSON.stringify(next)) } catch { /* noop */ }
+      return next
+    })
+  }
 
   function handleSearch(value) {
     setBusqueda(value)
@@ -407,13 +432,43 @@ export default function DashboardPage() {
 
         {/* Vista Kanban */}
         {!loading && vista === "kanban" && (
-          <div className="flex gap-3 overflow-x-auto pb-4">
+          <div className="mx-[calc(50%-50vw)] px-4 sm:px-6">
+          <div className="max-w-[1800px] mx-auto flex gap-3 overflow-x-auto pb-4">
             {estadosActivos.map(([estado, config]) => {
               const enEstado = ordenes.filter((o) => o.estado === estado)
+              const collapsed = isColCollapsed(estado, enEstado.length)
+
+              // Columna colapsada: franja fina vertical, click para expandir
+              if (collapsed) {
+                return (
+                  <button
+                    key={estado}
+                    onClick={() => toggleCol(estado, enEstado.length)}
+                    title={`Expandir ${config.label}`}
+                    className="flex-shrink-0 w-11 bg-white rounded-xl border border-slate-200 flex flex-col items-center py-3 gap-2 hover:bg-slate-50 transition-colors max-h-[calc(100vh-220px)]"
+                    style={{ borderTopColor: config.color, borderTopWidth: 3 }}
+                  >
+                    <span className="text-sm leading-none">{config.icon}</span>
+                    <span
+                      className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: config.bg, color: config.color }}
+                    >
+                      {enEstado.length}
+                    </span>
+                    <span
+                      className="text-[11px] font-bold text-slate-600 whitespace-nowrap mt-1"
+                      style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                    >
+                      {config.label}
+                    </span>
+                  </button>
+                )
+              }
+
               return (
                 <div
                   key={estado}
-                  className="flex-shrink-0 w-64 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(100vh-220px)]"
+                  className="flex-1 min-w-[200px] bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(100vh-220px)]"
                 >
                   <div
                     className="px-3.5 py-3 flex items-center gap-2 border-b-2"
@@ -427,6 +482,13 @@ export default function DashboardPage() {
                     >
                       {enEstado.length}
                     </span>
+                    <button
+                      onClick={() => toggleCol(estado, enEstado.length)}
+                      title={`Colapsar ${config.label}`}
+                      className="text-slate-400 hover:text-slate-700 transition-colors px-1 -mr-1 leading-none"
+                    >
+                      «
+                    </button>
                   </div>
                   <div className="p-2 space-y-1.5 overflow-y-auto flex-1">
                     {enEstado.map((o) => {
@@ -481,6 +543,7 @@ export default function DashboardPage() {
                 </div>
               )
             })}
+          </div>
           </div>
         )}
       </main>

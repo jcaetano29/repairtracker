@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getTalleres, crearTaller, updateTaller, deleteTaller } from "@/lib/data";
-import { sanitizePhone } from "@/lib/utils";
+import { getTalleres } from "@/lib/data";
+import PhoneInput from "@/components/PhoneInput";
+
+// Talleres writes are admin-only at the RLS level — they go through /api/admin/talleres.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
 
 export default function TalleresPage() {
   const [talleres, setTalleres] = useState([]);
@@ -28,9 +36,17 @@ export default function TalleresPage() {
     setError(null);
     try {
       if (editingId) {
-        await updateTaller(editingId, form);
+        await jsonFetch(`/api/admin/talleres/${editingId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
       } else {
-        await crearTaller(form);
+        await jsonFetch("/api/admin/talleres", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
       }
       setShowNew(false);
       setEditingId(null);
@@ -44,7 +60,7 @@ export default function TalleresPage() {
   async function handleDelete(id) {
     if (!confirm("¿Eliminar este taller? Esta acción no se puede deshacer.")) return;
     try {
-      await deleteTaller(id);
+      await jsonFetch(`/api/admin/talleres/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
       setError(e.message);
@@ -106,12 +122,10 @@ export default function TalleresPage() {
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                 Teléfono
               </label>
-              <input
-                type="text"
+              <PhoneInput
                 value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: sanitizePhone(e.target.value) })}
-                placeholder="Ej: +598 9 1234 5678"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                onChange={(v) => setForm({ ...form, telefono: v })}
+                placeholder="9 1234 5678"
               />
             </div>
           </div>

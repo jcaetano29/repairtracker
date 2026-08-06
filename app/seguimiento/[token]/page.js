@@ -22,6 +22,14 @@ export default async function SeguimientoPage({ params }) {
 
   const estadoConfig = ESTADOS[orden.estado];
 
+  // Fetch business name from config
+  const { data: configData } = await getSupabaseAdmin()
+    .from("configuracion")
+    .select("valor")
+    .eq("clave", "nombre_negocio")
+    .single()
+  const nombreNegocio = configData?.valor || "RepairTrack"
+
   // Build a simple timeline of key dates
   const timeline = [
     { label: "Ingresado", fecha: orden.fecha_ingreso, done: true },
@@ -36,7 +44,7 @@ export default async function SeguimientoPage({ params }) {
         {/* Header */}
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
-          <h1 className="text-lg font-bold text-slate-900 mt-2">RepairTrack</h1>
+          <h1 className="text-lg font-bold text-slate-900 mt-2">{nombreNegocio}</h1>
           <p className="text-base text-slate-500">Seguimiento de orden</p>
         </div>
 
@@ -77,13 +85,19 @@ export default async function SeguimientoPage({ params }) {
                 </span>
               </div>
             )}
+            {orden.talleres?.nombre && ["EN_TALLER", "ESPERANDO_APROBACION", "EN_REPARACION", "LISTO_EN_TALLER"].includes(orden.estado) && (
+              <div className="flex gap-2">
+                <span className="text-slate-500 w-24 flex-shrink-0">Taller</span>
+                <span className="text-slate-700">{orden.talleres.nombre}</span>
+              </div>
+            )}
             <div className="flex gap-2">
               <span className="text-slate-500 w-24 flex-shrink-0">Ingreso</span>
               <span className="text-slate-700">{formatFecha(orden.fecha_ingreso)}</span>
             </div>
             {orden.fecha_entrega_estimada && (
               <div className="flex gap-2">
-                <span className="text-slate-500 w-24 flex-shrink-0">Entrega est.</span>
+                <span className="text-slate-500 w-24 flex-shrink-0">Entrega</span>
                 <span className="text-slate-700">{formatFecha(orden.fecha_entrega_estimada)}</span>
               </div>
             )}

@@ -18,23 +18,6 @@ const ESTADO_ORDER = [
   "ENTREGADO",
 ]
 
-const PLANTILLA_LABELS = {
-  PRESUPUESTO: {
-    label: "Presupuesto",
-    desc: "Se envía cuando el operador registra un presupuesto y elige notificar.",
-    vars: "{{clienteNombre}}, {{numeroOrden}}, {{tipoArticulo}}, {{monto}}",
-  },
-  LISTO_PARA_RETIRO: {
-    label: "Listo para retiro",
-    desc: "Se envía cuando el artículo está listo y el operador elige notificar.",
-    vars: "{{clienteNombre}}, {{numeroOrden}}, {{tipoArticulo}}, {{trackingUrl}}",
-  },
-  RECORDATORIO_MANTENIMIENTO: {
-    label: "Recordatorio de mantenimiento",
-    desc: "Se envía automáticamente por el cron de recordatorios.",
-    vars: "{{clienteNombre}}, {{tipoServicio}}, {{ultimaFecha}}",
-  },
-}
 
 /**
  * ConfiguracionClient Component
@@ -43,9 +26,8 @@ const PLANTILLA_LABELS = {
  * Users can edit leve/grave values and save them to the API.
  *
  * @param {Object} configuracion - Configuration object mapping clave to {leve, grave}
- * @param {Array} plantillas - Array of plantillas from server
  */
-export default function ConfiguracionClient({ configuracion, plantillasEmail = [] }) {
+export default function ConfiguracionClient({ configuracion }) {
   const [nombreNegocio, setNombreNegocio] = useState(configuracion.nombre_negocio || "")
   const [nombreLoading, setNombreLoading] = useState(false)
 
@@ -79,14 +61,6 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
         grave: valor.grave,
         loading: false,
       }
-    })
-    return initial
-  })
-
-  const [templates, setTemplates] = useState(() => {
-    const initial = {}
-    plantillasEmail.forEach((p) => {
-      initial[p.tipo] = { asunto: p.asunto, cuerpo: p.cuerpo, loading: false }
     })
     return initial
   })
@@ -176,42 +150,6 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
     }
   }
 
-  async function handleSavePlantilla(tipo) {
-    const t = templates[tipo]
-    if (!t || t.asunto.trim().length === 0 || t.cuerpo.trim().length === 0) return
-
-    setTemplates((prev) => ({
-      ...prev,
-      [tipo]: { ...prev[tipo], loading: true },
-    }))
-
-    try {
-      const response = await fetch("/api/admin/plantillas-email", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, asunto: t.asunto, cuerpo: t.cuerpo }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al guardar")
-      }
-
-      setTemplates((prev) => ({
-        ...prev,
-        [tipo]: { ...prev[tipo], loading: false },
-      }))
-
-      toast.success("Plantilla actualizada")
-    } catch (error) {
-      toast.error(error.message)
-      setTemplates((prev) => ({
-        ...prev,
-        [tipo]: { ...prev[tipo], loading: false },
-      }))
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -298,13 +236,14 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
                   <td className="px-4 py-4 text-center">
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={row.leve === "" ? "" : row.leve}
                       onChange={(e) =>
                         handleInputChange(clave, "leve", e.target.value)
                       }
                       disabled={row.loading}
-                      className="w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 
@@ -312,13 +251,14 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
                   <td className="px-4 py-4 text-center">
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={row.grave === "" ? "" : row.grave}
                       onChange={(e) =>
                         handleInputChange(clave, "grave", e.target.value)
                       }
                       disabled={row.loading}
-                      className="w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 
@@ -354,84 +294,6 @@ export default function ConfiguracionClient({ configuracion, plantillasEmail = [
         <p className="text-xs text-blue-900 opacity-75">
           Los días se cuentan desde la última transición de estado (cuando la orden entró al estado actual).
         </p>
-      </div>
-
-      {/* Plantillas de Email */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          Plantillas de Email
-        </h2>
-        <p className="text-sm text-slate-600 mb-4">
-          Personalizá los emails que se envían a los clientes. Usá las variables entre llaves dobles para insertar datos dinámicos.
-        </p>
-
-        <div className="space-y-6">
-          {Object.entries(PLANTILLA_LABELS).map(([tipo, meta]) => {
-            const t = templates[tipo]
-            if (!t) return null
-
-            const canSave = !t.loading && t.asunto.trim().length > 0 && t.cuerpo.trim().length > 0
-
-            return (
-              <div key={tipo} className="bg-white rounded-xl border border-slate-200 p-5">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-bold text-slate-900">{meta.label}</h3>
-                  <button
-                    onClick={() => handleSavePlantilla(tipo)}
-                    disabled={!canSave}
-                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                      canSave
-                        ? "bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
-                        : "bg-slate-200 text-slate-500 cursor-not-allowed"
-                    }`}
-                  >
-                    {t.loading ? "Guardando..." : "Guardar"}
-                  </button>
-                </div>
-                <p className="text-xs text-slate-500 mb-2">{meta.desc}</p>
-                <div className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-1 rounded mb-3 font-mono">
-                  Variables: {meta.vars}
-                </div>
-
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Asunto</label>
-                <input
-                  type="text"
-                  value={t.asunto}
-                  onChange={(e) =>
-                    setTemplates((prev) => ({
-                      ...prev,
-                      [tipo]: { ...prev[tipo], asunto: e.target.value },
-                    }))
-                  }
-                  disabled={t.loading}
-                  maxLength={150}
-                  className="w-full mb-3 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
-                />
-                <div className="text-[10px] text-slate-400 text-right mb-2">
-                  {t.asunto.length}/150
-                </div>
-
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Cuerpo</label>
-                <textarea
-                  value={t.cuerpo}
-                  onChange={(e) =>
-                    setTemplates((prev) => ({
-                      ...prev,
-                      [tipo]: { ...prev[tipo], cuerpo: e.target.value },
-                    }))
-                  }
-                  disabled={t.loading}
-                  maxLength={2000}
-                  rows={10}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500 resize-y"
-                />
-                <div className="text-[10px] text-slate-400 text-right">
-                  {t.cuerpo.length}/2000
-                </div>
-              </div>
-            )
-          })}
-        </div>
       </div>
     </div>
   )

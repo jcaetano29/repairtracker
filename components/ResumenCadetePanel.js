@@ -165,6 +165,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ tipo: "traslado", traslado_id: trasladoId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
+      setTraslados((prev) => prev.filter((t) => t.id !== trasladoId))
       await Promise.all([loadItems(selectedResumen.id), loadData()])
     } catch (e) {
       setError(e.message)
@@ -180,7 +181,11 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ tipo: "orden", orden_id: ordenId, subtipo }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
-      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
+      setOrdenesPendientes((prev) => ({
+        ...prev,
+        [subtipo]: (prev[subtipo] || []).filter((o) => o.id !== ordenId),
+      }))
+      await Promise.all([loadItems(selectedResumen.id), loadData()])
     } catch (e) {
       setError(e.message)
     }
@@ -198,7 +203,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
       })
       if (!res.ok) throw new Error((await res.json()).error)
       setAdHocText("")
-      await Promise.all([loadItems(selectedResumen.id), loadData()])
+      await loadItems(selectedResumen.id)
     } catch (e) {
       setError(e.message)
     }
@@ -206,6 +211,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
 
   async function handleDeleteItem(itemId) {
     setError(null)
+    const deletedItem = items.find((i) => i.item_id === itemId)
     try {
       const res = await fetch(`/api/resumenes-cadete/${selectedResumen.id}/items`, {
         method: "DELETE",
@@ -213,7 +219,10 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ item_id: itemId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
-      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
+      const reloads = [loadItems(selectedResumen.id), loadData()]
+      if (deletedItem?.tipo === "orden") reloads.push(loadOrdenesPendientes())
+      if (deletedItem?.tipo === "traslado") reloads.push(loadTraslados())
+      await Promise.all(reloads)
     } catch (e) {
       setError(e.message)
     }
@@ -222,6 +231,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
   async function handleConfirmItem(itemId) {
     if (!confirm("¿Confirmar que el cadete completo esta tarea? Esto actualizara el estado de la orden.")) return
     setError(null)
+    const confirmedItem = items.find((i) => i.item_id === itemId)
     try {
       const res = await fetch(`/api/resumenes-cadete/${selectedResumen.id}/items/confirmar`, {
         method: "POST",
@@ -229,7 +239,9 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         body: JSON.stringify({ item_id: itemId }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
-      await Promise.all([loadItems(selectedResumen.id), loadOrdenesPendientes(), loadData()])
+      const reloads = [loadItems(selectedResumen.id), loadData()]
+      if (confirmedItem?.tipo === "orden") reloads.push(loadOrdenesPendientes())
+      await Promise.all(reloads)
     } catch (e) {
       setError(e.message)
     }

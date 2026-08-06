@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getTraslados, despacharTraslado, recibirTraslado } from "@/lib/traslados";
-import { getSupabaseClient } from "@/lib/supabase-client";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET(request) {
   const session = await auth();
@@ -47,7 +47,7 @@ export async function PATCH(request) {
     }
 
     // Fetch traslado to validate permissions
-    const { data: trasladoData, error: fetchErr } = await getSupabaseClient()
+    const { data: trasladoData, error: fetchErr } = await getSupabaseAdmin()
       .from("traslados")
       .select("sucursal_origen, sucursal_destino")
       .eq("id", traslado_id)
@@ -80,10 +80,10 @@ export async function PATCH(request) {
           const { formatNumeroOrden } = await import("@/lib/constants");
           const { sendNotification } = await import("@/lib/notifications");
           const orden = await getOrden(traslado.orden_id);
-          if (orden?.cliente_email) {
+          if (orden?.cliente_telefono) {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
             await sendNotification("LISTO_PARA_RETIRO", {
-              clienteEmail: orden.cliente_email,
+              clienteTelefono: orden.cliente_telefono,
               clienteNombre: orden.cliente_nombre,
               numeroOrden: formatNumeroOrden(orden.numero_orden),
               tipoArticulo: orden.tipo_articulo,

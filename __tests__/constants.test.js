@@ -82,9 +82,9 @@ describe('formatNumeroOrden', () => {
   })
 })
 
-describe('8-state structure', () => {
-  it('has exactly 8 states', () => {
-    expect(Object.keys(ESTADOS)).toHaveLength(8);
+describe('state structure', () => {
+  it('has exactly 9 states', () => {
+    expect(Object.keys(ESTADOS)).toHaveLength(9);
   });
 
   it('does not contain removed states', () => {
@@ -93,12 +93,13 @@ describe('8-state structure', () => {
     expect(ESTADOS).not.toHaveProperty('ENVIADO_A_TALLER');
   });
 
-  it('contains EN_TALLER instead of ENVIADO_A_TALLER', () => {
+  it('contains EN_TALLER and LISTO_PARA_ENVIO', () => {
     expect(ESTADOS).toHaveProperty('EN_TALLER');
+    expect(ESTADOS).toHaveProperty('LISTO_PARA_ENVIO');
   });
 
-  it('INGRESADO transitions to EN_TALLER and ESPERANDO_APROBACION, not EN_REPARACION', () => {
-    expect(TRANSICIONES.INGRESADO).toContain('EN_TALLER');
+  it('INGRESADO transitions to LISTO_PARA_ENVIO and ESPERANDO_APROBACION, not EN_REPARACION', () => {
+    expect(TRANSICIONES.INGRESADO).toContain('LISTO_PARA_ENVIO');
     expect(TRANSICIONES.INGRESADO).toContain('ESPERANDO_APROBACION');
     expect(TRANSICIONES.INGRESADO).not.toContain('EN_REPARACION');
   });

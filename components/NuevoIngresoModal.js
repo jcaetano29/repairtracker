@@ -3,11 +3,18 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
-import { buscarClientes, crearCliente, crearOrden, getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
+import { getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
 import { getCentrosReparacion } from "@/lib/traslados";
-import { sanitizePhone } from "@/lib/utils";
+
+// clientes/ordenes are admin-only — writes/searches go via /api.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
+import PhoneInput from "@/components/PhoneInput";
 import { generarTicketIngreso } from "@/lib/ticket";
-import { getConfiguracion } from "@/lib/data/configuracion";
 
 export function NuevoIngresoModal({ onClose, onCreated }) {
   const { data: session } = useSession()
@@ -83,8 +90,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     setBuscando(true);
     const timer = setTimeout(async () => {
       try {
-        const results = await buscarClientes(clienteQuery.trim());
-        setClientesEncontrados(results);
+        const { clientes } = await jsonFetch(`/api/clientes?q=${encodeURIComponent(clienteQuery.trim())}`);
+        setClientesEncontrados(clientes || []);
       } catch (e) {
         console.error("Error buscando clientes:", e);
       } finally {
@@ -95,10 +102,14 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, [clienteQuery]);
 
   async function handleCrearCliente() {
-    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.email.trim() || !nuevoCliente.documento.trim()) return;
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.telefono.trim() || !nuevoCliente.documento.trim()) return;
     setLoading(true);
     try {
-      const cliente = await crearCliente(nuevoCliente);
+      const { cliente } = await jsonFetch("/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoCliente),
+      });
       setClienteSeleccionado(cliente);
       setCreandoCliente(false);
       setStep(2);
@@ -136,28 +147,36 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     setError(null);
     try {
       const marcaFinal = form.marca === "__otra__" ? form.marca_otra : form.marca;
-      const orden = await crearOrden({
-        cliente_id: clienteSeleccionado.id,
-        tipo_articulo: form.tipo_articulo,
-        marca: marcaFinal,
-        modelo: form.modelo,
-        problema_reportado: form.problema_reportado,
-        notas_internas: form.notas_internas,
-        nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
-        monto_presupuesto: form.en_garantia ? null : (form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null),
-        moneda: form.moneda,
-        tipo_servicio_id: form.tipo_servicio_id || null,
-        sucursal_id: form.sucursal_id,
-        material: form.material || null,
-        material_otro: form.material === "otro" ? form.material_otro : null,
-        peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
-        en_garantia: form.en_garantia,
-        fecha_entrega_estimada: form.fecha_entrega_estimada || null,
-        forzar_traslado_a: trasladar ? centroDestino?.id : null,
+      const { orden } = await jsonFetch("/api/ordenes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cliente_id: clienteSeleccionado.id,
+          tipo_articulo: form.tipo_articulo,
+          marca: marcaFinal,
+          modelo: form.modelo,
+          problema_reportado: form.problema_reportado,
+          notas_internas: form.notas_internas,
+          nombre_articulo: form.tipo_articulo === "Otro" ? form.nombre_articulo : null,
+          monto_presupuesto: form.en_garantia ? null : (form.monto_presupuesto ? parseFloat(form.monto_presupuesto) : null),
+          moneda: form.moneda,
+          tipo_servicio_id: form.tipo_servicio_id || null,
+          sucursal_id: form.sucursal_id,
+          material: form.material || null,
+          material_otro: form.material === "otro" ? form.material_otro : null,
+          peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
+          en_garantia: form.en_garantia,
+          fecha_entrega_estimada: form.fecha_entrega_estimada || null,
+          forzar_traslado_a: trasladar ? centroDestino?.id : null,
+        }),
       });
-      // Generate intake ticket PDF
+      // Generate intake ticket PDF. Reads go through the API route because the
+      // configuracion table has admin-only RLS on SELECT.
       try {
-        const config = await getConfiguracion()
+        const config = await fetch("/api/configuracion")
+          .then((r) => r.json())
+          .then((d) => d.configuracion || {})
+          .catch(() => ({}))
         generarTicketIngreso(
           { ...orden, fecha_entrega_estimada: form.fecha_entrega_estimada || null },
           clienteSeleccionado,
@@ -306,17 +325,16 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   Teléfono *
                 </label>
-                <input
-                  type="tel"
-                  placeholder="099 123 456"
+                <PhoneInput
                   value={nuevoCliente.telefono}
-                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: sanitizePhone(e.target.value) })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  onChange={(v) => setNuevoCliente({ ...nuevoCliente, telefono: v })}
+                  placeholder="99 123 456"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-                  Email *
+                  Email
                 </label>
                 <div className="relative">
                   <input
@@ -350,7 +368,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </div>
               <button
                 onClick={handleCrearCliente}
-                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.email || !nuevoCliente.documento || loading}
+                disabled={!nuevoCliente.nombre || !nuevoCliente.telefono || !nuevoCliente.documento || loading}
                 className="w-full py-3.5 bg-indigo-500 text-white rounded-lg font-semibold text-base hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creando..." : "Crear cliente y continuar →"}
@@ -512,12 +530,13 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   </label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     min="0"
                     step="0.01"
                     value={form.peso_gramos}
                     onChange={(e) => setForm({ ...form, peso_gramos: e.target.value })}
                     placeholder="0.00"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="no-spinner w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                   {form.material === "oro" && (
                     <p className="text-xs text-amber-600 mt-1">Obligatorio para artículos de oro.</p>
@@ -533,6 +552,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   checked={form.en_garantia}
                   onChange={(e) => {
                     const checked = e.target.checked;
+                    if (checked && form.monto_presupuesto) {
+                      if (!confirm("Se borrara el presupuesto ingresado. ¿Continuar?")) return;
+                    }
                     setForm({
                       ...form,
                       en_garantia: checked,
@@ -564,13 +586,14 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     </select>
                     <input
                       type="number"
+                      inputMode="decimal"
                       min="0"
                       step="any"
                       value={form.monto_presupuesto}
                       onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
                       placeholder="0.00"
                       disabled={form.en_garantia}
-                      className={`flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`no-spinner flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>
@@ -667,7 +690,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     ))}
                   </select>
                   <p className="text-xs text-slate-400 mt-1">
-                    Si seleccionás un servicio, el cliente recibirá un recordatorio por email cuando sea hora de renovarlo.
+                    Si seleccionás un servicio, el cliente recibirá un recordatorio por WhatsApp cuando sea hora de renovarlo.
                   </p>
                 </div>
               )}

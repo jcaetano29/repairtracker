@@ -12,9 +12,8 @@ import { TrasladosBadge } from "@/components/TrasladosBadge"
 import { TrasladosPanel } from "@/components/TrasladosPanel"
 import { ResumenCadetePanel } from "@/components/ResumenCadetePanel"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
-import { getOrdenes, getStats, getTalleres, getSucursales } from "@/lib/data"
+import { getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
-import { getConfiguracion } from "@/lib/data/configuracion"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -40,6 +39,7 @@ export default function DashboardPage() {
   const [umbrales, setUmbrales] = useState({})
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
   const [showResumenCadete, setShowResumenCadete] = useState(false)
+  const [nombreNegocio, setNombreNegocio] = useState("")
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -49,27 +49,33 @@ export default function DashboardPage() {
     try {
       const sucursalFiltro = isDueno ? (filtroSucursal === "TODAS" ? undefined : filtroSucursal) : session?.user?.sucursal_id
 
-      // Load configuracion first so we can pass it to getStats
-      const configuracionData = await getConfiguracion()
+      // ordenes/stats/configuracion go through API routes (locked tables: admin-only RLS).
+      const ordenesParams = new URLSearchParams()
+      if (filtroEstado) ordenesParams.set("estado", filtroEstado)
+      if (filtroTaller) ordenesParams.set("taller_id", filtroTaller)
+      if (debouncedBusqueda) ordenesParams.set("busqueda", debouncedBusqueda)
+      if (filtroEstado === "ENTREGADO") ordenesParams.set("incluirEntregados", "true")
+      if (sucursalFiltro) ordenesParams.set("sucursal_id", sucursalFiltro)
+      ordenesParams.set("page", String(pagina))
+      ordenesParams.set("limit", "20")
 
-      const [{ data: ordenesData, count: ordenesCount }, statsData, talleresData] = await Promise.all([
-        getOrdenes({
-          estado: filtroEstado,
-          taller_id: filtroTaller,
-          busqueda: debouncedBusqueda || undefined,
-          incluirEntregados: filtroEstado === "ENTREGADO",
-          sucursal_id: sucursalFiltro,
-          page: pagina,
-          limit: 20,
-        }),
-        getStats(configuracionData, { sucursal_id: sucursalFiltro }),
+      const statsParams = new URLSearchParams()
+      if (sucursalFiltro) statsParams.set("sucursal_id", sucursalFiltro)
+
+      const [configResp, ordenesResp, statsResp, talleresData] = await Promise.all([
+        fetch("/api/configuracion").then((r) => r.json()).catch(() => ({})),
+        fetch(`/api/ordenes?${ordenesParams}`).then((r) => r.ok ? r.json() : { data: [], count: 0 }).catch(() => ({ data: [], count: 0 })),
+        fetch(`/api/stats?${statsParams}`).then((r) => r.ok ? r.json() : { stats: {} }).catch(() => ({ stats: {} })),
         getTalleres(),
       ])
-      setOrdenes(ordenesData)
-      setTotalOrdenes(ordenesCount)
-      setStatsState(statsData)
+
+      const configuracionData = configResp.configuracion || {}
+      setOrdenes(ordenesResp.data || [])
+      setTotalOrdenes(ordenesResp.count || 0)
+      setStatsState(statsResp.stats || { activas: 0, conRetraso: 0, listasRetiro: 0, enTaller: 0 })
       setTalleresState(talleresData)
       setUmbrales(configuracionData)
+      setNombreNegocio(configuracionData.nombre_negocio || "")
     } catch (e) {
       console.error("Error cargando datos:", e)
     } finally {
@@ -87,9 +93,9 @@ export default function DashboardPage() {
     loadData()
   }, [loadData])
 
-  // Auto-refresh cada 5 segundos
+  // Auto-refresh cada 30 segundos
   useEffect(() => {
-    const interval = setInterval(loadData, 5000)
+    const interval = setInterval(loadData, 30000)
     return () => clearInterval(interval)
   }, [loadData])
 
@@ -133,7 +139,7 @@ export default function DashboardPage() {
           <a href="/" className="flex items-center gap-3 cursor-pointer">
             <span className="text-2xl">⌚</span>
             <div>
-              <h1 className="text-lg font-bold text-white leading-tight">RepairTrack</h1>
+              <h1 className="text-lg font-bold text-white leading-tight">{nombreNegocio || "RepairTrack"}</h1>
               <p className="text-sm text-slate-500">Gestión de Reparaciones</p>
             </div>
           </a>
@@ -401,13 +407,13 @@ export default function DashboardPage() {
 
         {/* Vista Kanban */}
         {!loading && vista === "kanban" && (
-          <div className="flex gap-3 overflow-x-auto pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-4">
             {estadosActivos.map(([estado, config]) => {
               const enEstado = ordenes.filter((o) => o.estado === estado)
               return (
                 <div
                   key={estado}
-                  className="flex-shrink-0 w-64 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(100vh-220px)]"
+                  className="min-w-0 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(50vh-40px)]"
                 >
                   <div
                     className="px-3.5 py-3 flex items-center gap-2 border-b-2"

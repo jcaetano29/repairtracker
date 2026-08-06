@@ -3,10 +3,25 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { cambiarEstado, asignarTaller, registrarPresupuesto, entregarAlCliente, getHistorial, getTalleres, deleteOrden, aprobarPresupuesto, rechazarPresupuesto, updateSucursalRetiro, getSucursales } from "@/lib/data";
+import { getTalleres, getSucursales } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
-import { getTrasladosByOrden } from "@/lib/traslados";
+
+// ordenes/clientes/historial_estados are admin-only — all writes/reads go via /api.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
+async function postEstado(ordenId, body) {
+  return jsonFetch(`/api/ordenes/${ordenId}/estado`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+}
 import { TrasladosBadge } from "./TrasladosBadge";
+import { renderPlantilla } from "@/lib/plantillas-preview";
 
 export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales }) {
   const [loading, setLoading] = useState(false);
@@ -21,10 +36,9 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [tallerSelected, setTallerSelected] = useState("");
   const [metodoPago, setMetodoPago] = useState("efectivo");
   const [error, setError] = useState(null);
-  const [notificarPresupuesto, setNotificarPresupuesto] = useState(false);
+  const [notificarPresupuesto, setNotificarPresupuesto] = useState(true);
   const [showRetiro, setShowRetiro] = useState(false);
   const [notificarRetiro, setNotificarRetiro] = useState(true);
-  const [plantillas, setPlantillas] = useState({});
   const [trasladosHistorial, setTrasladosHistorial] = useState([]);
   const [sucursales, setSucursalesState] = useState([]);
   const [editingRetiro, setEditingRetiro] = useState(false);
@@ -60,36 +74,19 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [h, t, pRes, trasladosData, sucursalesRes] = await Promise.all([
-        getHistorial(orden.id),
+      const [historialRes, talleresData, trasladosRes, sucursalesRes] = await Promise.all([
+        jsonFetch(`/api/ordenes/${orden.id}/historial`).catch(() => ({ historial: [] })),
         getTalleres(),
-        fetch("/api/admin/plantillas-email").then(r => r.ok ? r.json() : Promise.resolve({ plantillas: [] })),
-        getTrasladosByOrden(orden.id),
+        jsonFetch(`/api/ordenes/${orden.id}/traslados`).catch(() => ({ traslados: [] })),
         getSucursales(),
       ]);
-      setHistorial(h);
-      setTalleresState(t);
-      const map = {};
-      (pRes.plantillas || []).forEach(p => { map[p.tipo] = p.cuerpo; });
-      setPlantillas(map);
-      setTrasladosHistorial(trasladosData);
+      setHistorial(historialRes.historial || []);
+      setTalleresState(talleresData);
+      setTrasladosHistorial(trasladosRes.traslados || []);
       setSucursalesState(sucursalesRes || []);
     } catch (e) {
       console.error(e);
     }
-  }
-
-  function buildPreview(tipo, extras = {}) {
-    const template = plantillas[tipo] || "";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-    const vars = {
-      clienteNombre: orden.cliente_nombre,
-      numeroOrden: formatNumeroOrden(orden.numero_orden),
-      tipoArticulo: orden.tipo_articulo,
-      trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
-      ...extras,
-    };
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
   }
 
   async function triggerNotify(type, extras = {}) {
@@ -101,7 +98,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
         type,
         data: {
           clienteTelefono: orden.cliente_telefono,
-          clienteEmail: orden.cliente_email,
           clienteNombre: orden.cliente_nombre,
           numeroOrden: formatNumeroOrden(orden.numero_orden),
           tipoArticulo: orden.tipo_articulo,
@@ -122,7 +118,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       return;
     }
     // Si pasa a ESPERANDO_APROBACION, mostrar panel de presupuesto
-    // (siempre mostrar para permitir notificar por email, incluso si ya hay monto)
+    // (siempre mostrar para permitir notificar por WhatsApp, incluso si ya hay monto)
     if (nuevoEstado === "ESPERANDO_APROBACION") {
       if (orden.monto_presupuesto) setMonto(String(orden.monto_presupuesto));
       if (orden.monto_presupuesto_taller) setMontoTaller(String(orden.monto_presupuesto_taller));
@@ -143,7 +139,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await cambiarEstado(orden.id, nuevoEstado);
+      await postEstado(orden.id, { action: "cambiar", nuevo_estado: nuevoEstado });
       onUpdated();
       onClose();
     } catch (e) {
@@ -157,7 +153,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     if (!tallerSelected) return;
     setLoading(true);
     try {
-      await asignarTaller(orden.id, tallerSelected);
+      await postEstado(orden.id, { action: "asignar_taller", taller_id: tallerSelected });
       onUpdated();
       onClose();
     } catch (e) {
@@ -168,13 +164,16 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function handlePresupuesto() {
-    if (!monto || parseFloat(monto) <= 0) return;
+    const montoNum = parseFloat(monto);
+    if (!Number.isFinite(montoNum) || montoNum <= 0) return;
+    const montoTallerNum = parseFloat(montoTaller);
+    const montoTallerSafe = Number.isFinite(montoTallerNum) && montoTallerNum > 0 ? montoTallerNum : null;
     setLoading(true);
     try {
-      await registrarPresupuesto(orden.id, parseFloat(monto), moneda, montoTaller ? parseFloat(montoTaller) : null);
-      if (notificarPresupuesto && orden.cliente_email) {
+      await postEstado(orden.id, { action: "presupuesto", monto: montoNum, moneda, monto_taller: montoTallerSafe });
+      if (notificarPresupuesto && orden.cliente_telefono) {
         try {
-          await triggerNotify("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
+          await triggerNotify("PRESUPUESTO", { monto: montoNum.toLocaleString("es-UY"), moneda: monedaPrefix(moneda) });
         } catch (e) {
           console.error("[Notify] Error al enviar presupuesto:", e);
         }
@@ -192,7 +191,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await aprobarPresupuesto(orden.id);
+      await postEstado(orden.id, { action: "aprobar" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -206,7 +205,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await rechazarPresupuesto(orden.id);
+      await postEstado(orden.id, { action: "rechazar" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -220,7 +219,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await cambiarEstado(orden.id, "LISTO_PARA_RETIRO");
+      await postEstado(orden.id, { action: "cambiar", nuevo_estado: "LISTO_PARA_RETIRO" });
 
       // Auto-create return transfer if pickup branch differs from current location (Task 5)
       if (orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id) {
@@ -239,7 +238,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
       // Only notify if the order doesn't need a return transfer
       // (if it does, notification will be sent when the return transfer is received)
       const needsRetorno = orden.sucursal_retiro_id && orden.sucursal_id && orden.sucursal_retiro_id !== orden.sucursal_id;
-      if (!needsRetorno && notificarRetiro && orden.cliente_email) {
+      if (!needsRetorno && notificarRetiro && orden.cliente_telefono) {
         try {
           await triggerNotify("LISTO_PARA_RETIRO");
         } catch (e) {
@@ -256,9 +255,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function handleEntrega() {
+    const montoNum = parseFloat(monto);
+    const montoFinal = Number.isFinite(montoNum) && montoNum > 0 ? montoNum : orden.monto_presupuesto;
     setLoading(true);
     try {
-      await entregarAlCliente(orden.id, monto ? parseFloat(monto) : orden.monto_presupuesto, metodoPago);
+      await postEstado(orden.id, { action: "entregar", monto_final: montoFinal, metodo_pago: metodoPago });
       onUpdated();
       onClose();
     } catch (e) {
@@ -272,7 +273,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     setLoading(true);
     setError(null);
     try {
-      await deleteOrden(orden.id);
+      await jsonFetch(`/api/ordenes/${orden.id}`, { method: "DELETE" });
       onUpdated();
       onClose();
     } catch (e) {
@@ -434,7 +435,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     onClick={async () => {
                       setLoading(true);
                       try {
-                        await updateSucursalRetiro(orden.id, retiroId);
+                        await jsonFetch(`/api/ordenes/${orden.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ sucursal_retiro_id: retiroId }),
+                        });
                         setEditingRetiro(false);
                         onUpdated();
                       } catch (e) {
@@ -493,12 +498,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 <label className="block text-xs text-slate-500 mb-1">Presupuesto taller</label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   min="0"
                   step="0.01"
                   placeholder="Monto del taller"
                   value={montoTaller}
                   onChange={(e) => setMontoTaller(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
                 />
               </div>
               <div>
@@ -514,32 +520,41 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   </select>
                   <input
                     type="number"
+                    inputMode="decimal"
                     min="0"
                     step="0.01"
                     placeholder="Monto"
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                    className="no-spinner flex-1 px-3 py-2 border rounded-lg text-sm"
                   />
                 </div>
               </div>
-              {orden.cliente_email && (
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificarPresupuesto}
-                    onChange={(e) => setNotificarPresupuesto(e.target.checked)}
-                    className="mt-0.5 rounded border-slate-300"
-                  />
-                  <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por email</span>
-                    {notificarPresupuesto && monto && (
-                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
-                        {buildPreview("PRESUPUESTO", { monto: parseFloat(monto).toLocaleString("es-UY"), moneda: monedaPrefix(moneda) })}
-                      </div>
-                    )}
-                  </div>
-                </label>
+              {orden.cliente_telefono && (
+                <>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notificarPresupuesto}
+                      onChange={(e) => setNotificarPresupuesto(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300"
+                    />
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    </div>
+                  </label>
+                  {notificarPresupuesto && (
+                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                      {renderPlantilla("PRESUPUESTO", {
+                        clienteNombre: orden.cliente_nombre,
+                        numeroOrden: formatNumeroOrden(orden.numero_orden),
+                        tipoArticulo: orden.tipo_articulo,
+                        moneda: monedaPrefix(moneda),
+                        monto: monto ? parseFloat(monto).toLocaleString("es-UY") : "",
+                      })}
+                    </pre>
+                  )}
+                </>
               )}
               <div className="flex gap-2">
                 <button onClick={handlePresupuesto} disabled={!monto || loading}
@@ -559,12 +574,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <div className="text-sm font-semibold text-green-900">Registrar entrega</div>
               <input
                 type="number"
+                inputMode="decimal"
                 min="0"
                 step="0.01"
                 placeholder={`Monto final (${orden.monto_presupuesto || ""})`}
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
+                className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
               />
               <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg text-sm">
@@ -588,23 +604,32 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           {showRetiro && (
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 space-y-3">
               <div className="text-sm font-semibold text-emerald-900">Marcar como listo para retiro</div>
-              {orden.cliente_email && (
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificarRetiro}
-                    onChange={(e) => setNotificarRetiro(e.target.checked)}
-                    className="mt-0.5 rounded border-slate-300"
-                  />
-                  <div className="text-xs text-slate-600">
-                    <span className="font-semibold">Notificar al cliente por email</span>
-                    {notificarRetiro && (
-                      <div className="mt-1 p-2 bg-white rounded border border-slate-200 text-[11px] text-slate-500 whitespace-pre-line">
-                        {buildPreview("LISTO_PARA_RETIRO")}
-                      </div>
-                    )}
-                  </div>
-                </label>
+              {orden.cliente_telefono && (
+                <>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notificarRetiro}
+                      onChange={(e) => setNotificarRetiro(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300"
+                    />
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold">Notificar al cliente por WhatsApp</span>
+                    </div>
+                  </label>
+                  {notificarRetiro && (
+                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                      {renderPlantilla("LISTO_PARA_RETIRO", {
+                        clienteNombre: orden.cliente_nombre,
+                        numeroOrden: formatNumeroOrden(orden.numero_orden),
+                        tipoArticulo: orden.tipo_articulo,
+                        trackingUrl: orden.tracking_token
+                          ? `${process.env.NEXT_PUBLIC_APP_URL || ""}/seguimiento/${orden.tracking_token}`
+                          : "",
+                      })}
+                    </pre>
+                  )}
+                </>
               )}
               <div className="flex gap-2">
                 <button onClick={handleRetiro} disabled={loading}

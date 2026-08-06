@@ -1,20 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { interpolate } from '@/lib/notifications'
 
-// Mocks para sendEmail y sendWhatsApp
-const mockSendEmail = vi.fn()
+// Mocks
 const mockSendWhatsApp = vi.fn()
 
-vi.mock('@/lib/notifications/email', () => ({
-  sendEmail: (...args) => mockSendEmail(...args),
-}))
 vi.mock('@/lib/notifications/whatsapp', () => ({
   sendWhatsApp: (...args) => mockSendWhatsApp(...args),
 }))
 
-// Mock Supabase admin para devolver plantillas
-const mockEmailRow = { asunto: 'Asunto {{numeroOrden}}', cuerpo: 'Hola {{clienteNombre}}' }
-const mockWaRow = { mensaje: 'WA {{clienteNombre}}' }
+// Mock Supabase admin — only plantillas_whatsapp_meta is queried now
+const mockMetaRow = {
+  template_name: 'presupuesto_ready_v2',
+  language_code: 'en',
+  param_keys: ['clienteNombre', 'numeroOrden', 'tipoArticulo', 'moneda', 'monto'],
+}
 
 vi.mock('@/lib/supabase-admin', () => ({
   getSupabaseAdmin: () => ({
@@ -22,8 +20,9 @@ vi.mock('@/lib/supabase-admin', () => ({
       select: () => ({
         eq: () => ({
           single: () => {
-            if (table === 'plantillas_email') return Promise.resolve({ data: mockEmailRow, error: null })
-            if (table === 'plantillas_whatsapp') return Promise.resolve({ data: mockWaRow, error: null })
+            if (table === 'plantillas_whatsapp_meta') {
+              return Promise.resolve({ data: mockMetaRow, error: null })
+            }
             return Promise.resolve({ data: null, error: null })
           },
         }),
@@ -32,88 +31,71 @@ vi.mock('@/lib/supabase-admin', () => ({
   }),
 }))
 
-describe('interpolate', () => {
-  it('replaces known variables', () => {
-    expect(interpolate('Hola {{nombre}}', { nombre: 'Juan' })).toBe('Hola Juan')
-  })
-  it('keeps unknown variables as placeholder', () => {
-    expect(interpolate('{{a}} {{b}}', { a: 'x' })).toBe('x {{b}}')
-  })
-  it('replaces multiple occurrences', () => {
-    expect(interpolate('{{n}} y {{n}}', { n: 'X' })).toBe('X y X')
-  })
-  it('handles template with no variables', () => {
-    expect(interpolate('Sin', { n: 'J' })).toBe('Sin')
-  })
-  it('handles empty vars object', () => {
-    expect(interpolate('{{n}}', {})).toBe('{{n}}')
-  })
-})
-
 describe('sendNotification', () => {
   beforeEach(() => {
-    mockSendEmail.mockReset()
     mockSendWhatsApp.mockReset()
-    mockSendEmail.mockResolvedValue()
-    mockSendWhatsApp.mockResolvedValue()
-  })
-
-  it('envía por email si hay clienteEmail', async () => {
-    const { sendNotification } = await import('@/lib/notifications')
-    await sendNotification('PRESUPUESTO', {
-      clienteEmail: 'a@b.com',
-      clienteNombre: 'Ana',
-      numeroOrden: '123',
-    })
-    expect(mockSendEmail).toHaveBeenCalledWith({
-      to: 'a@b.com',
-      subject: 'Asunto 123',
-      body: 'Hola Ana',
-    })
+    mockSendWhatsApp.mockResolvedValue('wamid.abc123')
   })
 
   it('envía por WhatsApp si hay clienteTelefono', async () => {
     const { sendNotification } = await import('@/lib/notifications')
     await sendNotification('PRESUPUESTO', {
-      clienteTelefono: '099123456',
-      clienteNombre: 'Ana',
-    })
-    expect(mockSendWhatsApp).toHaveBeenCalledWith({
-      to: '099123456',
-      body: 'WA Ana',
-    })
-  })
-
-  it('envía por ambos canales si hay email y teléfono', async () => {
-    const { sendNotification } = await import('@/lib/notifications')
-    await sendNotification('PRESUPUESTO', {
-      clienteEmail: 'a@b.com',
-      clienteTelefono: '099',
+      clienteTelefono: '59899123456',
       clienteNombre: 'Ana',
       numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
     })
-    expect(mockSendEmail).toHaveBeenCalled()
-    expect(mockSendWhatsApp).toHaveBeenCalled()
+    expect(mockSendWhatsApp).toHaveBeenCalledWith({
+      to: '59899123456',
+      templateName: 'presupuesto_ready_v2',
+      languageCode: 'en',
+      parameters: ['Ana', '123', 'Reloj', 'UYU', '3500'],
+    })
   })
 
-  it('no envía nada si no hay email ni teléfono', async () => {
+  it('no envía nada si no hay clienteTelefono', async () => {
     const { sendNotification } = await import('@/lib/notifications')
     await sendNotification('PRESUPUESTO', { clienteNombre: 'Ana' })
-    expect(mockSendEmail).not.toHaveBeenCalled()
     expect(mockSendWhatsApp).not.toHaveBeenCalled()
   })
 
-  it('si email falla, WhatsApp igual se envía', async () => {
-    mockSendEmail.mockRejectedValue(new Error('boom'))
-    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+  it('ignora silenciosamente clienteEmail (backward compat con callers viejos)', async () => {
     const { sendNotification } = await import('@/lib/notifications')
     await sendNotification('PRESUPUESTO', {
       clienteEmail: 'a@b.com',
-      clienteTelefono: '099',
+      clienteTelefono: '59899123456',
       clienteNombre: 'Ana',
       numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
     })
-    expect(mockSendWhatsApp).toHaveBeenCalled()
+    // Solo WhatsApp se llama. El email se ignora.
+    expect(mockSendWhatsApp).toHaveBeenCalledOnce()
+    expect(mockSendWhatsApp).toHaveBeenCalledWith({
+      to: '59899123456',
+      templateName: 'presupuesto_ready_v2',
+      languageCode: 'en',
+      parameters: ['Ana', '123', 'Reloj', 'UYU', '3500'],
+    })
+  })
+
+  it('loguea el error si WhatsApp falla pero no propaga', async () => {
+    mockSendWhatsApp.mockRejectedValue(new Error('boom'))
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { sendNotification } = await import('@/lib/notifications')
+    // resolves without throwing — non-propagation is asserted by the test not rejecting
+    await sendNotification('PRESUPUESTO', {
+      clienteTelefono: '59899123456',
+      clienteNombre: 'Ana',
+      numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
+    })
+    expect(err).toHaveBeenCalled()
     err.mockRestore()
   })
 })

@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getMarcas, crearMarca, updateMarca, deleteMarca } from "@/lib/data";
+import { getMarcas } from "@/lib/data";
+
+// Marcas writes are admin-only at the RLS level — they go through /api/admin/marcas.
+async function jsonFetch(url, opts) {
+  const res = await fetch(url, opts)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  return data
+}
 
 export default function MarcasPage() {
   const [marcas, setMarcas] = useState([]);
@@ -29,7 +37,11 @@ export default function MarcasPage() {
     setLoading(true);
     setError(null);
     try {
-      await crearMarca({ nombre: nombre.trim() });
+      await jsonFetch("/api/admin/marcas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombre.trim() }),
+      });
       setNombre("");
       await loadMarcas();
     } catch (e) {
@@ -44,7 +56,11 @@ export default function MarcasPage() {
     setLoading(true);
     setError(null);
     try {
-      await updateMarca(id, { nombre: editingNombre.trim() });
+      await jsonFetch(`/api/admin/marcas/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: editingNombre.trim() }),
+      });
       setEditingId(null);
       setEditingNombre("");
       await loadMarcas();
@@ -58,7 +74,11 @@ export default function MarcasPage() {
   async function handleToggleActivo(id, activo) {
     setLoading(true);
     try {
-      await updateMarca(id, { activo: !activo });
+      await jsonFetch(`/api/admin/marcas/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activo: !activo }),
+      });
       await loadMarcas();
     } catch (e) {
       setError(e.message);
@@ -71,7 +91,7 @@ export default function MarcasPage() {
     if (!confirm("¿Eliminar esta marca?")) return;
     setLoading(true);
     try {
-      await deleteMarca(id);
+      await jsonFetch(`/api/admin/marcas/${id}`, { method: "DELETE" });
       await loadMarcas();
     } catch (e) {
       setError(e.message);

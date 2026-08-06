@@ -2,7 +2,7 @@ import "./globals.css"
 import { SessionProvider } from "next-auth/react"
 
 export const metadata = {
-  title: "RepairTrack — Gestión de Reparaciones",
+  title: "Gestión de Reparaciones",
   description: "Sistema de gestión para relojerías y joyerías",
   manifest: "/manifest.json",
   themeColor: "#0f172a",

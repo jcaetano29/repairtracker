@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -10,28 +10,47 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [nombreNegocio, setNombreNegocio] = useState("")
+
+  useEffect(() => {
+    fetch("/api/configuracion")
+      .then((r) => r.json())
+      .then((d) => setNombreNegocio(d.configuracion?.nombre_negocio || ""))
+      .catch(() => {})
+  }, [])
 
   async function handleLogin(e) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const result = await signIn("credentials", {
-      username,
-      password,
-      redirect: false,
-    })
+    try {
+      const result = await signIn("credentials", {
+        username,
+        password,
+        redirect: false,
+      })
 
-    if (result?.error) {
-      setError("Usuario o contraseña incorrectos")
-      setLoading(false)
-    } else {
+      if (result?.error) {
+        setError("Usuario o contraseña incorrectos")
+        setLoading(false)
+        return
+      }
+
       // Fetch session to determine role-based redirect
-      const res = await fetch("/api/auth/session")
-      const session = await res.json()
+      let session = null
+      try {
+        const res = await fetch("/api/auth/session")
+        if (res.ok) session = await res.json()
+      } catch {
+        // Network error reading session — fall back to default redirect.
+      }
       const dest = session?.user?.role === "cadete" ? "/cadete" : "/"
       router.push(dest)
       router.refresh()
+    } catch (err) {
+      setError(err?.message || "Error al iniciar sesión")
+      setLoading(false)
     }
   }
 
@@ -40,7 +59,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
-          <h1 className="text-xl font-bold text-slate-900 mt-2">RepairTrack</h1>
+          <h1 className="text-xl font-bold text-slate-900 mt-2">{nombreNegocio || "RepairTrack"}</h1>
           <p className="text-sm text-slate-500">Iniciá sesión para continuar</p>
         </div>
 

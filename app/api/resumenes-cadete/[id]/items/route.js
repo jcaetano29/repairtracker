@@ -64,7 +64,8 @@ export async function POST(request, { params }) {
     return NextResponse.json({ item })
   } catch (e) {
     console.error("[/api/resumenes-cadete/[id]/items] POST error:", e)
-    return NextResponse.json({ error: "Error al agregar item" }, { status: 500 })
+    const status = e.message?.includes("ya esta asignada") ? 409 : 500
+    return NextResponse.json({ error: e.message || "Error al agregar item" }, { status })
   }
 }
 

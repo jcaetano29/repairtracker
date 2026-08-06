@@ -14,6 +14,10 @@ ALTER TABLE clientes ADD COLUMN IF NOT EXISTS telefono_e164 TEXT;
 -- 2-digit dials (54 AR, 55 BR, 56 CL, 34 ES), then 1 (US).
 UPDATE clientes
 SET telefono_e164 = CASE
+  -- UY con 0 de tronco pegado al dial (ej "598099123456") — típico cuando el
+  -- usuario tipeó el 0 en un input que ya tenía el dial 598 separado.
+  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^5980\d{8}$'
+    THEN '+598' || substring(regexp_replace(telefono, '\D', '', 'g') from 5)
   WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^598\d+$'
        AND length(regexp_replace(telefono, '\D', '', 'g')) > 8
     THEN '+' || regexp_replace(telefono, '\D', '', 'g')

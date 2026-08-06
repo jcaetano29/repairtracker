@@ -41,6 +41,7 @@ export default function DashboardPage() {
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
   const [showResumenCadete, setShowResumenCadete] = useState(false)
   const [nombreNegocio, setNombreNegocio] = useState("")
+  const [hayMensajesNuevos, setHayMensajesNuevos] = useState(false)
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -99,6 +100,24 @@ export default function DashboardPage() {
     const interval = setInterval(loadData, 30000)
     return () => clearInterval(interval)
   }, [loadData])
+
+  // Badge de WhatsApp sin leer — mismo ritmo de poll que el resto del dashboard.
+  useEffect(() => {
+    async function checkEstado() {
+      try {
+        const res = await fetch("/api/whatsapp/estado")
+        if (res.ok) {
+          const data = await res.json()
+          setHayMensajesNuevos(!!data.hayNuevos)
+        }
+      } catch {
+        // Silencioso — no bloquea el resto del dashboard.
+      }
+    }
+    checkEstado()
+    const interval = setInterval(checkEstado, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Cleanup search timeout on unmount
   useEffect(() => {
@@ -159,10 +178,15 @@ export default function DashboardPage() {
             </button>
             <Link
               href="/whatsapp"
-              className="px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
+              className="relative px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
             >
               <WhatsAppIcon className="w-4 h-4" />
               WhatsApp
+              {hayMensajesNuevos && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-slate-900">
+                  1
+                </span>
+              )}
             </Link>
             {isDueno && (
               <Link

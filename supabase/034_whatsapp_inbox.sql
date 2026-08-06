@@ -15,16 +15,16 @@ ALTER TABLE clientes ADD COLUMN IF NOT EXISTS telefono_e164 TEXT;
 UPDATE clientes
 SET telefono_e164 = CASE
   WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^598\d+$'
-       AND length(regexp_replace(telefono, '\D', '', 'g')) > 9
-    THEN '+' || regexp_replace(telefono, '\D', '', 'g')
-  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^595\d+$'
-       AND length(regexp_replace(telefono, '\D', '', 'g')) > 9
-    THEN '+' || regexp_replace(telefono, '\D', '', 'g')
-  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^(54|55|56|34)\d+$'
        AND length(regexp_replace(telefono, '\D', '', 'g')) > 8
     THEN '+' || regexp_replace(telefono, '\D', '', 'g')
-  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^1\d+$'
+  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^595\d+$'
+       AND length(regexp_replace(telefono, '\D', '', 'g')) > 8
+    THEN '+' || regexp_replace(telefono, '\D', '', 'g')
+  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^(54|55|56|34)\d+$'
        AND length(regexp_replace(telefono, '\D', '', 'g')) > 7
+    THEN '+' || regexp_replace(telefono, '\D', '', 'g')
+  WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^1\d+$'
+       AND length(regexp_replace(telefono, '\D', '', 'g')) > 6
     THEN '+' || regexp_replace(telefono, '\D', '', 'g')
   -- Legado uruguayo sin dial, con 0 de tronco, ej "099123456"
   WHEN regexp_replace(telefono, '\D', '', 'g') ~ '^0\d{8}$'

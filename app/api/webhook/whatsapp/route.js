@@ -1,6 +1,10 @@
 // app/api/webhook/whatsapp/route.js
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import { NextResponse } from "next/server"
+import { normalizePhoneToE164 } from "@/lib/phone"
+import { verifyWebhookSignature, extractIncomingMessages } from "@/lib/whatsapp-webhook"
+
+export const runtime = "nodejs"
 
 /**
  * GET — Meta webhook verification.
@@ -20,12 +24,24 @@ export async function GET(request) {
 }
 
 /**
- * POST — Meta status updates (sent, delivered, read, failed).
- * Always returns 200 — Meta retries on other status codes.
+ * POST — Meta status updates (sent, delivered, read, failed) and incoming
+ * client messages. Always returns 200 — Meta retries on other status codes.
  */
 export async function POST(request) {
+  const rawBody = await request.text()
+  const appSecret = process.env.WHATSAPP_APP_SECRET
+
+  if (appSecret) {
+    const signature = request.headers.get("x-hub-signature-256")
+    if (!verifyWebhookSignature(rawBody, signature, appSecret)) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+    }
+  } else {
+    console.warn("[Webhook WhatsApp] WHATSAPP_APP_SECRET no configurado — firma no verificada")
+  }
+
   try {
-    const body = await request.json()
+    const body = JSON.parse(rawBody)
     console.log("[Webhook WhatsApp] Payload recibido:", JSON.stringify(body))
     const entries = body.entry ?? []
 
@@ -37,6 +53,15 @@ export async function POST(request) {
           console.log("[Webhook WhatsApp] Status:", JSON.stringify(status))
           await processStatus(status)
         }
+      }
+    }
+
+    const messages = extractIncomingMessages(body)
+    for (const msg of messages) {
+      try {
+        await persistIncomingMessage(msg)
+      } catch (e) {
+        console.error("[Webhook WhatsApp] Error procesando mensaje entrante:", e?.message)
       }
     }
   } catch (e) {
@@ -72,5 +97,48 @@ async function processStatus(status) {
 
   if (error) {
     console.error("[Webhook WhatsApp] Error updating notification:", error)
+  }
+}
+
+async function persistIncomingMessage(msg) {
+  const telefonoE164 = normalizePhoneToE164(msg.waId)
+  if (!telefonoE164) return
+
+  const supabase = getSupabaseAdmin()
+  const { data: cliente } = await supabase
+    .from("clientes")
+    .select("id")
+    .eq("telefono_e164", telefonoE164)
+    .maybeSingle()
+
+  if (!cliente) return // Número desconocido — se descarta.
+
+  const { data: conversacion, error: convError } = await supabase
+    .from("whatsapp_conversaciones")
+    .upsert(
+      {
+        cliente_id: cliente.id,
+        telefono_e164: telefonoE164,
+        last_message_at: new Date().toISOString(),
+        last_message_preview: msg.type === "text" ? (msg.body?.slice(0, 120) ?? "") : "📎 Mensaje multimedia",
+      },
+      { onConflict: "cliente_id" }
+    )
+    .select("id")
+    .single()
+
+  if (convError || !conversacion) return
+
+  const { error: insertError } = await supabase.from("whatsapp_mensajes").insert({
+    conversacion_id: conversacion.id,
+    direccion: "entrante",
+    wa_message_id: msg.waMessageId,
+    tipo: msg.type,
+    body: msg.body,
+  })
+
+  // 23505 = unique_violation en wa_message_id — Meta reintentó un webhook ya procesado.
+  if (insertError && insertError.code !== "23505") {
+    console.error("[Webhook WhatsApp] Error insertando mensaje:", insertError.message)
   }
 }

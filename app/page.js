@@ -11,6 +11,7 @@ import { DetalleOrdenModal } from "@/components/DetalleOrdenModal"
 import { TrasladosBadge } from "@/components/TrasladosBadge"
 import { TrasladosPanel } from "@/components/TrasladosPanel"
 import { ResumenCadetePanel } from "@/components/ResumenCadetePanel"
+import { WhatsAppIcon } from "@/components/WhatsAppIcon"
 import { ESTADOS, getNivelRetraso, formatNumeroOrden } from "@/lib/constants"
 import { getTalleres, getSucursales } from "@/lib/data"
 import { formatMonto } from "@/lib/currency"
@@ -156,6 +157,13 @@ export default function DashboardPage() {
             >
               🚚 Cadete
             </button>
+            <Link
+              href="/whatsapp"
+              className="px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
+            >
+              <WhatsAppIcon className="w-4 h-4" />
+              WhatsApp
+            </Link>
             {isDueno && (
               <Link
                 href="/admin"

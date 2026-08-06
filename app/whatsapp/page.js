@@ -26,6 +26,7 @@ export default function WhatsAppPage() {
       const res = await fetch("/api/whatsapp/conversaciones");
       const data = res.ok ? await res.json() : { conversaciones: [] };
       setConversaciones(data.conversaciones ?? []);
+      fetch("/api/whatsapp/estado/marcar-leido", { method: "POST" }).catch(() => {});
     } catch (e) {
       console.error("Error cargando conversaciones:", e);
     } finally {

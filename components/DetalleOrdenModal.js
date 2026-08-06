@@ -5,6 +5,7 @@ import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
 import { getTalleres, getSucursales } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
+import { generarTicketIngreso } from "@/lib/ticket";
 
 // ordenes/clientes/historial_estados are admin-only — all writes/reads go via /api.
 async function jsonFetch(url, opts) {
@@ -267,6 +268,14 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleReimprimir() {
+    const res = await fetch("/api/configuracion");
+    const config = await res.json();
+    const nombreNegocio = config.nombre_negocio || "RepairTrack";
+    const cliente = { nombre: orden.cliente_nombre, telefono: orden.cliente_telefono };
+    generarTicketIngreso(orden, cliente, nombreNegocio);
   }
 
   async function handleDelete() {
@@ -715,6 +724,16 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               </div>
             </div>
           )}
+
+          {/* Reimprimir ticket */}
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              onClick={handleReimprimir}
+              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              🖨️ Reimprimir ticket
+            </button>
+          </div>
 
           {/* Eliminar orden — admins siempre, employees solo en INGRESADO */}
           {(isDueno || orden.estado === "INGRESADO") && (

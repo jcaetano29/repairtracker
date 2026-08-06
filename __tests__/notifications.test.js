@@ -161,4 +161,24 @@ describe('sendNotification', () => {
     })
     expect(mockMensajeInsert).not.toHaveBeenCalled()
   })
+
+  it('loguea el error si el insert en whatsapp_mensajes falla, pero no propaga', async () => {
+    mockMensajeInsert.mockResolvedValueOnce({ error: { message: 'db down' } })
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { sendNotification } = await import('@/lib/notifications')
+    await sendNotification('PRESUPUESTO', {
+      clienteTelefono: '59899123456',
+      clienteNombre: 'Ana',
+      numeroOrden: '123',
+      tipoArticulo: 'Reloj',
+      moneda: 'UYU',
+      monto: '3500',
+    })
+    expect(mockMensajeInsert).toHaveBeenCalledOnce()
+    expect(err).toHaveBeenCalledWith(
+      '[Notifications] Error inserting outbound whatsapp message:',
+      { message: 'db down' }
+    )
+    err.mockRestore()
+  })
 })

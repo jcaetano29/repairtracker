@@ -105,11 +105,16 @@ async function persistIncomingMessage(msg) {
   if (!telefonoE164) return
 
   const supabase = getSupabaseAdmin()
-  const { data: cliente } = await supabase
+  const { data: cliente, error: clienteError } = await supabase
     .from("clientes")
     .select("id")
     .eq("telefono_e164", telefonoE164)
     .maybeSingle()
+
+  if (clienteError) {
+    console.error("[Webhook WhatsApp] Error buscando cliente:", clienteError.message)
+    return
+  }
 
   if (!cliente) return // Número desconocido — se descarta.
 
@@ -127,7 +132,12 @@ async function persistIncomingMessage(msg) {
     .select("id")
     .single()
 
-  if (convError || !conversacion) return
+  if (convError) {
+    console.error("[Webhook WhatsApp] Error actualizando conversación:", convError.message)
+    return
+  }
+
+  if (!conversacion) return
 
   const { error: insertError } = await supabase.from("whatsapp_mensajes").insert({
     conversacion_id: conversacion.id,

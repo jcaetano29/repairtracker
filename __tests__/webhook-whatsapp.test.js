@@ -10,6 +10,9 @@ const mockUpdate = vi.fn().mockReturnValue({
 
 // clientes/whatsapp_conversaciones/whatsapp_mensajes mocks — overridable per test.
 let mockClienteResult = { data: { id: 'cliente-1' }, error: null }
+// Overridable per test to simulate a synchronous throw (e.g. a client library
+// error), distinct from mockClienteResult's normal resolved-value shape.
+let mockClienteMaybeSingle = () => Promise.resolve(mockClienteResult)
 let mockConversacionResult = { data: { id: 'conv-1' }, error: null }
 const mockMensajeInsert = vi.fn().mockResolvedValue({ error: null })
 
@@ -22,7 +25,7 @@ vi.mock('@/lib/supabase-admin', () => ({
       if (table === 'clientes') {
         return {
           select: () => ({
-            eq: () => ({ maybeSingle: () => Promise.resolve(mockClienteResult) }),
+            eq: () => ({ maybeSingle: () => mockClienteMaybeSingle() }),
           }),
         }
       }
@@ -50,6 +53,7 @@ beforeEach(() => {
   mockUpdate.mockClear()
   mockMensajeInsert.mockClear()
   mockClienteResult = { data: { id: 'cliente-1' }, error: null }
+  mockClienteMaybeSingle = () => Promise.resolve(mockClienteResult)
   mockConversacionResult = { data: { id: 'conv-1' }, error: null }
 })
 
@@ -247,7 +251,12 @@ describe('POST /api/webhook/whatsapp — incoming messages', () => {
   })
 
   it('does not fail the whole request if persisting one message errors', async () => {
-    mockClienteResult = { data: undefined, error: new Error('boom') } // will throw when destructured downstream is avoided; force error path
+    // Force a synchronous throw inside persistIncomingMessage so this genuinely
+    // exercises the per-message try/catch in the POST handler, rather than the
+    // ordinary "no client matched" early-return path.
+    mockClienteMaybeSingle = () => {
+      throw new Error('boom')
+    }
     const { POST } = await import('@/app/api/webhook/whatsapp/route')
 
     const rawBody = JSON.stringify({

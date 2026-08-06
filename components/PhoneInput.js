@@ -78,13 +78,7 @@ export default function PhoneInput({
 
   function handleNumberChange(e) {
     // Digits only — the dial prefix lives in the selector. Allowing "+" here would produce values like "598+99".
-    let cleaned = e.target.value.replace(/\D/g, "")
-    // Uruguay/Argentina/Brasil use a trunk "0" for domestic calls that's not part of E.164.
-    // If user types it, drop it — otherwise it ends up concatenated after the dial code
-    // (e.g. "598" + "099..." → "598099...") and breaks WhatsApp wa_id matching.
-    if (["UY", "AR", "BR"].includes(country.code) && cleaned.startsWith("0")) {
-      cleaned = cleaned.replace(/^0+/, "")
-    }
+    const cleaned = e.target.value.replace(/\D/g, "")
     setNumber(cleaned)
     emit(cleaned === "" ? "" : country.dial + cleaned)
   }

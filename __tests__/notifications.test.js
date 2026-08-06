@@ -17,7 +17,7 @@ const mockMetaRow = {
 }
 const mockPreviewRow = { mensaje: 'Hola {{clienteNombre}}, tu presupuesto de {{tipoArticulo}} está listo.' }
 const mockMensajeInsert = vi.fn().mockResolvedValue({ error: null })
-let mockClienteResult = { data: { id: 'cliente-1' }, error: null }
+let mockClienteResult = { data: [{ id: 'cliente-1' }], error: null }
 
 vi.mock('@/lib/supabase-admin', () => ({
   getSupabaseAdmin: () => ({
@@ -29,7 +29,7 @@ vi.mock('@/lib/supabase-admin', () => ({
         return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: mockPreviewRow, error: null }) }) }) }
       }
       if (table === 'clientes') {
-        return { select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve(mockClienteResult) }) }) }
+        return { select: () => ({ eq: () => ({ order: () => ({ limit: () => Promise.resolve(mockClienteResult) }) }) }) }
       }
       if (table === 'whatsapp_conversaciones') {
         return { upsert: () => ({ select: () => ({ single: () => Promise.resolve({ data: { id: 'conv-1' }, error: null }) }) }) }
@@ -47,7 +47,7 @@ describe('sendNotification', () => {
     mockSendWhatsApp.mockReset()
     mockSendWhatsApp.mockResolvedValue('wamid.abc123')
     mockMensajeInsert.mockClear()
-    mockClienteResult = { data: { id: 'cliente-1' }, error: null }
+    mockClienteResult = { data: [{ id: 'cliente-1' }], error: null }
   })
 
   it('envía por WhatsApp si hay clienteTelefono', async () => {
@@ -149,7 +149,7 @@ describe('sendNotification', () => {
   })
 
   it('no registra el mensaje saliente si el teléfono no matchea ningún cliente', async () => {
-    mockClienteResult = { data: null, error: null }
+    mockClienteResult = { data: [], error: null }
     const { sendNotification } = await import('@/lib/notifications')
     await sendNotification('PRESUPUESTO', {
       clienteTelefono: '59899123456',

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { buscarClientes, crearCliente } from "@/lib/data"
+import { buscarClientes, crearCliente, buscarClientePorTelefonoE164 } from "@/lib/data"
+import { normalizePhoneToE164 } from "@/lib/phone"
 
 export async function GET(request) {
   const session = await auth()
@@ -31,6 +32,16 @@ export async function POST(request) {
   }
 
   try {
+    const telefonoE164 = normalizePhoneToE164(telefono)
+    if (telefonoE164) {
+      const existing = await buscarClientePorTelefonoE164(telefonoE164)
+      if (existing) {
+        return NextResponse.json(
+          { error: "Ya existe un cliente con este teléfono", clienteExistente: existing },
+          { status: 409 }
+        )
+      }
+    }
     const cliente = await crearCliente({ nombre, telefono, email, documento })
     return NextResponse.json({ cliente })
   } catch (e) {

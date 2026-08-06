@@ -105,17 +105,21 @@ async function persistIncomingMessage(msg) {
   if (!telefonoE164) return
 
   const supabase = getSupabaseAdmin()
-  const { data: cliente, error: clienteError } = await supabase
+  // Si por algún motivo hay más de un cliente con el mismo telefono_e164 (histórico
+  // pre-UNIQUE), tomamos el más antiguo — es el que probablemente ya tiene la conversación.
+  const { data: clientes, error: clienteError } = await supabase
     .from("clientes")
     .select("id")
     .eq("telefono_e164", telefonoE164)
-    .maybeSingle()
+    .order("created_at", { ascending: true })
+    .limit(1)
 
   if (clienteError) {
     console.error("[Webhook WhatsApp] Error buscando cliente:", clienteError.message)
     return
   }
 
+  const cliente = clientes?.[0]
   if (!cliente) return // Número desconocido — se descarta.
 
   const { data: conversacion, error: convError } = await supabase

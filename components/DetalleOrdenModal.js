@@ -679,15 +679,21 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             </div>
           )}
 
-          {/* Transiciones genéricas (todos los estados excepto ESPERANDO_APROBACION) */}
-          {orden.estado !== "ESPERANDO_APROBACION" && siguientes.length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
+          {/* Transiciones genéricas */}
+          {siguientes.filter((s) => {
+            if (orden.estado === "ESPERANDO_APROBACION" && (s === "EN_REPARACION" || s === "RECHAZADO")) return false;
+            return !estadosBloqueados.includes(s);
+          }).length > 0 && !showAsignar && !showPresupuesto && !showEntrega && !showRetiro && (
             <div>
               <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
                 Cambiar estado
               </div>
               <div className="flex flex-wrap gap-2">
                 {siguientes
-                  .filter((s) => !estadosBloqueados.includes(s))
+                  .filter((s) => {
+                    if (orden.estado === "ESPERANDO_APROBACION" && (s === "EN_REPARACION" || s === "RECHAZADO")) return false;
+                    return !estadosBloqueados.includes(s);
+                  })
                   .map((s) => {
                     const next = ESTADOS[s];
                     return (

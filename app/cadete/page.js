@@ -161,7 +161,7 @@ export default function CadetePage() {
                       onClick={() => toggleCheck(item.item_id)}
                       className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50"
+                          ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
                           : "border-slate-200 dark:border-slate-700"
                       }`}
                     >
@@ -203,7 +203,7 @@ export default function CadetePage() {
                       onClick={() => toggleCheck(item.item_id)}
                       className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50"
+                          ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
                           : "border-slate-200 dark:border-slate-700"
                       }`}
                     >
@@ -245,7 +245,7 @@ export default function CadetePage() {
                     onClick={() => toggleCheck(item.item_id)}
                     className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                       isChecked
-                        ? "border-green-300 bg-green-50"
+                        ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
                         : "border-slate-200 dark:border-slate-700"
                     }`}
                   >

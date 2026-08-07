@@ -39,21 +39,21 @@ export default async function SeguimientoPage({ params }) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 py-12 px-4">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 py-12 px-4">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
-          <h1 className="text-lg font-bold text-slate-900 mt-2">{nombreNegocio}</h1>
+          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-2">{nombreNegocio}</h1>
           <p className="text-base text-slate-500">Seguimiento de orden</p>
         </div>
 
         {/* Order card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-4">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-sm text-slate-500 font-semibold uppercase tracking-wider">Orden</div>
-              <div className="text-3xl font-extrabold text-slate-900 font-mono">
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono">
                 #{formatNumeroOrden(orden.numero_orden)}
               </div>
             </div>
@@ -68,18 +68,18 @@ export default async function SeguimientoPage({ params }) {
           <div className="space-y-3 text-base">
             <div className="flex gap-2">
               <span className="text-slate-500 w-24 flex-shrink-0">Cliente</span>
-              <span className="font-semibold text-slate-900">{orden.clientes?.nombre}</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{orden.clientes?.nombre}</span>
             </div>
             <div className="flex gap-2">
               <span className="text-slate-500 w-24 flex-shrink-0">Artículo</span>
-              <span className="text-slate-700">
+              <span className="text-slate-700 dark:text-slate-300">
                 {orden.tipo_articulo}{orden.marca ? ` — ${orden.marca}` : ""}
               </span>
             </div>
             {orden.material && (
               <div className="flex gap-2">
                 <span className="text-slate-500 w-24 flex-shrink-0">Material</span>
-                <span className="text-slate-700">
+                <span className="text-slate-700 dark:text-slate-300">
                   {orden.material === "otro" ? orden.material_otro : orden.material.charAt(0).toUpperCase() + orden.material.slice(1)}
                   {orden.peso_gramos != null ? ` — ${orden.peso_gramos} g` : ""}
                 </span>
@@ -88,17 +88,17 @@ export default async function SeguimientoPage({ params }) {
             {orden.talleres?.nombre && ["EN_TALLER", "ESPERANDO_APROBACION", "EN_REPARACION", "LISTO_EN_TALLER"].includes(orden.estado) && (
               <div className="flex gap-2">
                 <span className="text-slate-500 w-24 flex-shrink-0">Taller</span>
-                <span className="text-slate-700">{orden.talleres.nombre}</span>
+                <span className="text-slate-700 dark:text-slate-300">{orden.talleres.nombre}</span>
               </div>
             )}
             <div className="flex gap-2">
               <span className="text-slate-500 w-24 flex-shrink-0">Ingreso</span>
-              <span className="text-slate-700">{formatFecha(orden.fecha_ingreso)}</span>
+              <span className="text-slate-700 dark:text-slate-300">{formatFecha(orden.fecha_ingreso)}</span>
             </div>
             {orden.fecha_entrega_estimada && (
               <div className="flex gap-2">
                 <span className="text-slate-500 w-24 flex-shrink-0">Entrega</span>
-                <span className="text-slate-700">{formatFecha(orden.fecha_entrega_estimada)}</span>
+                <span className="text-slate-700 dark:text-slate-300">{formatFecha(orden.fecha_entrega_estimada)}</span>
               </div>
             )}
           </div>
@@ -131,7 +131,7 @@ export default async function SeguimientoPage({ params }) {
         )}
 
         {/* Timeline */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
           <div className="text-sm text-slate-500 font-semibold uppercase tracking-wider mb-4">Progreso</div>
           <div className="space-y-4">
             {timeline.map((step, i) => (
@@ -140,13 +140,13 @@ export default async function SeguimientoPage({ params }) {
                   className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
                     step.done
                       ? "bg-indigo-500 text-white"
-                      : "bg-slate-100 text-slate-300"
+                      : "bg-slate-100 dark:bg-slate-950 text-slate-300"
                   }`}
                 >
                   {step.done ? "✓" : "○"}
                 </div>
                 <div className="flex-1">
-                  <div className={`text-base font-semibold ${step.done ? "text-slate-900" : "text-slate-300"}`}>
+                  <div className={`text-base font-semibold ${step.done ? "text-slate-900 dark:text-slate-100" : "text-slate-300"}`}>
                     {step.label}
                   </div>
                   {step.fecha && (

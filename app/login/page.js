@@ -55,11 +55,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm p-8">
         <div className="text-center mb-8">
           <span className="text-4xl">⌚</span>
-          <h1 className="text-xl font-bold text-slate-900 mt-2">{nombreNegocio || "RepairTrack"}</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-2">{nombreNegocio || "RepairTrack"}</h1>
           <p className="text-sm text-slate-500">Iniciá sesión para continuar</p>
         </div>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
               autoFocus
               autoComplete="username"
               disabled={loading}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               placeholder="usuario"
             />
           </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
               disabled={loading}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               placeholder="••••••••"
             />
           </div>

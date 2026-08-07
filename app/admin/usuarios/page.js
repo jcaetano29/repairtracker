@@ -90,7 +90,7 @@ export default function UsuariosPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Usuarios</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Usuarios</h2>
           <p className="text-sm text-slate-500 mt-0.5">Gestioná el acceso al sistema</p>
         </div>
         <button
@@ -113,8 +113,8 @@ export default function UsuariosPage() {
       )}
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
-          <h3 className="font-semibold text-slate-900 mb-4">Crear nuevo usuario</h3>
+        <form onSubmit={handleCreate} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-4">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">Crear nuevo usuario</h3>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
@@ -125,7 +125,7 @@ export default function UsuariosPage() {
                 required
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 placeholder="nombreusuario"
               />
             </div>
@@ -139,7 +139,7 @@ export default function UsuariosPage() {
                 minLength={6}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 placeholder="mínimo 6 caracteres"
               />
             </div>
@@ -150,7 +150,7 @@ export default function UsuariosPage() {
               <select
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value, sucursal_id: "" })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
               >
                 <option value="employee">Employee</option>
                 <option value="cadete">Cadete</option>
@@ -167,7 +167,7 @@ export default function UsuariosPage() {
                 required
                 value={form.sucursal_id}
                 onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
               >
                 <option value="">Seleccionar...</option>
                 {sucursales.map(s => (
@@ -186,7 +186,7 @@ export default function UsuariosPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600"
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400"
             >
               Cancelar
             </button>
@@ -197,7 +197,7 @@ export default function UsuariosPage() {
       {loading ? (
         <div className="text-center py-12 text-slate-400">Cargando...</div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
@@ -219,7 +219,7 @@ export default function UsuariosPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{u.username}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{u.username}</td>
                   <td className="px-4 py-3">
                     <select
                       value={u.role}
@@ -231,7 +231,7 @@ export default function UsuariosPage() {
                       <option value="admin">Admin</option>
                     </select>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400 text-xs">
                     {(u.role === "employee" || u.role === "cadete") ? (u.sucursales?.nombre ?? "—") : <span className="text-slate-400">Todas</span>}
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs">

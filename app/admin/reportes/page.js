@@ -16,7 +16,7 @@ const ESTADOS_CONFIG = {
 
 function StatBox({ label, value, sub, color = "#6366f1" }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
       <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">{label}</div>
       <div className="text-3xl font-extrabold" style={{ color }}>
         {value}
@@ -32,7 +32,7 @@ function MoneyBox({ label, montos, sub, color = "#6366f1", compact = false }) {
   if (montos.USD) lines.push(["USD", montos.USD]);
   if (lines.length === 0) lines.push(["UYU", 0]);
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
       <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">{label}</div>
       <div className="space-y-0.5">
         {lines.map(([m, v]) => (
@@ -91,7 +91,7 @@ export default function ReportesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Reportes</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Reportes</h2>
           <p className="text-sm text-slate-500 mt-0.5">Resumen de actividad del negocio</p>
         </div>
         <div className="flex gap-2">
@@ -100,7 +100,7 @@ export default function ReportesPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filtroSucursal === null
                 ? "bg-indigo-500 text-white"
-                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
             }`}
           >
             Todas
@@ -112,7 +112,7 @@ export default function ReportesPage() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filtroSucursal === s.id
                   ? "bg-indigo-500 text-white"
-                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
               }`}
             >
               {s.nombre}
@@ -184,7 +184,7 @@ export default function ReportesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Orders by state */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">
             Órdenes por estado
           </div>
@@ -196,8 +196,8 @@ export default function ReportesPage() {
                 <div key={estado} className="flex items-center gap-3">
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-700">{cfg.label}</span>
-                      <span className="font-semibold text-slate-900">{count}</span>
+                      <span className="text-slate-700 dark:text-slate-300">{cfg.label}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">{count}</span>
                     </div>
                     <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
@@ -219,7 +219,7 @@ export default function ReportesPage() {
         </div>
 
         {/* Top article types */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">
             Artículos más frecuentes
           </div>
@@ -228,8 +228,8 @@ export default function ReportesPage() {
               <div key={tipo} className="flex items-center gap-3">
                 <div className="flex-1">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-700">{tipo}</span>
-                    <span className="font-semibold text-slate-900">{count}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{tipo}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{count}</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -249,15 +249,15 @@ export default function ReportesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Clients */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">Clientes</div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Total en la base</span>
-              <span className="font-bold text-slate-900">{stats.clientesUnicos}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">Total en la base</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{stats.clientesUnicos}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Nuevos este mes</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">Nuevos este mes</span>
               <span className="font-bold text-indigo-600">{stats.clientesNuevosEsteMes}</span>
             </div>
           </div>
@@ -265,24 +265,24 @@ export default function ReportesPage() {
 
         {/* Taller stats */}
         {stats.talleresStats.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
             <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-4">
               Talleres externos
             </div>
             <div className="space-y-3">
               {stats.talleresStats.map(t => (
                 <div key={t.id} className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700 truncate flex-1">{t.nombre}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300 truncate flex-1">{t.nombre}</span>
                   <div className="flex gap-4 text-xs text-slate-500 ml-3 shrink-0">
                     <span>
-                      <span className="font-semibold text-slate-800">{t.ordenes_activas}</span> activas
+                      <span className="font-semibold text-slate-800 dark:text-slate-100">{t.ordenes_activas}</span> activas
                     </span>
                     <span>
-                      <span className="font-semibold text-slate-800">{t.ordenes_completadas}</span> listas
+                      <span className="font-semibold text-slate-800 dark:text-slate-100">{t.ordenes_completadas}</span> listas
                     </span>
                     {t.promedio_dias_reparacion !== null && (
                       <span>
-                        <span className="font-semibold text-slate-800">{t.promedio_dias_reparacion}d</span> prom
+                        <span className="font-semibold text-slate-800 dark:text-slate-100">{t.promedio_dias_reparacion}d</span> prom
                       </span>
                     )}
                   </div>

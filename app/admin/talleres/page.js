@@ -82,7 +82,7 @@ export default function TalleresPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Talleres</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Talleres</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             Administrá los talleres asociados
           </p>
@@ -101,8 +101,8 @@ export default function TalleresPage() {
 
       {/* Form */}
       {showNew && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
-          <h3 className="font-semibold text-slate-900 mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-4">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
             {editingId ? "Editar taller" : "Nuevo taller"}
           </h3>
           <div className="grid grid-cols-2 gap-4">
@@ -115,7 +115,7 @@ export default function TalleresPage() {
                 value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 placeholder="Ej: Taller Central"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function TalleresPage() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="Ej: taller@example.com"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@ export default function TalleresPage() {
                 value={form.direccion}
                 onChange={(e) => setForm({ ...form, direccion: e.target.value })}
                 placeholder="Ej: Calle Principal 123"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function TalleresPage() {
             </button>
             <button
               onClick={() => { setShowNew(false); setEditingId(null); }}
-              className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50"
             >
               Cancelar
             </button>
@@ -177,7 +177,7 @@ export default function TalleresPage() {
       {loading ? (
         <div className="text-center py-12 text-slate-400">Cargando...</div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
@@ -191,10 +191,10 @@ export default function TalleresPage() {
             <tbody>
               {talleres.map((t) => (
                 <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{t.nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">{t.telefono || "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{t.email || "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{t.direccion || "—"}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{t.nombre}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{t.telefono || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{t.email || "—"}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{t.direccion || "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
                       <button

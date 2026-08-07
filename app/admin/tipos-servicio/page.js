@@ -77,7 +77,7 @@ export default function TiposServicioPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Tipos de servicio</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Tipos de servicio</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             Configurá los ciclos de recordatorio por tipo de servicio
           </p>
@@ -96,8 +96,8 @@ export default function TiposServicioPage() {
 
       {/* Form */}
       {showNew && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
-          <h3 className="font-semibold text-slate-900 mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-4">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
             {editingId ? "Editar tipo" : "Nuevo tipo de servicio"}
           </h3>
           <div className="grid grid-cols-2 gap-4">
@@ -110,7 +110,7 @@ export default function TiposServicioPage() {
                 value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 placeholder="Ej: Cambio de pila"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -124,7 +124,7 @@ export default function TiposServicioPage() {
                 onChange={(e) => setForm({ ...form, ciclo_meses: e.target.value })}
                 min="1"
                 max="120"
-                className="no-spinner w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="no-spinner w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function TiposServicioPage() {
             </button>
             <button
               onClick={() => { setShowNew(false); setEditingId(null); }}
-              className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50"
             >
               Cancelar
             </button>
@@ -150,7 +150,7 @@ export default function TiposServicioPage() {
       {loading ? (
         <div className="text-center py-12 text-slate-400">Cargando...</div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
@@ -162,8 +162,8 @@ export default function TiposServicioPage() {
             <tbody>
               {tipos.map((t) => (
                 <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{t.nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{t.nombre}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                     Cada <span className="font-bold">{t.ciclo_meses}</span> meses
                   </td>
                   <td className="px-4 py-3">

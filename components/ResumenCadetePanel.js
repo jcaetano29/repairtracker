@@ -456,7 +456,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 <div className="mb-4">
                   <h4 className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                    Listo para envio a taller ({availableLlevar.length})
+                    Enviar a Taller ({availableLlevar.length})
                   </h4>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {availableLlevar.map((o) => renderOrdenCard(o, "llevar_a_taller"))}

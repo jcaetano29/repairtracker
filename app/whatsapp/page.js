@@ -15,6 +15,10 @@ function formatFecha(iso) {
     : fecha.toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit" });
 }
 
+function marcarConversacionLeida(conversacionId) {
+  fetch(`/api/whatsapp/conversaciones/${conversacionId}/marcar-leido`, { method: "POST" }).catch(() => {});
+}
+
 export default function WhatsAppPage() {
   const [conversaciones, setConversaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,8 +29,15 @@ export default function WhatsAppPage() {
     try {
       const res = await fetch("/api/whatsapp/conversaciones");
       const data = res.ok ? await res.json() : { conversaciones: [] };
-      setConversaciones(data.conversaciones ?? []);
+      const nuevas = data.conversaciones ?? [];
+      setConversaciones(nuevas);
       fetch("/api/whatsapp/estado/marcar-leido", { method: "POST" }).catch(() => {});
+
+      setSeleccionada((actual) => {
+        const abierta = nuevas.find((c) => c.id === actual);
+        if (abierta?.unread) marcarConversacionLeida(actual);
+        return actual;
+      });
     } catch (e) {
       console.error("Error cargando conversaciones:", e);
     } finally {
@@ -98,13 +109,30 @@ export default function WhatsAppPage() {
             {conversacionesFiltradas.map((c) => (
               <button
                 key={c.id}
-                onClick={() => setSeleccionada(c.id)}
+                onClick={() => {
+                  setSeleccionada(c.id);
+                  if (c.unread) {
+                    marcarConversacionLeida(c.id);
+                    setConversaciones((prev) =>
+                      prev.map((conv) => (conv.id === c.id ? { ...conv, unread: false } : conv))
+                    );
+                  }
+                }}
                 className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${
                   seleccionada === c.id ? "bg-slate-100 dark:bg-slate-950" : ""
                 }`}
               >
                 <div className="flex justify-between items-baseline gap-2">
-                  <span className="font-medium text-sm text-slate-800 dark:text-slate-100 truncate">
+                  <span
+                    className={`text-sm truncate flex items-center gap-1.5 ${
+                      c.unread
+                        ? "font-bold text-slate-900 dark:text-white"
+                        : "font-medium text-slate-800 dark:text-slate-100"
+                    }`}
+                  >
+                    {c.unread && (
+                      <span className="w-2 h-2 rounded-full bg-[#25D366] shrink-0" aria-label="Mensaje nuevo" />
+                    )}
                     {c.clientes?.nombre ?? c.telefono_e164}
                   </span>
                   <span className="text-[10px] text-slate-400 shrink-0">{formatFecha(c.last_message_at)}</span>

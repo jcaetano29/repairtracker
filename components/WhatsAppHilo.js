@@ -69,7 +69,7 @@ export function WhatsAppHilo({ conversacionId, cliente }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#e5ddd5] min-h-0">
+    <div className="flex-1 flex flex-col whatsapp-wallpaper min-h-0">
       <div className="px-4 py-3 bg-slate-800 text-white font-semibold text-sm shrink-0 flex items-center justify-between">
         <span>{cliente?.nombre ?? cliente?.telefono}</span>
         <div ref={menuRef} className="relative">

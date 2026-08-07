@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { WhatsAppHilo } from "@/components/WhatsAppHilo";
@@ -15,7 +15,7 @@ function formatFecha(iso) {
     : fecha.toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit" });
 }
 
-function marcarConversacionLeida(conversacionId) {
+function postMarcarLeido(conversacionId) {
   fetch(`/api/whatsapp/conversaciones/${conversacionId}/marcar-leido`, { method: "POST" }).catch(() => {});
 }
 
@@ -25,19 +25,25 @@ export default function WhatsAppPage() {
   const [busqueda, setBusqueda] = useState("");
   const [seleccionada, setSeleccionada] = useState(null);
 
+  const seleccionadaRef = useRef(null);
+  useEffect(() => {
+    seleccionadaRef.current = seleccionada;
+  }, [seleccionada]);
+
   const cargarConversaciones = useCallback(async () => {
     try {
       const res = await fetch("/api/whatsapp/conversaciones");
       const data = res.ok ? await res.json() : { conversaciones: [] };
       const nuevas = data.conversaciones ?? [];
-      setConversaciones(nuevas);
       fetch("/api/whatsapp/estado/marcar-leido", { method: "POST" }).catch(() => {});
 
-      setSeleccionada((actual) => {
-        const abierta = nuevas.find((c) => c.id === actual);
-        if (abierta?.unread) marcarConversacionLeida(actual);
-        return actual;
-      });
+      const abierta = nuevas.find((c) => c.id === seleccionadaRef.current);
+      if (abierta?.unread) {
+        postMarcarLeido(abierta.id);
+        setConversaciones(nuevas.map((c) => (c.id === abierta.id ? { ...c, unread: false } : c)));
+      } else {
+        setConversaciones(nuevas);
+      }
     } catch (e) {
       console.error("Error cargando conversaciones:", e);
     } finally {
@@ -112,7 +118,7 @@ export default function WhatsAppPage() {
                 onClick={() => {
                   setSeleccionada(c.id);
                   if (c.unread) {
-                    marcarConversacionLeida(c.id);
+                    postMarcarLeido(c.id);
                     setConversaciones((prev) =>
                       prev.map((conv) => (conv.id === c.id ? { ...conv, unread: false } : conv))
                     );

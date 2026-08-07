@@ -138,7 +138,7 @@ export default function SucursalesPage() {
             </thead>
             <tbody>
               {sucursales.map((s) => (
-                <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50">
+                <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <td className="px-4 py-3">
                     {editando?.id === s.id ? (
                       <form onSubmit={handleEditNombre} className="flex gap-2">

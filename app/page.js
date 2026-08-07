@@ -276,7 +276,7 @@ export default function DashboardPage() {
               className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "kanban"
                   ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300"
+                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Tablero
@@ -286,7 +286,7 @@ export default function DashboardPage() {
               className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "tabla"
                   ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300"
+                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Lista
@@ -326,9 +326,9 @@ export default function DashboardPage() {
                       onClick={() => setSelectedOrden(o)}
                       className={`border-b border-slate-50 cursor-pointer transition-colors ${
                         retraso === "grave"
-                          ? "bg-red-50 hover:bg-red-100/70"
+                          ? "bg-red-50 hover:bg-red-100/70 dark:bg-red-950/40 dark:hover:bg-red-950/60"
                           : retraso === "leve"
-                          ? "bg-amber-50 hover:bg-amber-100/50"
+                          ? "bg-amber-50 hover:bg-amber-100/50 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
                           : "hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
@@ -469,9 +469,9 @@ export default function DashboardPage() {
                           onClick={() => setSelectedOrden(o)}
                           className={`p-2.5 rounded-lg cursor-pointer transition-colors ${
                             retraso === "grave"
-                              ? "border-2 border-red-300 bg-red-50"
+                              ? "border-2 border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/40"
                               : retraso === "leve"
-                              ? "border-2 border-amber-300 bg-amber-50"
+                              ? "border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40"
                               : "border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
                         >

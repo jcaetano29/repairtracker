@@ -219,7 +219,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               Paso {step} de 2 — {step === 1 ? "Cliente" : "Artículo"}
             </p>
           </div>
-          <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
             ×
           </button>
         </div>
@@ -392,7 +392,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </button>
 
               {/* Cliente seleccionado */}
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900">
                 <div className="text-xs text-indigo-500 font-semibold">CLIENTE</div>
                 <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{clienteSeleccionado?.nombre}</div>
                 <div className="text-xs text-slate-500">{clienteSeleccionado?.telefono}</div>
@@ -456,7 +456,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.tipo_articulo === t
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                       }`}
                     >
                       {t}
@@ -468,7 +468,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Conditional: "Otro" text input */}
               {form.tipo_articulo === "Otro" && (
                 <div className="mt-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     ¿Qué tipo de artículo es?
                   </label>
                   <input
@@ -476,7 +476,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.nombre_articulo}
                     onChange={(e) => setForm({ ...form, nombre_articulo: e.target.value })}
                     placeholder="Ej: Consola de videojuegos, Impresora..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
                     autoFocus
                   />
                 </div>
@@ -496,7 +496,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.material === m.value
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                       }`}
                     >
                       {m.label}
@@ -508,7 +508,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Material otro - texto libre */}
               {form.material === "otro" && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     ¿Qué material es?
                   </label>
                   <input
@@ -516,7 +516,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.material_otro}
                     onChange={(e) => setForm({ ...form, material_otro: e.target.value })}
                     placeholder="Ej: Titanio, Platino..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
                     autoFocus
                   />
                 </div>
@@ -571,7 +571,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Presupuesto (opcional) */}
               <div className="mt-4 space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Presupuesto cliente (opcional)
                   </label>
                   <div className="flex gap-2">
@@ -579,7 +579,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       value={form.moneda}
                       onChange={(e) => setForm({ ...form, moneda: e.target.value })}
                       disabled={form.en_garantia}
-                      className={`border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     >
                       <option value="UYU">$U</option>
                       <option value="USD">US$</option>
@@ -593,7 +593,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
                       placeholder="0.00"
                       disabled={form.en_garantia}
-                      className={`no-spinner flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`no-spinner flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>

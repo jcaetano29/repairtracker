@@ -94,7 +94,7 @@ export default function PhoneInput({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-label="Seleccionar país"
-          className="flex items-center gap-2 px-3 border-r border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 rounded-l-lg"
+          className="flex items-center gap-2 px-3 border-r border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-l-lg"
         >
           <Flag title={country.name} className="w-5 h-auto rounded-sm" />
           <span>+{country.dial}</span>
@@ -126,8 +126,8 @@ export default function PhoneInput({
                   role="option"
                   aria-selected={selected}
                   onClick={() => handleCountrySelect(c)}
-                  className={`flex items-center gap-3 px-3 py-2 w-full text-left text-sm hover:bg-slate-50 ${
-                    selected ? "bg-indigo-50" : ""
+                  className={`flex items-center gap-3 px-3 py-2 w-full text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                    selected ? "bg-indigo-50 dark:bg-indigo-950/40" : ""
                   }`}
                 >
                   <ItemFlag title={c.name} className="w-5 h-auto rounded-sm" />

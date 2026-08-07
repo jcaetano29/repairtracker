@@ -138,7 +138,7 @@ export default function TiposServicioPage() {
             </button>
             <button
               onClick={() => { setShowNew(false); setEditingId(null); }}
-              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               Cancelar
             </button>
@@ -161,7 +161,7 @@ export default function TiposServicioPage() {
             </thead>
             <tbody>
               {tipos.map((t) => (
-                <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50">
+                <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{t.nombre}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                     Cada <span className="font-bold">{t.ciclo_meses}</span> meses

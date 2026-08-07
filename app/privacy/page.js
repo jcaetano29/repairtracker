@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
               El responsable del tratamiento de los datos personales gestionados a través de la
               Aplicación es el comercio (relojería o joyería) que la utiliza como herramienta interna.
               Para consultas sobre esta política o el desarrollo técnico de la Aplicación podés
-              escribir a: <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
+              escribir a: <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
             </p>
           </section>
 
@@ -150,7 +150,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <p>
               Para ejercer estos derechos escribí a{" "}
-              <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>{" "}
+              <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>{" "}
               indicando la solicitud concreta. Responderemos dentro de los plazos previstos por la
               normativa aplicable.
             </p>
@@ -199,7 +199,7 @@ export default function PrivacyPolicyPage() {
             <p>
               Para cualquier consulta sobre esta política o sobre el tratamiento de tus datos,
               escribinos a{" "}
-              <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
+              <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
             </p>
           </section>
         </article>

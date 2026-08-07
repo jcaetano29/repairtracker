@@ -308,7 +308,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 #{formatNumeroOrden(orden.numero_orden)}
               </h2>
             </div>
-            <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600">×</button>
+            <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">×</button>
           </div>
         </div>
 
@@ -729,7 +729,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           <div className="pt-2 border-t border-slate-100">
             <button
               onClick={handleReimprimir}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               🖨️ Reimprimir ticket
             </button>

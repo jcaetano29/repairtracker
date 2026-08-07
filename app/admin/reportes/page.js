@@ -100,7 +100,7 @@ export default function ReportesPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filtroSucursal === null
                 ? "bg-indigo-500 text-white"
-                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >
             Todas
@@ -112,7 +112,7 @@ export default function ReportesPage() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filtroSucursal === s.id
                   ? "bg-indigo-500 text-white"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
               {s.nombre}

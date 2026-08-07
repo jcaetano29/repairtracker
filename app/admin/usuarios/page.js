@@ -218,7 +218,7 @@ export default function UsuariosPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50">
+                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{u.username}</td>
                   <td className="px-4 py-3">
                     <select

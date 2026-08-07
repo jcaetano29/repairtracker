@@ -99,7 +99,7 @@ export default function WhatsAppPage() {
               <button
                 key={c.id}
                 onClick={() => setSeleccionada(c.id)}
-                className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors ${
+                className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${
                   seleccionada === c.id ? "bg-slate-100 dark:bg-slate-950" : ""
                 }`}
               >

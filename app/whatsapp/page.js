@@ -139,7 +139,7 @@ export default function WhatsAppPage() {
                     {c.unread && (
                       <span className="w-2 h-2 rounded-full bg-[#25D366] shrink-0" aria-label="Mensaje nuevo" />
                     )}
-                    {c.clientes?.nombre ?? c.telefono_e164}
+                    {c.clientes?.nombre ? `${c.clientes.nombre} (${c.telefono_e164})` : c.telefono_e164}
                   </span>
                   <span className="text-[10px] text-slate-400 shrink-0">{formatFecha(c.last_message_at)}</span>
                 </div>
@@ -160,7 +160,11 @@ export default function WhatsAppPage() {
           )}
           <WhatsAppHilo
             conversacionId={seleccionada}
-            clienteNombre={conversacionActual?.clientes?.nombre ?? conversacionActual?.telefono_e164}
+            cliente={{
+              nombre: conversacionActual?.clientes?.nombre,
+              telefono: conversacionActual?.telefono_e164,
+              email: conversacionActual?.clientes?.email,
+            }}
           />
         </div>
       </main>

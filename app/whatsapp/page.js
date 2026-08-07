@@ -67,7 +67,7 @@ export default function WhatsAppPage() {
   }
 
   const conversacionesFiltradas = conversaciones.filter((c) =>
-    (c.clientes?.nombre ?? c.telefono_e164 ?? "").toLowerCase().includes(busqueda.toLowerCase())
+    `${c.clientes?.nombre ?? ""} ${c.telefono_e164 ?? ""}`.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const conversacionActual = conversaciones.find((c) => c.id === seleccionada);
@@ -130,7 +130,7 @@ export default function WhatsAppPage() {
               >
                 <div className="flex justify-between items-baseline gap-2">
                   <span
-                    className={`text-sm truncate flex items-center gap-1.5 ${
+                    className={`text-sm flex items-center gap-1.5 min-w-0 ${
                       c.unread
                         ? "font-bold text-slate-900 dark:text-white"
                         : "font-medium text-slate-800 dark:text-slate-100"
@@ -139,7 +139,12 @@ export default function WhatsAppPage() {
                     {c.unread && (
                       <span className="w-2 h-2 rounded-full bg-[#25D366] shrink-0" aria-label="Mensaje nuevo" />
                     )}
-                    {c.clientes?.nombre ? `${c.clientes.nombre} (${c.telefono_e164})` : c.telefono_e164}
+                    <span className="truncate">{c.clientes?.nombre ?? c.telefono_e164}</span>
+                    {c.clientes?.nombre && (
+                      <span className="text-slate-400 dark:text-slate-500 font-normal shrink-0">
+                        ({c.telefono_e164})
+                      </span>
+                    )}
                   </span>
                   <span className="text-[10px] text-slate-400 shrink-0">{formatFecha(c.last_message_at)}</span>
                 </div>

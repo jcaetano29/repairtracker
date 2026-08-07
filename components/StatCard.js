@@ -2,7 +2,7 @@
 
 export function StatCard({ label, value, icon, color, description }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 flex-1 min-w-[140px]">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex-1 min-w-[140px]">
       <div className="text-xs text-slate-500 flex items-center gap-1.5 mb-1">
         <span>{icon}</span> {label}
       </div>

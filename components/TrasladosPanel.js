@@ -76,10 +76,10 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, 
   if (traslados.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 mb-5">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-5">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-sm">🚚</span>
-        <h3 className="text-sm font-bold text-slate-900">Traslados Activos</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Traslados Activos</h3>
         <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
           {traslados.length}
         </span>
@@ -101,21 +101,21 @@ export function TrasladosPanel({ sucursalId, isDueno, userSucursalId, onAction, 
           return (
             <div
               key={t.id}
-              className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100"
+              className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold font-mono text-slate-900">
+                  <span className="text-xs font-bold font-mono text-slate-900 dark:text-slate-100">
                     #{formatNumeroOrden(orden?.numero_orden)}
                   </span>
                   <span className={`text-xs font-semibold ${estadoColor}`}>
                     {estadoIcon} {estadoLabel}
                   </span>
-                  <span className="text-xs text-slate-500 px-1.5 py-0.5 bg-slate-100 rounded">
+                  <span className="text-xs text-slate-500 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded">
                     {tipoLabel}
                   </span>
                 </div>
-                <div className="text-sm text-slate-700 mt-0.5">
+                <div className="text-sm text-slate-700 dark:text-slate-300 mt-0.5">
                   {cliente?.nombre} — {orden?.tipo_articulo} {orden?.marca ? `(${orden.marca})` : ""}
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">

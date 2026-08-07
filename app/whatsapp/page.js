@@ -73,7 +73,7 @@ export default function WhatsAppPage() {
   const conversacionActual = conversaciones.find((c) => c.id === seleccionada);
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col">
+    <div className="h-screen bg-slate-100 dark:bg-slate-950 flex flex-col">
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4 shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-3 cursor-pointer">

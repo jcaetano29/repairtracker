@@ -106,7 +106,7 @@ export function WhatsAppHilo({ conversacionId, cliente }) {
       {mostrarDetalle && (
         <DetalleClienteModal cliente={cliente} onClose={() => setMostrarDetalle(false)} />
       )}
-      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col gap-2">
         {loading && <p className="text-center text-xs text-slate-500">Cargando...</p>}
         {!loading && mensajes.length === 0 && (
           <p className="text-center text-xs text-slate-500">Todavía no hay mensajes</p>

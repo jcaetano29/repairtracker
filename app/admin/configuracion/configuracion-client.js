@@ -242,6 +242,7 @@ export default function ConfiguracionClient({ configuracion }) {
                       onChange={(e) =>
                         handleInputChange(clave, "leve", e.target.value)
                       }
+                      onWheel={(e) => e.currentTarget.blur()}
                       disabled={row.loading}
                       className="no-spinner w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
@@ -257,6 +258,7 @@ export default function ConfiguracionClient({ configuracion }) {
                       onChange={(e) =>
                         handleInputChange(clave, "grave", e.target.value)
                       }
+                      onWheel={(e) => e.currentTarget.blur()}
                       disabled={row.loading}
                       className="no-spinner w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />

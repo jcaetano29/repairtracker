@@ -513,6 +513,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   placeholder="Monto del taller"
                   value={montoTaller}
                   onChange={(e) => setMontoTaller(e.target.value)}
+                  onWheel={(e) => e.currentTarget.blur()}
                   className="no-spinner w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
@@ -535,6 +536,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     placeholder="Monto"
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className="no-spinner flex-1 px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
@@ -589,6 +591,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 placeholder={`Monto final (${orden.monto_presupuesto || ""})`}
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className="no-spinner w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
               />
               <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}

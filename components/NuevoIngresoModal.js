@@ -552,6 +552,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     step="0.01"
                     value={form.peso_gramos}
                     onChange={(e) => setForm({ ...form, peso_gramos: e.target.value })}
+                    onWheel={(e) => e.currentTarget.blur()}
                     placeholder="0.00"
                     className="no-spinner w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   />
@@ -608,6 +609,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       step="any"
                       value={form.monto_presupuesto}
                       onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
+                      onWheel={(e) => e.currentTarget.blur()}
                       placeholder="0.00"
                       disabled={form.en_garantia}
                       className={`no-spinner flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}

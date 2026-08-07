@@ -122,6 +122,7 @@ export default function TiposServicioPage() {
                 inputMode="numeric"
                 value={form.ciclo_meses}
                 onChange={(e) => setForm({ ...form, ciclo_meses: e.target.value })}
+                onWheel={(e) => e.currentTarget.blur()}
                 min="1"
                 max="120"
                 className="no-spinner w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"

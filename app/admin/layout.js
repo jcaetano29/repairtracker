@@ -13,7 +13,7 @@ export default function AdminLayout({ children }) {
               <p className="text-[11px] text-slate-400">Panel de administración</p>
             </div>
           </Link>
-          <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-2">
+          <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-2 mr-14">
             ← Volver al dashboard
           </Link>
         </div>

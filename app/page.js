@@ -163,7 +163,7 @@ export default function DashboardPage() {
               <p className="text-sm text-slate-500">Gestión de Reparaciones</p>
             </div>
           </a>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mr-14">
             <button
               onClick={() => setShowNuevo(true)}
               className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"

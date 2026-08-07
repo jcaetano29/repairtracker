@@ -5,14 +5,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext({ theme: "light", toggleTheme: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("rt-theme");
-    if (stored === "dark" || stored === "light") {
-      setTheme(stored);
-    }
-  }, []);
+  const [theme, setTheme] = useState(() =>
+    typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light"
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

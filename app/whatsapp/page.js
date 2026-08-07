@@ -68,7 +68,7 @@ export default function WhatsAppPage() {
               </p>
             </div>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mr-14">
             <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-2">
               ← Volver al dashboard
             </Link>

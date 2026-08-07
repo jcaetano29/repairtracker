@@ -25,7 +25,7 @@ const ANTI_FLASH_SCRIPT = `
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: ANTI_FLASH_SCRIPT }} />
       </head>

@@ -129,6 +129,7 @@ async function persistIncomingMessage(msg) {
         cliente_id: cliente.id,
         telefono_e164: telefonoE164,
         last_message_at: new Date().toISOString(),
+        last_incoming_message_at: new Date().toISOString(),
         last_message_preview: msg.type === "text" ? (msg.body?.slice(0, 120) ?? "") : "📎 Mensaje multimedia",
       },
       { onConflict: "cliente_id" }

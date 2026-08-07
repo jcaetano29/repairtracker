@@ -15,6 +15,7 @@ let mockClienteResult = { data: [{ id: 'cliente-1' }], error: null }
 let mockClienteQuery = () => Promise.resolve(mockClienteResult)
 let mockConversacionResult = { data: { id: 'conv-1' }, error: null }
 const mockMensajeInsert = vi.fn().mockResolvedValue({ error: null })
+const mockConversacionUpsert = vi.fn()
 
 vi.mock('@/lib/supabase-admin', () => ({
   getSupabaseAdmin: () => ({
@@ -33,9 +34,10 @@ vi.mock('@/lib/supabase-admin', () => ({
       }
       if (table === 'whatsapp_conversaciones') {
         return {
-          upsert: () => ({
-            select: () => ({ single: () => Promise.resolve(mockConversacionResult) }),
-          }),
+          upsert: (...args) => {
+            mockConversacionUpsert(...args)
+            return { select: () => ({ single: () => Promise.resolve(mockConversacionResult) }) }
+          },
         }
       }
       if (table === 'whatsapp_mensajes') {
@@ -54,6 +56,7 @@ beforeEach(() => {
   process.env.WHATSAPP_VERIFY_TOKEN = 'my-secret-token'
   mockUpdate.mockClear()
   mockMensajeInsert.mockClear()
+  mockConversacionUpsert.mockClear()
   mockClienteResult = { data: [{ id: 'cliente-1' }], error: null }
   mockClienteQuery = () => Promise.resolve(mockClienteResult)
   mockConversacionResult = { data: { id: 'conv-1' }, error: null }
@@ -250,6 +253,28 @@ describe('POST /api/webhook/whatsapp — incoming messages', () => {
 
     expect(res.status).toBe(200)
     expect(mockMensajeInsert).not.toHaveBeenCalled()
+  })
+
+  it('stamps last_incoming_message_at on the conversation upsert', async () => {
+    const { POST } = await import('@/app/api/webhook/whatsapp/route')
+
+    const rawBody = JSON.stringify({
+      entry: [{ changes: [{ value: { messages: [{ id: 'wamid.in4', from: '59899111222', type: 'text', text: { body: 'Hola' } }] } }] }],
+    })
+
+    const res = await POST(new Request('http://localhost/api/webhook/whatsapp', {
+      method: 'POST',
+      body: rawBody,
+    }))
+
+    expect(res.status).toBe(200)
+    expect(mockConversacionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        last_message_at: expect.any(String),
+        last_incoming_message_at: expect.any(String),
+      }),
+      { onConflict: 'cliente_id' }
+    )
   })
 
   it('does not fail the whole request if persisting one message errors', async () => {

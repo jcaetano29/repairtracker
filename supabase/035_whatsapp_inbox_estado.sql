@@ -15,4 +15,7 @@ INSERT INTO whatsapp_inbox_estado (id, last_read_at) VALUES (1, NOW());
 -- policies. All access via getSupabaseAdmin() from authenticated API routes.
 ALTER TABLE whatsapp_inbox_estado ENABLE ROW LEVEL SECURITY;
 
+CREATE INDEX idx_whatsapp_mensajes_entrantes_created
+  ON whatsapp_mensajes (created_at) WHERE direccion = 'entrante';
+
 COMMIT;

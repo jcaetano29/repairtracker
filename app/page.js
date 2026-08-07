@@ -41,6 +41,7 @@ export default function DashboardPage() {
   const [trasladosRefresh, setTrasladosRefresh] = useState(0)
   const [showResumenCadete, setShowResumenCadete] = useState(false)
   const [nombreNegocio, setNombreNegocio] = useState("")
+  const [hayMensajesNuevos, setHayMensajesNuevos] = useState(false)
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/login" })
@@ -100,6 +101,24 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [loadData])
 
+  // Badge de WhatsApp sin leer — mismo ritmo de poll que el resto del dashboard.
+  useEffect(() => {
+    async function checkEstado() {
+      try {
+        const res = await fetch("/api/whatsapp/estado")
+        if (res.ok) {
+          const data = await res.json()
+          setHayMensajesNuevos(!!data.hayNuevos)
+        }
+      } catch {
+        // Silencioso — no bloquea el resto del dashboard.
+      }
+    }
+    checkEstado()
+    const interval = setInterval(checkEstado, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   // Cleanup search timeout on unmount
   useEffect(() => {
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current) }
@@ -133,7 +152,7 @@ export default function DashboardPage() {
   const totalPaginas = Math.ceil(totalOrdenes / 20)
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       {/* Header */}
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
@@ -144,7 +163,7 @@ export default function DashboardPage() {
               <p className="text-sm text-slate-500">Gestión de Reparaciones</p>
             </div>
           </a>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mr-14">
             <button
               onClick={() => setShowNuevo(true)}
               className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
@@ -159,10 +178,15 @@ export default function DashboardPage() {
             </button>
             <Link
               href="/whatsapp"
-              className="px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
+              className="relative px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
             >
               <WhatsAppIcon className="w-4 h-4" />
               WhatsApp
+              {hayMensajesNuevos && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-slate-900">
+                  1
+                </span>
+              )}
             </Link>
             {isDueno && (
               <Link
@@ -185,7 +209,7 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
         {/* Stats */}
         <div className="flex flex-wrap gap-3 mb-5">
-          <StatCard label="Activas" value={stats.activas} icon="📋" color="#0f172a" description="Órdenes en curso sin entregar" />
+          <StatCard label="Activas" value={stats.activas} icon="📋" description="Órdenes en curso sin entregar" />
           <StatCard label="Con Retraso" value={stats.conRetraso} icon="⚠️" color="#ef4444" description="Superan el umbral de días en su estado" />
           <StatCard label="Para Retiro" value={stats.listasRetiro} icon="🎉" color="#22c55e" description="Listas para que el cliente retire" />
           <StatCard label="En Talleres" value={stats.enTaller} icon="🔧" color="#8b5cf6" description="Enviadas, en reparación o listas en taller" />
@@ -207,13 +231,13 @@ export default function DashboardPage() {
             placeholder="🔍 Buscar cliente, orden, marca..."
             value={busqueda}
             onChange={(e) => handleSearch(e.target.value)}
-            className="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 w-64"
+            className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 w-64"
           />
           {isDueno && sucursales.length > 0 && (
             <select
               value={filtroSucursal}
               onChange={(e) => { setFiltroSucursal(e.target.value); setPagina(1) }}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-700"
+              className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300"
             >
               <option value="TODAS">Todas las sucursales</option>
               {sucursales.map(s => (
@@ -224,7 +248,7 @@ export default function DashboardPage() {
           <select
             value={filtroEstado}
             onChange={(e) => { setFiltroEstado(e.target.value); setPagina(1) }}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer"
+            className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 cursor-pointer"
           >
             <option value="TODOS">Todos los estados</option>
             {Object.entries(ESTADOS).map(([k, v]) => (
@@ -236,7 +260,7 @@ export default function DashboardPage() {
           <select
             value={filtroTaller}
             onChange={(e) => { setFiltroTaller(e.target.value); setPagina(1) }}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer"
+            className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 cursor-pointer"
           >
             <option value="TODOS">Todos los talleres</option>
             <option value="LOCAL">En el local</option>
@@ -252,7 +276,7 @@ export default function DashboardPage() {
               className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "kanban"
                   ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Tablero
@@ -262,7 +286,7 @@ export default function DashboardPage() {
               className={`px-3 py-2.5 rounded-md text-xs font-medium border transition-colors ${
                 vista === "tabla"
                   ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                  : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Lista
@@ -277,7 +301,7 @@ export default function DashboardPage() {
 
         {/* Vista Tabla */}
         {!loading && vista === "tabla" && (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-slate-100">
@@ -302,21 +326,21 @@ export default function DashboardPage() {
                       onClick={() => setSelectedOrden(o)}
                       className={`border-b border-slate-50 cursor-pointer transition-colors ${
                         retraso === "grave"
-                          ? "bg-red-50 hover:bg-red-100/70"
+                          ? "bg-red-50 hover:bg-red-100/70 dark:bg-red-950/40 dark:hover:bg-red-950/60"
                           : retraso === "leve"
-                          ? "bg-amber-50 hover:bg-amber-100/50"
-                          : "hover:bg-slate-50"
+                          ? "bg-amber-50 hover:bg-amber-100/50 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+                          : "hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
-                      <td className="px-4 py-3 font-bold font-mono text-slate-900">
+                      <td className="px-4 py-3 font-bold font-mono text-slate-900 dark:text-slate-100">
                         #{formatNumeroOrden(o.numero_orden)}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-semibold text-slate-900">{o.cliente_nombre}</div>
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">{o.cliente_nombre}</div>
                         <div className="text-sm text-slate-500">{o.cliente_telefono}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900">{o.tipo_articulo}</div>
+                        <div className="font-medium text-slate-900 dark:text-slate-100">{o.tipo_articulo}</div>
                         <div className="text-sm text-slate-500">{o.marca || "—"}</div>
                       </td>
                       <td className="px-4 py-3">
@@ -327,7 +351,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">
+                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                         {o.traslado_activo_id && o.traslado_activo_estado !== "recibido"
                           ? <span className="text-blue-600">🚚 {o.traslado_activo_estado === "pendiente" ? "Pendiente envío" : "En tránsito"}</span>
                           : o.taller_nombre
@@ -376,7 +400,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ← Anterior
               </button>
@@ -391,7 +415,7 @@ export default function DashboardPage() {
                     className={`w-10 h-10 text-xs font-medium rounded-lg border transition-colors ${
                       p === pagina
                         ? "bg-slate-900 text-white border-slate-900"
-                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -402,7 +426,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                 disabled={pagina === totalPaginas}
-                className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Siguiente →
               </button>
@@ -421,14 +445,14 @@ export default function DashboardPage() {
               return (
                 <div
                   key={estado}
-                  className="min-w-0 bg-white rounded-xl border border-slate-200 flex flex-col max-h-[calc(50vh-40px)]"
+                  className="min-w-0 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[calc(50vh-40px)]"
                 >
                   <div
                     className="px-3.5 py-3 flex items-center gap-2 border-b-2"
                     style={{ borderBottomColor: config.color }}
                   >
                     <span>{config.icon}</span>
-                    <span className="text-xs font-bold text-slate-900 truncate">{config.label}</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{config.label}</span>
                     <span
                       className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: config.bg, color: config.color }}
@@ -445,20 +469,20 @@ export default function DashboardPage() {
                           onClick={() => setSelectedOrden(o)}
                           className={`p-2.5 rounded-lg cursor-pointer transition-colors ${
                             retraso === "grave"
-                              ? "border-2 border-red-300 bg-red-50"
+                              ? "border-2 border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/40"
                               : retraso === "leve"
-                              ? "border-2 border-amber-300 bg-amber-50"
-                              : "border border-slate-200 bg-slate-50 hover:bg-slate-100"
+                              ? "border-2 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40"
+                              : "border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-bold font-mono text-slate-900">
+                            <span className="text-xs font-bold font-mono text-slate-900 dark:text-slate-100">
                               #{formatNumeroOrden(o.numero_orden)}
                             </span>
                             <span className="text-xs text-slate-500">{o.dias_en_estado}d</span>
                           </div>
-                          <div className="text-xs font-semibold text-slate-700">{o.cliente_nombre}</div>
-                          <div className="text-sm text-slate-600">
+                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">{o.cliente_nombre}</div>
+                          <div className="text-sm text-slate-600 dark:text-slate-400">
                             {o.tipo_articulo} — {o.marca || "S/M"}
                           </div>
                           <div className="text-xs mt-1">

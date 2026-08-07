@@ -225,18 +225,18 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-slate-100">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">📥 Nuevo Ingreso</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">📥 Nuevo Ingreso</h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Paso {step} de 2 — {step === 1 ? "Cliente" : "Artículo"}
             </p>
           </div>
-          <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
             ×
           </button>
         </div>
@@ -261,7 +261,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   placeholder="Ej: Juan, 099..."
                   value={clienteQuery}
                   onChange={(e) => setClienteQuery(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
 
@@ -282,9 +282,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                         setClienteSeleccionado(c);
                         setStep(2);
                       }}
-                      className="w-full text-left p-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors"
+                      className="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors"
                     >
-                      <div className="font-semibold text-sm text-slate-900">{c.nombre}</div>
+                      <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{c.nombre}</div>
                       <div className="text-xs text-slate-500">{c.telefono} {c.documento ? `• ${c.documento}` : ""}</div>
                     </button>
                   ))}
@@ -293,7 +293,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               <button
                 onClick={() => setCreandoCliente(true)}
-                className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg text-sm text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                className="w-full p-3 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
               >
                 + Crear cliente nuevo
               </button>
@@ -323,7 +323,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   placeholder="Ej: 1.234.567-8"
                   value={nuevoCliente.documento}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, documento: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
               <div>
@@ -335,7 +335,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   placeholder="Nombre completo"
                   value={nuevoCliente.nombre}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
               <div>
@@ -360,7 +360,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     placeholder="email@ejemplo.com"
                     value={nuevoCliente.email}
                     onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
-                    className="w-full px-3 py-2.5 pr-10 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3 py-2.5 pr-10 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   />
                   <button
                     type="button"
@@ -409,9 +409,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               </button>
 
               {/* Cliente seleccionado */}
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900">
                 <div className="text-xs text-indigo-500 font-semibold">CLIENTE</div>
-                <div className="text-sm font-bold text-slate-900">{clienteSeleccionado?.nombre}</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{clienteSeleccionado?.nombre}</div>
                 <div className="text-xs text-slate-500">{clienteSeleccionado?.telefono}</div>
               </div>
 
@@ -426,7 +426,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     aria-required="true"
                     value={form.sucursal_id}
                     onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   >
                     <option value="">Seleccioná una sucursal</option>
                     {sucursales.map((s) => (
@@ -436,7 +436,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     ))}
                   </select>
                 ) : (
-                  <div className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700">
+                  <div className="px-3 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300">
                     {sucursales.length === 0
                       ? "Cargando..."
                       : sucursales.find((s) => s.id === form.sucursal_id)?.nombre ?? "Sin sucursal asignada"}
@@ -452,9 +452,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     id="trasladar"
                     checked={trasladar}
                     onChange={(e) => setTrasladar(e.target.checked)}
-                    className="h-5 w-5 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
+                    className="h-5 w-5 rounded border-slate-300 dark:border-slate-700 text-indigo-500 focus:ring-indigo-500/20"
                   />
-                  <label htmlFor="trasladar" className="text-base text-slate-700">
+                  <label htmlFor="trasladar" className="text-base text-slate-700 dark:text-slate-300">
                     Trasladar a {centroDestino.nombre}
                   </label>
                 </div>
@@ -473,7 +473,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.tipo_articulo === t
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 text-slate-600 hover:border-slate-300"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                       }`}
                     >
                       {t}
@@ -485,7 +485,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Conditional: "Otro" text input */}
               {form.tipo_articulo === "Otro" && (
                 <div className="mt-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     ¿Qué tipo de artículo es?
                   </label>
                   <input
@@ -493,7 +493,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.nombre_articulo}
                     onChange={(e) => setForm({ ...form, nombre_articulo: e.target.value })}
                     placeholder="Ej: Consola de videojuegos, Impresora..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
                     autoFocus
                   />
                 </div>
@@ -513,7 +513,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                         form.material === m.value
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 text-slate-600 hover:border-slate-300"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                       }`}
                     >
                       {m.label}
@@ -525,7 +525,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Material otro - texto libre */}
               {form.material === "otro" && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     ¿Qué material es?
                   </label>
                   <input
@@ -533,7 +533,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.material_otro}
                     onChange={(e) => setForm({ ...form, material_otro: e.target.value })}
                     placeholder="Ej: Titanio, Platino..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100"
                     autoFocus
                   />
                 </div>
@@ -553,7 +553,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     value={form.peso_gramos}
                     onChange={(e) => setForm({ ...form, peso_gramos: e.target.value })}
                     placeholder="0.00"
-                    className="no-spinner w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="no-spinner w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   />
                   {form.material === "oro" && (
                     <p className="text-xs text-amber-600 mt-1">Obligatorio para artículos de oro.</p>
@@ -578,9 +578,9 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       monto_presupuesto: checked ? "" : form.monto_presupuesto,
                     });
                   }}
-                  className="h-5 w-5 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20"
+                  className="h-5 w-5 rounded border-slate-300 dark:border-slate-700 text-indigo-500 focus:ring-indigo-500/20"
                 />
-                <label htmlFor="en_garantia" className="text-base text-slate-700">
+                <label htmlFor="en_garantia" className="text-base text-slate-700 dark:text-slate-300">
                   En garantía (sin costo)
                 </label>
               </div>
@@ -588,7 +588,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
               {/* Presupuesto (opcional) */}
               <div className="mt-4 space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Presupuesto cliente (opcional)
                   </label>
                   <div className="flex gap-2">
@@ -596,7 +596,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       value={form.moneda}
                       onChange={(e) => setForm({ ...form, moneda: e.target.value })}
                       disabled={form.en_garantia}
-                      className={`border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     >
                       <option value="UYU">$U</option>
                       <option value="USD">US$</option>
@@ -610,7 +610,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       onChange={(e) => setForm({ ...form, monto_presupuesto: e.target.value })}
                       placeholder="0.00"
                       disabled={form.en_garantia}
-                      className={`no-spinner flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
+                      className={`no-spinner flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-900 dark:text-slate-100 ${form.en_garantia ? "opacity-50 cursor-not-allowed bg-gray-100" : ""}`}
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Lo que se le cobra al cliente.</p>
@@ -627,7 +627,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   value={form.fecha_entrega_estimada}
                   onChange={(e) => setForm({ ...form, fecha_entrega_estimada: e.target.value })}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
 
@@ -638,7 +638,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                 <select
                   value={form.marca}
                   onChange={(e) => setForm({ ...form, marca: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 >
                   <option value="">Seleccionar marca...</option>
                   {marcas.map((m) => (
@@ -657,7 +657,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     placeholder="Nombre de la marca..."
                     value={form.marca_otra}
                     onChange={(e) => setForm({ ...form, marca_otra: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                     autoFocus
                   />
                 </div>
@@ -672,7 +672,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   value={form.problema_reportado}
                   onChange={(e) => setForm({ ...form, problema_reportado: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-y"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100 resize-y"
                 />
               </div>
 
@@ -685,7 +685,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   placeholder="Notas para uso interno..."
                   value={form.notas_internas}
                   onChange={(e) => setForm({ ...form, notas_internas: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
 
@@ -697,7 +697,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                   <select
                     value={form.tipo_servicio_id}
                     onChange={(e) => setForm({ ...form, tipo_servicio_id: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   >
                     <option value="">Sin recordatorio de mantenimiento</option>
                     {tiposServicio.map((t) => (

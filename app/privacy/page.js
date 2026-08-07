@@ -10,7 +10,7 @@ const CONTACTO_EMAIL = "contacto@rivierajoyas.com.uy"
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <span className="text-2xl">⌚</span>
@@ -22,9 +22,9 @@ export default function PrivacyPolicyPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-        <article className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6 text-slate-700 leading-relaxed">
+        <article className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 space-y-6 text-slate-700 dark:text-slate-300 leading-relaxed">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Política de Privacidad</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">Política de Privacidad</h2>
             <p className="text-sm text-slate-500">Última actualización: {ULTIMA_ACTUALIZACION}</p>
           </div>
 
@@ -39,17 +39,17 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">1. Responsable del tratamiento</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">1. Responsable del tratamiento</h3>
             <p>
               El responsable del tratamiento de los datos personales gestionados a través de la
               Aplicación es el comercio (relojería o joyería) que la utiliza como herramienta interna.
               Para consultas sobre esta política o el desarrollo técnico de la Aplicación podés
-              escribir a: <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
+              escribir a: <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">2. Datos que recolectamos</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">2. Datos que recolectamos</h3>
             <p>Tratamos las siguientes categorías de datos:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">3. Finalidad del tratamiento</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">3. Finalidad del tratamiento</h3>
             <p>Los datos se utilizan exclusivamente para:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Gestionar internamente las órdenes de reparación y su trazabilidad.</li>
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">4. Base legal</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">4. Base legal</h3>
             <p>
               El tratamiento se basa en (a) la ejecución del contrato de servicio de reparación
               solicitado por el cliente, (b) el interés legítimo del comercio en gestionar su
@@ -102,7 +102,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">5. Compartición de datos con terceros</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">5. Compartición de datos con terceros</h3>
             <p>
               <strong>No vendemos ni comercializamos datos personales.</strong> Los datos se comparten
               únicamente con proveedores estrictamente necesarios para el funcionamiento del servicio:
@@ -130,7 +130,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">6. Conservación de los datos</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">6. Conservación de los datos</h3>
             <p>
               Los datos relativos a una orden de reparación se conservan mientras dure la relación
               comercial y durante los plazos exigidos por la legislación aplicable (por ejemplo,
@@ -141,7 +141,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">7. Derechos del titular</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">7. Derechos del titular</h3>
             <p>
               Como titular de los datos podés ejercer los derechos de acceso, rectificación,
               supresión, oposición, limitación y portabilidad. También podés solicitar dejar de
@@ -150,14 +150,14 @@ export default function PrivacyPolicyPage() {
             </p>
             <p>
               Para ejercer estos derechos escribí a{" "}
-              <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>{" "}
+              <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>{" "}
               indicando la solicitud concreta. Responderemos dentro de los plazos previstos por la
               normativa aplicable.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">8. Seguridad</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">8. Seguridad</h3>
             <p>
               Aplicamos medidas técnicas y organizativas razonables para proteger los datos: acceso
               restringido por roles, autenticación con contraseñas cifradas, conexiones cifradas
@@ -168,7 +168,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">9. Menores de edad</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">9. Menores de edad</h3>
             <p>
               La Aplicación no está dirigida a menores de edad. No recolectamos datos de menores de
               forma intencional. Si detectás que un menor proporcionó datos sin autorización,
@@ -177,7 +177,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">10. Transferencias internacionales</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">10. Transferencias internacionales</h3>
             <p>
               Algunos proveedores (Meta, Supabase, Vercel) pueden procesar datos fuera del país del
               comercio. En todos los casos se trata de proveedores con políticas de cumplimiento
@@ -186,7 +186,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">11. Cambios en esta política</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">11. Cambios en esta política</h3>
             <p>
               Podemos actualizar esta política cuando sea necesario para reflejar cambios legales o
               en el servicio. La fecha de la última actualización se indica al inicio del documento.
@@ -195,11 +195,11 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-900">12. Contacto</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">12. Contacto</h3>
             <p>
               Para cualquier consulta sobre esta política o sobre el tratamiento de tus datos,
               escribinos a{" "}
-              <a className="text-indigo-600 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
+              <a className="text-indigo-600 dark:text-indigo-400 underline" href={`mailto:${CONTACTO_EMAIL}`}>{CONTACTO_EMAIL}</a>.
             </p>
           </section>
         </article>

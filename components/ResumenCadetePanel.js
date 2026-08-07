@@ -297,14 +297,14 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         </span>
       )
     }
-    return <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">TAREA</span>
+    return <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 dark:text-slate-400">TAREA</span>
   }
 
   function renderItemDetail(item) {
     if (item.tipo === "traslado") {
       return (
         <>
-          <span className="text-sm text-slate-700 ml-2">
+          <span className="text-sm text-slate-700 dark:text-slate-300 ml-2">
             {[item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")}
           </span>
           <span className="text-xs text-slate-500 ml-2">
@@ -316,7 +316,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
     if (item.tipo === "orden") {
       return (
         <>
-          <span className="text-sm text-slate-700 ml-2">
+          <span className="text-sm text-slate-700 dark:text-slate-300 ml-2">
             #{String(item.numero_orden).padStart(4, "0")} — {[item.tipo_articulo, item.marca, item.modelo].filter(Boolean).join(" — ")}
           </span>
           <span className="text-xs text-slate-500 ml-2">
@@ -327,22 +327,22 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
         </>
       )
     }
-    return <span className="text-sm text-slate-700 ml-2">{item.descripcion}</span>
+    return <span className="text-sm text-slate-700 dark:text-slate-300 ml-2">{item.descripcion}</span>
   }
 
   function renderOrdenCard(orden, subtipo) {
     const label = subtipo === "retirar_de_taller" ? "Retirar de" : "Llevar a"
     const tallerDisplay = orden.taller_nombre || "Sin taller asignado"
     return (
-      <div key={orden.id} className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200 text-sm">
+      <div key={orden.id} className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-sm">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold font-mono text-slate-900">#{String(orden.numero_orden).padStart(4, "0")}</span>
-            <span className="text-slate-700">{[orden.tipo_articulo, orden.marca, orden.modelo].filter(Boolean).join(" — ")}</span>
+            <span className="font-bold font-mono text-slate-900 dark:text-slate-100">#{String(orden.numero_orden).padStart(4, "0")}</span>
+            <span className="text-slate-700 dark:text-slate-300">{[orden.tipo_articulo, orden.marca, orden.modelo].filter(Boolean).join(" — ")}</span>
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
             {orden.taller_nombre
-              ? <>{label} <span className="font-semibold text-slate-600">{orden.taller_nombre}</span></>
+              ? <>{label} <span className="font-semibold text-slate-600 dark:text-slate-400">{orden.taller_nombre}</span></>
               : <span className="text-amber-600 font-medium">Sin taller asignado</span>
             }
             <span className="mx-1">|</span>
@@ -361,11 +361,11 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-bold text-slate-900">Resumenes de Cadete</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Resumenes de Cadete</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl">✕</button>
         </div>
 
         {error && (
@@ -395,7 +395,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                 </button>
               </div>
 
-              <h3 className="text-sm font-bold text-slate-700 mb-4">
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4">
                 {selectedResumen.nombre || "Sin nombre"} — {selectedResumen.cadete_username}
               </h3>
 
@@ -408,7 +408,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                     <p className="text-sm text-slate-400 py-4 text-center">Sin items. Selecciona ordenes, traslados o agrega tareas.</p>
                   )}
                   {items.map((item, idx) => (
-                    <div key={item.item_id} className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                    <div key={item.item_id} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                       <div className="flex flex-col gap-0.5">
                         <button onClick={() => handleMoveItem(idx, -1)} disabled={idx === 0}
                           className="text-xs text-slate-400 hover:text-slate-700 disabled:opacity-20">▲</button>
@@ -473,7 +473,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                   </h4>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {availableTraslados.map((t) => (
-                      <div key={t.id} className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200 text-sm">
+                      <div key={t.id} className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-sm">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
@@ -481,7 +481,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                             }`}>
                               {t.tipo === "ida" ? "IDA" : "RETORNO"}
                             </span>
-                            <span className="text-slate-700">
+                            <span className="text-slate-700 dark:text-slate-300">
                               #{String(t.ordenes?.numero_orden).padStart(4, "0")} — {t.ordenes?.tipo_articulo} {t.ordenes?.marca || ""}
                             </span>
                           </div>
@@ -511,7 +511,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                     value={adHocText}
                     onChange={(e) => setAdHocText(e.target.value)}
                     placeholder='Ej: "Retirar repuesto en Taller Lopez, Av. Italia 1234"'
-                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+                    className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
                   />
                   <button
                     type="submit"
@@ -535,7 +535,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
               </div>
 
               {showCreate && (
-                <form onSubmit={handleCreate} className="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4">
+                <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Cadete</label>
@@ -543,7 +543,7 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                         required
                         value={newCadeteId}
                         onChange={(e) => setNewCadeteId(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
                       >
                         <option value="">Seleccionar cadete...</option>
                         {cadetes.map((c) => (
@@ -558,13 +558,13 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                         value={newNombre}
                         onChange={(e) => setNewNombre(e.target.value)}
                         placeholder="Ej: Ronda lunes tarde"
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
                       />
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
                     <button type="submit" disabled={!newCadeteId} className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 disabled:opacity-40">Crear y seleccionar items</button>
-                    <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600">Cancelar</button>
+                    <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-400">Cancelar</button>
                   </div>
                 </form>
               )}
@@ -578,14 +578,14 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                   {resumenes.map((r) => (
                     <div
                       key={r.id}
-                      className={`bg-white rounded-xl border p-4 transition-colors ${
-                        r.activo ? "border-slate-200" : "border-slate-100 opacity-50"
+                      className={`bg-white dark:bg-slate-900 rounded-xl border p-4 transition-colors ${
+                        r.activo ? "border-slate-200 dark:border-slate-700" : "border-slate-100 opacity-50"
                       }`}
                     >
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleSelectResumen(r)}>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-slate-900">{r.nombre || "Sin nombre"}</span>
+                            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{r.nombre || "Sin nombre"}</span>
                             {!r.activo && (
                               <span className="text-xs px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded">Inactivo</span>
                             )}
@@ -596,9 +596,9 @@ export function ResumenCadetePanel({ onClose, sucursalId, isDueno }) {
                         </div>
                         <div className="flex items-center gap-2">
                           <button onClick={() => handleSelectResumen(r)}
-                            className="px-3 py-1.5 text-xs bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium">Editar</button>
+                            className="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 font-medium">Editar</button>
                           <button onClick={() => handleToggleActivo(r)}
-                            className="px-3 py-1.5 text-xs border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"
+                            className="px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
                           >{r.activo ? "Desactivar" : "Activar"}</button>
                           <button onClick={() => handleDeleteResumen(r.id)}
                             className="px-3 py-1.5 text-xs text-red-500 hover:text-red-700 font-medium">Eliminar</button>

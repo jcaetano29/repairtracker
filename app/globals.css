@@ -12,6 +12,14 @@ body {
   margin: 0;
 }
 
+.dark body {
+  background: #020617;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 /* Hide number input spinner arrows (price fields) */
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button {

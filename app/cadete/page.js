@@ -86,7 +86,7 @@ export default function CadetePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       {/* Header */}
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function CadetePage() {
           <div key={resumen.id} className="mb-6">
             {/* Resumen header */}
             <div className="flex items-center gap-2 mb-3">
-              <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+              <h2 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {resumen.nombre || "Tareas asignadas"}
               </h2>
               <span className="text-xs text-slate-400">
@@ -144,7 +144,7 @@ export default function CadetePage() {
             </div>
 
             {resumen.items.length === 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
+              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center text-slate-400 text-sm">
                 Sin items en este resumen
               </div>
             )}
@@ -159,17 +159,17 @@ export default function CadetePage() {
                     <div
                       key={item.item_id}
                       onClick={() => toggleCheck(item.item_id)}
-                      className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
+                      className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50"
-                          : "border-slate-200"
+                          ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
+                          : "border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                           isChecked
                             ? "bg-green-500 border-green-500 text-white"
-                            : "border-slate-300"
+                            : "border-slate-300 dark:border-slate-700"
                         }`}>
                           {isChecked && <span className="text-xs font-bold">✓</span>}
                         </div>
@@ -183,9 +183,9 @@ export default function CadetePage() {
                               {item.traslado_tipo === "ida" ? "↑ LLEVAR" : "↓ RETIRAR"}
                             </span>
                           </div>
-                          <p className="text-sm font-semibold text-slate-900">{article || "Articulo"}</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{article || "Articulo"}</p>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {action} <span className="font-semibold text-slate-700">{destination}</span>
+                            {action} <span className="font-semibold text-slate-700 dark:text-slate-300">{destination}</span>
                           </p>
                         </div>
                       </div>
@@ -201,17 +201,17 @@ export default function CadetePage() {
                     <div
                       key={item.item_id}
                       onClick={() => toggleCheck(item.item_id)}
-                      className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
+                      className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                         isChecked
-                          ? "border-green-300 bg-green-50"
-                          : "border-slate-200"
+                          ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
+                          : "border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                           isChecked
                             ? "bg-green-500 border-green-500 text-white"
-                            : "border-slate-300"
+                            : "border-slate-300 dark:border-slate-700"
                         }`}>
                           {isChecked && <span className="text-xs font-bold">✓</span>}
                         </div>
@@ -225,9 +225,9 @@ export default function CadetePage() {
                               {item.subtipo === "retirar_de_taller" ? "↓ RETIRAR" : "↑ LLEVAR"}
                             </span>
                           </div>
-                          <p className="text-sm font-semibold text-slate-900">{article || "Articulo"}</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{article || "Articulo"}</p>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {action} <span className="font-semibold text-slate-700">{destination}</span>
+                            {action} <span className="font-semibold text-slate-700 dark:text-slate-300">{destination}</span>
                           </p>
                           {item.orden_taller_direccion && (
                             <p className="text-xs text-slate-400 mt-0.5">{item.orden_taller_direccion}</p>
@@ -243,25 +243,25 @@ export default function CadetePage() {
                   <div
                     key={item.item_id}
                     onClick={() => toggleCheck(item.item_id)}
-                    className={`bg-white rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
+                    className={`bg-white dark:bg-slate-900 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.98] ${
                       isChecked
-                        ? "border-green-300 bg-green-50"
-                        : "border-slate-200"
+                        ? "border-green-300 bg-green-50 dark:border-green-700 dark:!bg-green-950"
+                        : "border-slate-200 dark:border-slate-700"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                         isChecked
                           ? "bg-green-500 border-green-500 text-white"
-                          : "border-slate-300"
+                          : "border-slate-300 dark:border-slate-700"
                       }`}>
                         {isChecked && <span className="text-xs font-bold">✓</span>}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 mb-1 inline-block">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 mb-1 inline-block">
                           TAREA
                         </span>
-                        <p className="text-sm text-slate-900 mt-1">{item.descripcion}</p>
+                        <p className="text-sm text-slate-900 dark:text-slate-100 mt-1">{item.descripcion}</p>
                       </div>
                     </div>
                   </div>

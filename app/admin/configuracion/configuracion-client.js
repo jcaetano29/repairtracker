@@ -155,8 +155,8 @@ export default function ConfiguracionClient({ configuracion }) {
     <div className="space-y-6">
       {/* Nombre del negocio */}
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Nombre del Negocio</h2>
-        <p className="text-sm text-slate-600 mb-3">Este nombre aparece en los tickets de ingreso impresos.</p>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Nombre del Negocio</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">Este nombre aparece en los tickets de ingreso impresos.</p>
         <div className="flex gap-2 max-w-md">
           <input
             type="text"
@@ -164,7 +164,7 @@ export default function ConfiguracionClient({ configuracion }) {
             onChange={(e) => setNombreNegocio(e.target.value)}
             disabled={nombreLoading}
             placeholder="Ej: Joyería López"
-            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100"
+            className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100"
           />
           <button
             onClick={handleSaveNombre}
@@ -181,28 +181,28 @@ export default function ConfiguracionClient({ configuracion }) {
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
           Configuración de Umbrales de Retraso
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           Define los umbrales de días para alertas de retraso (leve y grave) en cada estado de orden.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b-2 border-slate-100 bg-slate-50">
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <tr className="border-b-2 border-slate-100 bg-slate-50 dark:bg-slate-950">
+              <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 Estado
               </th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 Umbral Leve (días)
               </th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 Umbral Grave (días)
               </th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 Acción
               </th>
             </tr>
@@ -217,7 +217,7 @@ export default function ConfiguracionClient({ configuracion }) {
                 <tr
                   key={clave}
                   className={`border-b border-slate-100 ${
-                    index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                    index % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-slate-50 dark:bg-slate-950"
                   }`}
                 >
                   {/* Estado column */}
@@ -226,7 +226,7 @@ export default function ConfiguracionClient({ configuracion }) {
                       <span className="text-lg">
                         {ESTADOS[estado]?.icon || ""}
                       </span>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
                         {ESTADOS[estado]?.label || estado}
                       </span>
                     </div>
@@ -243,7 +243,7 @@ export default function ConfiguracionClient({ configuracion }) {
                         handleInputChange(clave, "leve", e.target.value)
                       }
                       disabled={row.loading}
-                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 
@@ -258,7 +258,7 @@ export default function ConfiguracionClient({ configuracion }) {
                         handleInputChange(clave, "grave", e.target.value)
                       }
                       disabled={row.loading}
-                      className="no-spinner w-20 px-3 py-2 border border-slate-200 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="no-spinner w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </td>
 

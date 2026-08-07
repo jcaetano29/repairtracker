@@ -26,6 +26,7 @@ export default function WhatsAppPage() {
       const res = await fetch("/api/whatsapp/conversaciones");
       const data = res.ok ? await res.json() : { conversaciones: [] };
       setConversaciones(data.conversaciones ?? []);
+      fetch("/api/whatsapp/estado/marcar-leido", { method: "POST" }).catch(() => {});
     } catch (e) {
       console.error("Error cargando conversaciones:", e);
     } finally {
@@ -55,7 +56,7 @@ export default function WhatsAppPage() {
   const conversacionActual = conversaciones.find((c) => c.id === seleccionada);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col">
       <header className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4 shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-3 cursor-pointer">
@@ -67,7 +68,7 @@ export default function WhatsAppPage() {
               </p>
             </div>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mr-14">
             <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors px-3 py-2">
               ← Volver al dashboard
             </Link>
@@ -78,15 +79,15 @@ export default function WhatsAppPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row bg-white md:my-6 md:rounded-xl md:shadow overflow-hidden md:h-[75vh] min-h-0">
-        <div className={`w-full md:w-80 border-r border-slate-200 flex-col ${seleccionada ? "hidden md:flex" : "flex"}`}>
-          <div className="p-3 border-b border-slate-200 shrink-0">
+      <main className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row bg-white dark:bg-slate-900 md:my-6 md:rounded-xl md:shadow overflow-hidden md:h-[75vh] min-h-0">
+        <div className={`w-full md:w-80 border-r border-slate-200 dark:border-slate-700 flex-col ${seleccionada ? "hidden md:flex" : "flex"}`}>
+          <div className="p-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <input
               type="text"
               placeholder="🔍 Buscar cliente..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#25D366]/30"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#25D366]/30"
             />
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -98,12 +99,12 @@ export default function WhatsAppPage() {
               <button
                 key={c.id}
                 onClick={() => setSeleccionada(c.id)}
-                className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors ${
-                  seleccionada === c.id ? "bg-slate-100" : ""
+                className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${
+                  seleccionada === c.id ? "bg-slate-100 dark:bg-slate-950" : ""
                 }`}
               >
                 <div className="flex justify-between items-baseline gap-2">
-                  <span className="font-medium text-sm text-slate-800 truncate">
+                  <span className="font-medium text-sm text-slate-800 dark:text-slate-100 truncate">
                     {c.clientes?.nombre ?? c.telefono_e164}
                   </span>
                   <span className="text-[10px] text-slate-400 shrink-0">{formatFecha(c.last_message_at)}</span>
@@ -118,7 +119,7 @@ export default function WhatsAppPage() {
           {seleccionada && (
             <button
               onClick={() => setSeleccionada(null)}
-              className="md:hidden px-4 py-2 text-xs text-slate-500 border-b border-slate-200 text-left shrink-0"
+              className="md:hidden px-4 py-2 text-xs text-slate-500 border-b border-slate-200 dark:border-slate-700 text-left shrink-0"
             >
               ← Volver a conversaciones
             </button>

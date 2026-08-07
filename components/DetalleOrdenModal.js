@@ -296,7 +296,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -304,11 +304,11 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           <div className="flex items-start justify-between">
             <div>
               <div className="text-xs text-slate-400 font-semibold tracking-wider">ORDEN</div>
-              <h2 className="text-2xl font-extrabold text-slate-900">
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
                 #{formatNumeroOrden(orden.numero_orden)}
               </h2>
             </div>
-            <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600">×</button>
+            <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">×</button>
           </div>
         </div>
 
@@ -332,17 +332,17 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
           {/* Info */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
               <div className="text-xs text-slate-400 font-semibold uppercase">Cliente</div>
-              <div className="text-sm font-bold text-slate-900">{orden.cliente_nombre}</div>
+              <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{orden.cliente_nombre}</div>
               <div className="text-xs text-slate-500">{orden.cliente_telefono}</div>
               {orden.cliente_documento && (
                 <div className="text-xs text-slate-500">Doc: {orden.cliente_documento}</div>
               )}
             </div>
-            <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
               <div className="text-xs text-slate-400 font-semibold uppercase">Artículo</div>
-              <div className="text-sm font-bold text-slate-900">{orden.tipo_articulo}</div>
+              <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{orden.tipo_articulo}</div>
               <div className="text-xs text-slate-500">{orden.marca || "—"}</div>
               {orden.material && (
                 <div className="text-xs text-slate-500 mt-1">
@@ -351,9 +351,9 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 </div>
               )}
             </div>
-            <div className="bg-slate-50 p-3 rounded-lg col-span-2">
+            <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg col-span-2">
               <div className="text-xs text-slate-400 font-semibold uppercase">Problema</div>
-              <div className="text-sm text-slate-900">{orden.problema_reportado}</div>
+              <div className="text-sm text-slate-900 dark:text-slate-100">{orden.problema_reportado}</div>
             </div>
           </div>
 
@@ -367,7 +367,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               )}
               {orden.monto_presupuesto && (
                 <div className="text-sm">
-                  <span className="font-bold text-slate-900">
+                  <span className="font-bold text-slate-900 dark:text-slate-100">
                     Cliente: {formatMonto(orden.monto_presupuesto, orden.moneda)}
                   </span>
                   {orden.monto_presupuesto_taller && (
@@ -407,17 +407,17 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
           {/* Sucursales info */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
               <div className="text-xs text-slate-400 font-semibold uppercase">Recepción</div>
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {orden.sucursal_recepcion_nombre || orden.sucursal_nombre}
               </div>
             </div>
-            <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
               <div className="text-xs text-slate-400 font-semibold uppercase">Retiro</div>
               {!editingRetiro ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900">
+                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {orden.sucursal_retiro_nombre || orden.sucursal_nombre}
                   </span>
                   {orden.estado !== "ENTREGADO" && (
@@ -434,7 +434,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   <select
                     value={retiroId}
                     onChange={(e) => setRetiroId(e.target.value)}
-                    className="flex-1 px-2 py-1 border rounded text-xs"
+                    className="flex-1 px-2 py-1 border rounded text-xs dark:bg-slate-900 dark:text-slate-100"
                   >
                     {sucursales.filter(s => s.activo).map((s) => (
                       <option key={s.id} value={s.id}>{s.nombre}</option>
@@ -480,7 +480,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               <select
                 value={tallerSelected}
                 onChange={(e) => setTallerSelected(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm"
+                className="w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
               >
                 <option value="">Elegir taller...</option>
                 {talleres.map((t) => (
@@ -513,7 +513,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   placeholder="Monto del taller"
                   value={montoTaller}
                   onChange={(e) => setMontoTaller(e.target.value)}
-                  className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
+                  className="no-spinner w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
               <div>
@@ -522,7 +522,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                   <select
                     value={moneda}
                     onChange={(e) => setMoneda(e.target.value)}
-                    className="px-2 py-2 border rounded-lg text-sm"
+                    className="px-2 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
                   >
                     <option value="UYU">$U</option>
                     <option value="USD">US$</option>
@@ -535,7 +535,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                     placeholder="Monto"
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
-                    className="no-spinner flex-1 px-3 py-2 border rounded-lg text-sm"
+                    className="no-spinner flex-1 px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
@@ -546,14 +546,14 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                       type="checkbox"
                       checked={notificarPresupuesto}
                       onChange={(e) => setNotificarPresupuesto(e.target.checked)}
-                      className="mt-0.5 rounded border-slate-300"
+                      className="mt-0.5 rounded border-slate-300 dark:border-slate-700"
                     />
-                    <div className="text-xs text-slate-600">
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
                       <span className="font-semibold">Notificar al cliente por WhatsApp</span>
                     </div>
                   </label>
                   {notificarPresupuesto && (
-                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                    <pre className="text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-3 whitespace-pre-wrap font-sans">
                       {renderPlantilla("PRESUPUESTO", {
                         clienteNombre: orden.cliente_nombre,
                         numeroOrden: formatNumeroOrden(orden.numero_orden),
@@ -589,10 +589,10 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 placeholder={`Monto final (${orden.monto_presupuesto || ""})`}
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
-                className="no-spinner w-full px-3 py-2 border rounded-lg text-sm"
+                className="no-spinner w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100"
               />
               <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm">
+                className="w-full px-3 py-2 border rounded-lg text-sm dark:bg-slate-900 dark:text-slate-100">
                 <option value="efectivo">Efectivo</option>
                 <option value="tarjeta">Tarjeta</option>
                 <option value="transferencia">Transferencia</option>
@@ -620,14 +620,14 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                       type="checkbox"
                       checked={notificarRetiro}
                       onChange={(e) => setNotificarRetiro(e.target.checked)}
-                      className="mt-0.5 rounded border-slate-300"
+                      className="mt-0.5 rounded border-slate-300 dark:border-slate-700"
                     />
-                    <div className="text-xs text-slate-600">
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
                       <span className="font-semibold">Notificar al cliente por WhatsApp</span>
                     </div>
                   </label>
                   {notificarRetiro && (
-                    <pre className="text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3 whitespace-pre-wrap font-sans">
+                    <pre className="text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-3 whitespace-pre-wrap font-sans">
                       {renderPlantilla("LISTO_PARA_RETIRO", {
                         clienteNombre: orden.cliente_nombre,
                         numeroOrden: formatNumeroOrden(orden.numero_orden),
@@ -729,7 +729,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           <div className="pt-2 border-t border-slate-100">
             <button
               onClick={handleReimprimir}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               🖨️ Reimprimir ticket
             </button>
@@ -779,7 +779,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 {trasladosHistorial.map((t) => (
                   <div key={t.id} className="flex items-center gap-2 text-xs">
                     <span className="text-slate-400 w-24 flex-shrink-0">{formatFechaHora(t.created_at)}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded text-slate-500">
                       {t.tipo === "ida" ? "Ida" : "Retorno"}
                     </span>
                     <TrasladosBadge tipo={t.tipo} estado={t.estado} />

@@ -102,7 +102,7 @@ export default function MarcasPage() {
 
   return (
     <div className="max-w-2xl">
-      <h2 className="text-xl font-bold text-slate-900 mb-6">Marcas</h2>
+      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">Marcas</h2>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
@@ -116,7 +116,7 @@ export default function MarcasPage() {
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCrear()}
-          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+          className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
         />
         <button
           onClick={handleCrear}
@@ -128,7 +128,7 @@ export default function MarcasPage() {
       </div>
 
       {/* Lista de marcas */}
-      <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100">
         {marcas.length === 0 && (
           <div className="p-6 text-center text-sm text-slate-400">No hay marcas registradas</div>
         )}
@@ -149,7 +149,7 @@ export default function MarcasPage() {
               </>
             ) : (
               <>
-                <span className={`flex-1 text-sm ${m.activo ? "text-slate-900" : "text-slate-400 line-through"}`}>
+                <span className={`flex-1 text-sm ${m.activo ? "text-slate-900 dark:text-slate-100" : "text-slate-400 line-through"}`}>
                   {m.nombre}
                 </span>
                 <button

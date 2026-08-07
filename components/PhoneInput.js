@@ -87,14 +87,14 @@ export default function PhoneInput({
 
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
-      <div className="flex items-stretch border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 bg-white">
+      <div className="flex items-stretch border border-slate-200 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 bg-white dark:bg-slate-900">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-label="Seleccionar país"
-          className="flex items-center gap-2 px-3 border-r border-slate-200 text-sm text-slate-700 hover:bg-slate-50 rounded-l-lg"
+          className="flex items-center gap-2 px-3 border-r border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-l-lg"
         >
           <Flag title={country.name} className="w-5 h-auto rounded-sm" />
           <span>+{country.dial}</span>
@@ -107,14 +107,14 @@ export default function PhoneInput({
           placeholder={placeholder}
           value={number}
           onChange={handleNumberChange}
-          className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent rounded-r-lg"
+          className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent rounded-r-lg dark:text-slate-100"
         />
       </div>
 
       {open && (
         <ul
           role="listbox"
-          className="absolute z-10 mt-1 w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-1 max-h-72 overflow-auto"
+          className="absolute z-10 mt-1 w-64 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 max-h-72 overflow-auto"
         >
           {COUNTRIES.map((c) => {
             const ItemFlag = c.Flag
@@ -126,12 +126,12 @@ export default function PhoneInput({
                   role="option"
                   aria-selected={selected}
                   onClick={() => handleCountrySelect(c)}
-                  className={`flex items-center gap-3 px-3 py-2 w-full text-left text-sm hover:bg-slate-50 ${
-                    selected ? "bg-indigo-50" : ""
+                  className={`flex items-center gap-3 px-3 py-2 w-full text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                    selected ? "bg-indigo-50 dark:bg-indigo-950/40" : ""
                   }`}
                 >
                   <ItemFlag title={c.name} className="w-5 h-auto rounded-sm" />
-                  <span className="text-slate-700">{c.name}</span>
+                  <span className="text-slate-700 dark:text-slate-300">{c.name}</span>
                   <span className="ml-auto text-slate-500">+{c.dial}</span>
                 </button>
               </li>

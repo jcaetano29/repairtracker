@@ -10,7 +10,12 @@ import { getCentrosReparacion } from "@/lib/traslados";
 async function jsonFetch(url, opts) {
   const res = await fetch(url, opts)
   const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+  if (!res.ok) {
+    const err = new Error(data.error || `HTTP ${res.status}`)
+    err.status = res.status
+    err.data = data
+    throw err
+  }
   return data
 }
 import PhoneInput from "@/components/PhoneInput";
@@ -114,7 +119,19 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       setCreandoCliente(false);
       setStep(2);
     } catch (e) {
-      setError("Error creando cliente: " + e.message);
+      if (e.status === 409 && e.data?.clienteExistente) {
+        const existente = e.data.clienteExistente;
+        const usar = window.confirm(
+          `Ya existe un cliente con este teléfono:\n\n${existente.nombre}${existente.documento ? ` (${existente.documento})` : ""}\n\n¿Usar ese cliente para esta orden?`
+        );
+        if (usar) {
+          setClienteSeleccionado(existente);
+          setCreandoCliente(false);
+          setStep(2);
+        }
+      } else {
+        setError("Error creando cliente: " + e.message);
+      }
     } finally {
       setLoading(false);
     }

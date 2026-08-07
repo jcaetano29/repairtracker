@@ -209,7 +209,7 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
         {/* Stats */}
         <div className="flex flex-wrap gap-3 mb-5">
-          <StatCard label="Activas" value={stats.activas} icon="📋" color="#0f172a" description="Órdenes en curso sin entregar" />
+          <StatCard label="Activas" value={stats.activas} icon="📋" description="Órdenes en curso sin entregar" />
           <StatCard label="Con Retraso" value={stats.conRetraso} icon="⚠️" color="#ef4444" description="Superan el umbral de días en su estado" />
           <StatCard label="Para Retiro" value={stats.listasRetiro} icon="🎉" color="#22c55e" description="Listas para que el cliente retire" />
           <StatCard label="En Talleres" value={stats.enTaller} icon="🔧" color="#8b5cf6" description="Enviadas, en reparación o listas en taller" />
@@ -329,7 +329,7 @@ export default function DashboardPage() {
                           ? "bg-red-50 hover:bg-red-100/70"
                           : retraso === "leve"
                           ? "bg-amber-50 hover:bg-amber-100/50"
-                          : "hover:bg-slate-50"
+                          : "hover:bg-slate-50 dark:hover:bg-slate-800"
                       }`}
                     >
                       <td className="px-4 py-3 font-bold font-mono text-slate-900 dark:text-slate-100">
@@ -400,7 +400,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ← Anterior
               </button>
@@ -415,7 +415,7 @@ export default function DashboardPage() {
                     className={`w-10 h-10 text-xs font-medium rounded-lg border transition-colors ${
                       p === pagina
                         ? "bg-slate-900 text-white border-slate-900"
-                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -426,7 +426,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                 disabled={pagina === totalPaginas}
-                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Siguiente →
               </button>
@@ -472,7 +472,7 @@ export default function DashboardPage() {
                               ? "border-2 border-red-300 bg-red-50"
                               : retraso === "leve"
                               ? "border-2 border-amber-300 bg-amber-50"
-                              : "border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100"
+                              : "border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-1">

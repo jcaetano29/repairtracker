@@ -199,7 +199,7 @@ export default function ReportesPage() {
                       <span className="text-slate-700 dark:text-slate-300">{cfg.label}</span>
                       <span className="font-semibold text-slate-900 dark:text-slate-100">{count}</span>
                     </div>
-                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{
@@ -231,7 +231,7 @@ export default function ReportesPage() {
                     <span className="text-slate-700 dark:text-slate-300">{tipo}</span>
                     <span className="font-semibold text-slate-900 dark:text-slate-100">{count}</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-400 rounded-full"
                       style={{ width: `${stats.totalOrdenes > 0 ? (count / stats.totalOrdenes) * 100 : 0}%` }}

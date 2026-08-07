@@ -7,8 +7,8 @@ export function StatCard({ label, value, icon, color, description }) {
         <span>{icon}</span> {label}
       </div>
       <div
-        className="text-3xl font-bold tracking-tight"
-        style={{ color: color || "#0f172a" }}
+        className={`text-3xl font-bold tracking-tight ${color ? "" : "text-slate-900 dark:text-slate-100"}`}
+        style={color ? { color } : undefined}
       >
         {value}
       </div>

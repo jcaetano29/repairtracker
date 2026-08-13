@@ -91,7 +91,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   }
 
   async function triggerNotify(type, extras = {}) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
     const res = await fetch("/api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -102,7 +101,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
           clienteNombre: orden.cliente_nombre,
           numeroOrden: formatNumeroOrden(orden.numero_orden),
           tipoArticulo: orden.tipo_articulo,
-          trackingUrl: orden.tracking_token ? `${appUrl}/seguimiento/${orden.tracking_token}` : "",
           ...extras,
         },
       }),
@@ -635,9 +633,6 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                         clienteNombre: orden.cliente_nombre,
                         numeroOrden: formatNumeroOrden(orden.numero_orden),
                         tipoArticulo: orden.tipo_articulo,
-                        trackingUrl: orden.tracking_token
-                          ? `${process.env.NEXT_PUBLIC_APP_URL || ""}/seguimiento/${orden.tracking_token}`
-                          : "",
                       })}
                     </pre>
                   )}

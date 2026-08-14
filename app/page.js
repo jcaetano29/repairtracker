@@ -177,6 +177,12 @@ export default function DashboardPage() {
               🚚 Cadete
             </button>
             <Link
+              href="/clientes"
+              className="px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
+            >
+              👤 Clientes
+            </Link>
+            <Link
               href="/whatsapp"
               className="relative px-4 py-2.5 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5"
             >

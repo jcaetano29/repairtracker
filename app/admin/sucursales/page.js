@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 
 export default function SucursalesPage() {
   const [sucursales, setSucursales] = useState([])
@@ -10,6 +10,9 @@ export default function SucursalesPage() {
   const [editando, setEditando] = useState(null) // { id, nombre }
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [empleadosPorSucursal, setEmpleadosPorSucursal] = useState({}) // { [sucursalId]: Empleado[] }
+  const [showEmpleadoForm, setShowEmpleadoForm] = useState(null) // sucursalId | null
+  const [nuevoEmpleadoNombre, setNuevoEmpleadoNombre] = useState("")
 
   async function load() {
     setLoading(true)
@@ -25,7 +28,23 @@ export default function SucursalesPage() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  async function loadEmpleados() {
+    try {
+      const res = await fetch("/api/admin/empleados")
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const { empleados } = await res.json()
+      const grouped = {}
+      for (const emp of empleados || []) {
+        if (!grouped[emp.sucursal_id]) grouped[emp.sucursal_id] = []
+        grouped[emp.sucursal_id].push(emp)
+      }
+      setEmpleadosPorSucursal(grouped)
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  useEffect(() => { load(); loadEmpleados() }, [])
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -75,6 +94,40 @@ export default function SucursalesPage() {
       if (!res.ok) throw new Error((await res.json()).error)
       setEditando(null)
       await load()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleCreateEmpleado(sucursalId, e) {
+    e.preventDefault()
+    setError(null)
+    try {
+      const res = await fetch("/api/admin/empleados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sucursal_id: sucursalId, nombre: nuevoEmpleadoNombre }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setNuevoEmpleadoNombre("")
+      setShowEmpleadoForm(null)
+      await loadEmpleados()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleToggleEmpleadoActivo(empleado) {
+    setError(null)
+    try {
+      const res = await fetch("/api/admin/empleados", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ empleadoId: empleado.id, activo: !empleado.activo }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      await loadEmpleados()
     } catch (e) {
       setError(e.message)
     }
@@ -138,43 +191,92 @@ export default function SucursalesPage() {
             </thead>
             <tbody>
               {sucursales.map((s) => (
-                <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800">
-                  <td className="px-4 py-3">
-                    {editando?.id === s.id ? (
-                      <form onSubmit={handleEditNombre} className="flex gap-2">
-                        <input
-                          autoFocus
-                          value={editando.nombre}
-                          onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
-                          className="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        />
-                        <button type="submit" className="text-xs text-indigo-600 font-semibold">Guardar</button>
-                        <button type="button" onClick={() => setEditando(null)} className="text-xs text-slate-400">Cancelar</button>
-                      </form>
-                    ) : (
-                      <span className="font-medium text-slate-900 dark:text-slate-100">{s.nombre}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${s.activo ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
-                      {s.activo ? "Activa" : "Inactiva"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right flex gap-3 justify-end">
-                    <button
-                      onClick={() => setEditando({ id: s.id, nombre: s.nombre })}
-                      className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
-                    >
-                      Renombrar
-                    </button>
-                    <button
-                      onClick={() => handleToggleActivo(s)}
-                      className="text-xs text-slate-500 hover:text-slate-700 font-medium"
-                    >
-                      {s.activo ? "Desactivar" : "Activar"}
-                    </button>
-                  </td>
-                </tr>
+                <Fragment key={s.id}>
+                  <tr className="border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <td className="px-4 py-3">
+                      {editando?.id === s.id ? (
+                        <form onSubmit={handleEditNombre} className="flex gap-2">
+                          <input
+                            autoFocus
+                            value={editando.nombre}
+                            onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
+                            className="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                          <button type="submit" className="text-xs text-indigo-600 font-semibold">Guardar</button>
+                          <button type="button" onClick={() => setEditando(null)} className="text-xs text-slate-400">Cancelar</button>
+                        </form>
+                      ) : (
+                        <span className="font-medium text-slate-900 dark:text-slate-100">{s.nombre}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${s.activo ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
+                        {s.activo ? "Activa" : "Inactiva"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right flex gap-3 justify-end">
+                      <button
+                        onClick={() => setEditando({ id: s.id, nombre: s.nombre })}
+                        className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
+                      >
+                        Renombrar
+                      </button>
+                      <button
+                        onClick={() => handleToggleActivo(s)}
+                        className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                      >
+                        {s.activo ? "Desactivar" : "Activar"}
+                      </button>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-slate-100 bg-slate-50/50 dark:bg-slate-800/30">
+                    <td colSpan={3} className="px-4 py-3">
+                      <div className="pl-2">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Empleados</span>
+                          <button
+                            onClick={() => { setShowEmpleadoForm(s.id); setNuevoEmpleadoNombre(""); setError(null) }}
+                            className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
+                          >
+                            + Agregar empleado
+                          </button>
+                        </div>
+                        {showEmpleadoForm === s.id && (
+                          <form onSubmit={(e) => handleCreateEmpleado(s.id, e)} className="flex gap-2 mb-2">
+                            <input
+                              autoFocus
+                              required
+                              value={nuevoEmpleadoNombre}
+                              onChange={(e) => setNuevoEmpleadoNombre(e.target.value)}
+                              placeholder="Nombre del empleado"
+                              className="flex-1 px-2 py-1 border border-slate-200 dark:border-slate-700 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            />
+                            <button type="submit" className="text-xs text-indigo-600 font-semibold">Guardar</button>
+                            <button type="button" onClick={() => setShowEmpleadoForm(null)} className="text-xs text-slate-400">Cancelar</button>
+                          </form>
+                        )}
+                        <ul className="space-y-1">
+                          {(empleadosPorSucursal[s.id] || []).map((emp) => (
+                            <li key={emp.id} className="flex items-center justify-between text-sm">
+                              <span className={emp.activo ? "text-slate-700 dark:text-slate-300" : "text-slate-400 line-through"}>
+                                {emp.nombre}
+                              </span>
+                              <button
+                                onClick={() => handleToggleEmpleadoActivo(emp)}
+                                className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                              >
+                                {emp.activo ? "Desactivar" : "Activar"}
+                              </button>
+                            </li>
+                          ))}
+                          {(empleadosPorSucursal[s.id] || []).length === 0 && (
+                            <li className="text-xs text-slate-400">Sin empleados cargados</li>
+                          )}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                </Fragment>
               ))}
               {sucursales.length === 0 && (
                 <tr>

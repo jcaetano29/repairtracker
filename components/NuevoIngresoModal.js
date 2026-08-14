@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { TIPOS_ARTICULO, MATERIALES } from "@/lib/constants";
-import { getTiposServicio, getSucursales, getMarcas } from "@/lib/data";
+import { getTiposServicio, getSucursales, getMarcas, getEmpleados } from "@/lib/data";
 import { getCentrosReparacion } from "@/lib/traslados";
 
 // clientes/ordenes are admin-only — writes/searches go via /api.
@@ -41,6 +41,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
     moneda: "UYU",
     tipo_servicio_id: "",
     sucursal_id: "",
+    empleado_id: "",
     material: "",
     material_otro: "",
     peso_gramos: "",
@@ -49,6 +50,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   });
   const [tiposServicio, setTiposServicio] = useState([]);
   const [sucursales, setSucursales] = useState([]);
+  const [empleados, setEmpleados] = useState([]);
   const [marcas, setMarcas] = useState([]);
   const [centrosReparacion, setCentrosReparacion] = useState([]);
   const [trasladar, setTrasladar] = useState(false);
@@ -64,6 +66,12 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   useEffect(() => {
     getSucursales()
       .then((data) => setSucursales(data.filter((s) => s.activo)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    getEmpleados()
+      .then((data) => setEmpleados(data.filter((e) => e.activo)))
       .catch(() => {});
   }, []);
 
@@ -150,6 +158,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       return;
     }
 
+    if (!form.empleado_id) {
+      setError("Seleccioná qué empleado ingresa la orden.");
+      return;
+    }
+
     if (form.material === "oro" && !form.peso_gramos) {
       setError("El peso es obligatorio para artículos de oro.");
       return;
@@ -179,6 +192,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           moneda: form.moneda,
           tipo_servicio_id: form.tipo_servicio_id || null,
           sucursal_id: form.sucursal_id,
+          empleado_id: form.empleado_id,
           material: form.material || null,
           material_otro: form.material === "otro" ? form.material_otro : null,
           peso_gramos: form.peso_gramos ? parseFloat(form.peso_gramos) : null,
@@ -211,6 +225,8 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
       setLoading(false);
     }
   }
+
+  const empleadosDeSucursal = empleados.filter((e) => e.sucursal_id === form.sucursal_id);
 
   // Check if user's sucursal is a repair center with another center available
   const userSucursalId = form.sucursal_id;
@@ -425,7 +441,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                     id="sucursal_id"
                     aria-required="true"
                     value={form.sucursal_id}
-                    onChange={(e) => setForm({ ...form, sucursal_id: e.target.value })}
+                    onChange={(e) => setForm({ ...form, sucursal_id: e.target.value, empleado_id: "" })}
                     className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100"
                   >
                     <option value="">Seleccioná una sucursal</option>
@@ -442,6 +458,30 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
                       : sucursales.find((s) => s.id === form.sucursal_id)?.nombre ?? "Sin sucursal asignada"}
                   </div>
                 )}
+              </div>
+
+              {/* Empleado */}
+              <div>
+                <label htmlFor="empleado_id" className="block text-sm font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  Empleado *
+                </label>
+                <select
+                  id="empleado_id"
+                  aria-required="true"
+                  value={form.empleado_id}
+                  onChange={(e) => setForm({ ...form, empleado_id: e.target.value })}
+                  disabled={!form.sucursal_id}
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-slate-900 dark:text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {form.sucursal_id ? "Seleccioná un empleado" : "Elegí una sucursal primero"}
+                  </option>
+                  {empleadosDeSucursal.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Trasladar a otro centro */}
@@ -716,7 +756,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.problema_reportado || !form.sucursal_id || loading}
+                disabled={!form.problema_reportado || !form.sucursal_id || !form.empleado_id || loading}
                 className="w-full py-3.5 bg-indigo-500 text-white rounded-lg font-bold text-base hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Registrando..." : "✓ Registrar Ingreso"}

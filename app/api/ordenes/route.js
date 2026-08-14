@@ -45,6 +45,10 @@ export async function POST(request) {
     return NextResponse.json({ error: "No autorizado para esta sucursal" }, { status: 403 })
   }
 
+  if (!body.empleado_id) {
+    return NextResponse.json({ error: "empleado_id es requerido" }, { status: 400 })
+  }
+
   try {
     const orden = await crearOrden(body)
     return NextResponse.json({ orden })

@@ -207,11 +207,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           .then((d) => d.configuracion || {})
           .catch(() => ({}))
         generarTicketIngreso(
-          {
-            ...orden,
-            fecha_entrega_estimada: form.fecha_entrega_estimada || null,
-            empleado_nombre: empleados.find((e) => e.id === form.empleado_id)?.nombre || null,
-          },
+          { ...orden, fecha_entrega_estimada: form.fecha_entrega_estimada || null },
           clienteSeleccionado,
           config.nombre_negocio || "RepairTrack"
         )

@@ -15,8 +15,8 @@ CREATE TABLE empleados (
 CREATE INDEX idx_empleados_sucursal ON empleados(sucursal_id);
 
 ALTER TABLE empleados ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Authenticated users full access" ON empleados
-  FOR ALL USING (auth.role() = 'authenticated' OR true);
+CREATE POLICY "Allow anon read empleados" ON empleados
+  FOR SELECT USING (true);
 
 -- Nullable: las órdenes históricas no tienen empleado registrado y no se
 -- pueden backfillear retroactivamente.

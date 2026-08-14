@@ -118,13 +118,14 @@ export default function SucursalesPage() {
     }
   }
 
-  async function handleToggleEmpleadoActivo(empleado) {
+  async function handleDeleteEmpleado(empleado) {
+    if (!confirm(`¿Borrar a "${empleado.nombre}"? Esta acción no se puede deshacer.`)) return
     setError(null)
     try {
       const res = await fetch("/api/admin/empleados", {
-        method: "PATCH",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ empleadoId: empleado.id, activo: !empleado.activo }),
+        body: JSON.stringify({ empleadoId: empleado.id }),
       })
       if (!res.ok) throw new Error((await res.json()).error)
       await loadEmpleados()
@@ -258,14 +259,14 @@ export default function SucursalesPage() {
                         <ul className="space-y-1">
                           {(empleadosPorSucursal[s.id] || []).map((emp) => (
                             <li key={emp.id} className="flex items-center justify-between text-sm">
-                              <span className={emp.activo ? "text-slate-700 dark:text-slate-300" : "text-slate-400 line-through"}>
+                              <span className="text-slate-700 dark:text-slate-300">
                                 {emp.nombre}
                               </span>
                               <button
-                                onClick={() => handleToggleEmpleadoActivo(emp)}
-                                className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                                onClick={() => handleDeleteEmpleado(emp)}
+                                className="text-xs text-red-500 hover:text-red-700 font-medium"
                               >
-                                {emp.activo ? "Desactivar" : "Activar"}
+                                Borrar
                               </button>
                             </li>
                           ))}

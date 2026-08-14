@@ -403,6 +403,17 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             )}
           </div>
 
+          {/* Empleado que ingresó la orden */}
+          {orden.empleado_nombre && (
+            <div className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
+              <span className="text-sm">🧑‍💼</span>
+              <div>
+                <div className="text-xs text-slate-400 font-semibold uppercase">Empleado</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{orden.empleado_nombre}</div>
+              </div>
+            </div>
+          )}
+
           {/* Sucursales info */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">

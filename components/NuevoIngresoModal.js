@@ -70,9 +70,7 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
   }, []);
 
   useEffect(() => {
-    getEmpleados()
-      .then((data) => setEmpleados(data.filter((e) => e.activo)))
-      .catch(() => {});
+    getEmpleados().then(setEmpleados).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -209,7 +207,11 @@ export function NuevoIngresoModal({ onClose, onCreated }) {
           .then((d) => d.configuracion || {})
           .catch(() => ({}))
         generarTicketIngreso(
-          { ...orden, fecha_entrega_estimada: form.fecha_entrega_estimada || null },
+          {
+            ...orden,
+            fecha_entrega_estimada: form.fecha_entrega_estimada || null,
+            empleado_nombre: empleados.find((e) => e.id === form.empleado_id)?.nombre || null,
+          },
           clienteSeleccionado,
           config.nombre_negocio || "RepairTrack"
         )

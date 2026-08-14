@@ -18,7 +18,7 @@ export async function GET(request) {
 
   let query = getSupabaseAdmin()
     .from("empleados")
-    .select("id, sucursal_id, nombre, activo, created_at")
+    .select("id, sucursal_id, nombre, created_at")
     .order("nombre")
 
   if (sucursalId) {
@@ -67,8 +67,8 @@ export async function POST(request) {
   return NextResponse.json({ ok: true })
 }
 
-// PATCH — toggle activo
-export async function PATCH(request) {
+// DELETE — remove empleado permanently
+export async function DELETE(request) {
   if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
@@ -78,19 +78,19 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const { empleadoId, activo } = body
+  const { empleadoId } = body
   if (!empleadoId) {
     return NextResponse.json({ error: "empleadoId es requerido" }, { status: 400 })
   }
 
   const { error } = await getSupabaseAdmin()
     .from("empleados")
-    .update({ activo })
+    .delete()
     .eq("id", empleadoId)
 
   if (error) {
-    console.error("[/api/admin/empleados] PATCH error:", error)
-    return NextResponse.json({ error: "Error al actualizar empleado" }, { status: 500 })
+    console.error("[/api/admin/empleados] DELETE error:", error)
+    return NextResponse.json({ error: "Error al borrar empleado" }, { status: 500 })
   }
   return NextResponse.json({ ok: true })
 }

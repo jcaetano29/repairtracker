@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getOrden, deleteOrden, updateSucursalRetiro } from "@/lib/data"
+import { getOrden, deleteOrden, updateSucursalRetiro, cambiarTallerOrden } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -35,9 +35,15 @@ export async function PATCH(request, { params }) {
   try { body = await request.json() } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) }
 
   try {
-    // Currently the only supported partial update is sucursal_retiro_id.
     if (body.sucursal_retiro_id !== undefined) {
       const data = await updateSucursalRetiro(id, body.sucursal_retiro_id)
+      return NextResponse.json({ orden: data })
+    }
+    if (body.taller_id !== undefined) {
+      if (!UUID.test(body.taller_id)) {
+        return NextResponse.json({ error: "taller_id inválido" }, { status: 400 })
+      }
+      const data = await cambiarTallerOrden(id, body.taller_id)
       return NextResponse.json({ orden: data })
     }
     return NextResponse.json({ error: "Nada para actualizar" }, { status: 400 })

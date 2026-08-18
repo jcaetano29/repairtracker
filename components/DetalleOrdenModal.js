@@ -44,6 +44,8 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [sucursales, setSucursalesState] = useState([]);
   const [editingRetiro, setEditingRetiro] = useState(false);
   const [retiroId, setRetiroId] = useState(orden.sucursal_retiro_id || "");
+  const [editingTaller, setEditingTaller] = useState(false);
+  const [tallerCambioId, setTallerCambioId] = useState(orden.taller_id || "");
   const [montoTaller, setMontoTaller] = useState("");
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
@@ -360,8 +362,64 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Estado actual</div>
             <div className="flex items-center gap-3 flex-wrap">
               <Badge estado={orden.estado} size="md" />
-              {orden.taller_nombre && (
-                <span className="text-xs text-purple-600">📍 {orden.taller_nombre}</span>
+              {orden.taller_nombre && !editingTaller && (
+                <span className="text-xs text-purple-600 flex items-center gap-1.5">
+                  📍 {orden.taller_nombre}
+                  {orden.estado === "EN_REPARACION" && (
+                    <button
+                      onClick={() => setEditingTaller(true)}
+                      className="text-xs text-indigo-500 hover:text-indigo-700"
+                    >
+                      Cambiar
+                    </button>
+                  )}
+                </span>
+              )}
+              {editingTaller && (
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={tallerCambioId}
+                    onChange={(e) => setTallerCambioId(e.target.value)}
+                    className="px-2 py-1 border rounded text-xs dark:bg-slate-900 dark:text-slate-100"
+                  >
+                    {talleres.map((t) => (
+                      <option key={t.id} value={t.id}>{t.nombre}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={async () => {
+                      if (!tallerCambioId || tallerCambioId === orden.taller_id) {
+                        setEditingTaller(false);
+                        return;
+                      }
+                      setLoading(true);
+                      setError(null);
+                      try {
+                        await jsonFetch(`/api/ordenes/${orden.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ taller_id: tallerCambioId }),
+                        });
+                        setEditingTaller(false);
+                        onUpdated();
+                      } catch (e) {
+                        setError(e.message);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={loading}
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-xs font-semibold disabled:opacity-50"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => { setEditingTaller(false); setTallerCambioId(orden.taller_id || ""); }}
+                    className="px-2 py-1 border rounded text-xs"
+                  >
+                    X
+                  </button>
+                </div>
               )}
               {orden.monto_presupuesto && (
                 <div className="text-sm">

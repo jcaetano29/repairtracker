@@ -365,7 +365,7 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
               {orden.taller_nombre && !editingTaller && (
                 <span className="text-xs text-purple-600 flex items-center gap-1.5">
                   📍 {orden.taller_nombre}
-                  {orden.estado === "EN_REPARACION" && (
+                  {["LISTO_PARA_ENVIO", "EN_TALLER", "EN_REPARACION"].includes(orden.estado) && (
                     <button
                       onClick={() => setEditingTaller(true)}
                       className="text-xs text-indigo-500 hover:text-indigo-700"

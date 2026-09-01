@@ -58,8 +58,11 @@ export default function DashboardPage() {
       if (debouncedBusqueda) ordenesParams.set("busqueda", debouncedBusqueda)
       if (filtroEstado === "ENTREGADO") ordenesParams.set("incluirEntregados", "true")
       if (sucursalFiltro) ordenesParams.set("sucursal_id", sucursalFiltro)
-      ordenesParams.set("page", String(pagina))
-      ordenesParams.set("limit", "20")
+      // El kanban es un tablero completo: carga todas las órdenes activas sin
+      // paginar. La vista tabla mantiene la paginación de 20 por página.
+      const esKanban = vista === "kanban"
+      ordenesParams.set("page", String(esKanban ? 1 : pagina))
+      ordenesParams.set("limit", esKanban ? "all" : "20")
 
       const statsParams = new URLSearchParams()
       if (sucursalFiltro) statsParams.set("sucursal_id", sucursalFiltro)
@@ -83,7 +86,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal, isDueno, session, pagina])
+  }, [filtroEstado, filtroTaller, debouncedBusqueda, filtroSucursal, isDueno, session, pagina, vista])
 
   useEffect(() => {
     if (isDueno) {

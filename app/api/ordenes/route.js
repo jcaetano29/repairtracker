@@ -16,6 +16,10 @@ export async function GET(request) {
     sucursalParam = userSucursal || undefined
   }
 
+  // limit=all: sin paginar (lo usa la vista kanban, que muestra todo el tablero)
+  const limitParam = searchParams.get("limit")
+  const limit = limitParam === "all" ? "all" : (Number(limitParam) || 20)
+
   try {
     const result = await getOrdenes({
       estado: searchParams.get("estado") || undefined,
@@ -24,7 +28,7 @@ export async function GET(request) {
       incluirEntregados: searchParams.get("incluirEntregados") === "true",
       sucursal_id: sucursalParam,
       page: Number(searchParams.get("page")) || 1,
-      limit: Number(searchParams.get("limit")) || 20,
+      limit,
     })
     return NextResponse.json(result)
   } catch (e) {

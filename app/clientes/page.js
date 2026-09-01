@@ -154,6 +154,7 @@ export default function ClientesPage() {
               ← Volver
             </Link>
           </div>
+        </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6">

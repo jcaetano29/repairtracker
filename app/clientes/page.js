@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import PhoneInput from "@/components/PhoneInput"
 
@@ -14,6 +15,10 @@ async function jsonFetch(url, opts) {
 const emptyForm = { nombre: "", telefono: "", email: "", documento: "" }
 
 export default function ClientesPage() {
+  const { data: session } = useSession()
+  const esAdmin = session?.user?.role === "admin"
+  const [exportando, setExportando] = useState(false)
+
   const [busqueda, setBusqueda] = useState("")
   const [debounced, setDebounced] = useState("")
   const [clientes, setClientes] = useState([])
@@ -97,6 +102,31 @@ export default function ClientesPage() {
     }
   }
 
+  async function exportarCSV() {
+    setExportando(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/clientes/export")
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `clientes-${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setExportando(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       {/* Header */}
@@ -106,10 +136,24 @@ export default function ClientesPage() {
             <h1 className="text-lg font-bold text-white leading-tight">Clientes</h1>
             <p className="text-sm text-slate-500">Buscar y corregir datos</p>
           </div>
-          <Link href="/" className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors">
-            ← Volver
-          </Link>
-        </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {esAdmin && (
+              <button
+                onClick={exportarCSV}
+                disabled={exportando}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 disabled:opacity-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                  <path fillRule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v6.638l1.96-2.158a.75.75 0 1 1 1.11 1.01l-3.25 3.5a.75.75 0 0 1-1.1 0l-3.25-3.5a.75.75 0 1 1 1.1-1.01l1.96 2.158V3.75A.75.75 0 0 1 10 3Z" clipRule="evenodd" />
+                  <path d="M3.5 12.75a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 0 .75.75h10a.75.75 0 0 0 .75-.75v-2.25a.75.75 0 0 1 1.5 0v2.25A2.25 2.25 0 0 1 15 18H5a2.25 2.25 0 0 1-2.25-2.25v-2.25a.75.75 0 0 1 .75-.75Z" />
+                </svg>
+                {exportando ? "Exportando…" : "Exportar CSV"}
+              </button>
+            )}
+            <Link href="/" className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors">
+              ← Volver
+            </Link>
+          </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6">

@@ -7,11 +7,13 @@ function formatHora(iso) {
   return new Date(iso).toLocaleTimeString("es-UY", { hour: "2-digit", minute: "2-digit" });
 }
 
-export function WhatsAppHilo({ conversacionId, cliente }) {
+export function WhatsAppHilo({ conversacionId, cliente, recordatorioRetiro, onRecordatorioEnviado }) {
   const [mensajes, setMensajes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
+  const [enviandoRecordatorio, setEnviandoRecordatorio] = useState(false);
+  const [recordatorioFeedback, setRecordatorioFeedback] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -52,6 +54,38 @@ export function WhatsAppHilo({ conversacionId, cliente }) {
     cargarMensajes();
   }, [cargarMensajes]);
 
+  // Reset del feedback al cambiar de conversación.
+  useEffect(() => {
+    setRecordatorioFeedback(null);
+  }, [conversacionId]);
+
+  async function handleEnviarRecordatorio() {
+    if (enviandoRecordatorio) return;
+    const orden = recordatorioRetiro?.numeroOrden;
+    const confirmar = window.confirm(
+      `¿Enviar recordatorio de retiro${orden ? ` de la orden #${orden}` : ""} a ${cliente?.nombre ?? "el cliente"}?`
+    );
+    if (!confirmar) return;
+
+    setEnviandoRecordatorio(true);
+    setRecordatorioFeedback(null);
+    try {
+      const res = await fetch(
+        `/api/whatsapp/conversaciones/${conversacionId}/recordatorio-retiro`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Error al enviar el recordatorio");
+      setRecordatorioFeedback({ tipo: "ok", texto: "Recordatorio enviado ✓" });
+      await cargarMensajes();
+      onRecordatorioEnviado?.();
+    } catch (e) {
+      console.error("[Recordatorio retiro] Error:", e);
+      setRecordatorioFeedback({ tipo: "error", texto: "No se pudo enviar. Reintentá." });
+    } finally {
+      setEnviandoRecordatorio(false);
+    }
+  }
+
   // Polling — mismo patrón que components/TrasladosPanel.js (este proyecto
   // no usa Supabase Realtime en ningún lado).
   useEffect(() => {
@@ -70,8 +104,30 @@ export function WhatsAppHilo({ conversacionId, cliente }) {
 
   return (
     <div className="flex-1 flex flex-col whatsapp-wallpaper min-h-0">
-      <div className="px-4 py-3 bg-slate-800 text-white font-semibold text-sm shrink-0 flex items-center justify-between">
-        <span>{cliente?.nombre ?? cliente?.telefono}</span>
+      <div className="px-4 py-3 bg-slate-800 text-white font-semibold text-sm shrink-0 flex items-center justify-between gap-2">
+        <span className="truncate">{cliente?.nombre ?? cliente?.telefono}</span>
+        <div className="flex items-center gap-2 shrink-0">
+          {recordatorioRetiro?.disponible && (
+            <div className="flex items-center gap-2">
+              {recordatorioFeedback && (
+                <span
+                  className={`text-[11px] ${
+                    recordatorioFeedback.tipo === "ok" ? "text-emerald-300" : "text-red-300"
+                  }`}
+                >
+                  {recordatorioFeedback.texto}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleEnviarRecordatorio}
+                disabled={enviandoRecordatorio}
+                className="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {enviandoRecordatorio ? "Enviando..." : "📦 Recordar retiro"}
+              </button>
+            </div>
+          )}
         <div ref={menuRef} className="relative">
           <button
             type="button"
@@ -101,6 +157,7 @@ export function WhatsAppHilo({ conversacionId, cliente }) {
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
       {mostrarDetalle && (

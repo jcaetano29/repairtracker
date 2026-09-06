@@ -149,6 +149,11 @@ export default function WhatsAppPage() {
                   <span className="text-[10px] text-slate-400 shrink-0">{formatFecha(c.last_message_at)}</span>
                 </div>
                 <p className="text-xs text-slate-500 truncate mt-0.5">{c.last_message_preview}</p>
+                {c.recordatorioDisponible && (
+                  <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                    📦 Retiro demorado
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -170,6 +175,12 @@ export default function WhatsAppPage() {
               telefono: conversacionActual?.telefono_e164,
               email: conversacionActual?.clientes?.email,
             }}
+            recordatorioRetiro={{
+              disponible: !!conversacionActual?.recordatorioDisponible,
+              numeroOrden: conversacionActual?.retiroPendiente?.numeroOrden,
+              tipoArticulo: conversacionActual?.retiroPendiente?.tipoArticulo,
+            }}
+            onRecordatorioEnviado={cargarConversaciones}
           />
         </div>
       </main>

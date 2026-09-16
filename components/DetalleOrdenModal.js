@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Badge } from "./Badge";
 import { ESTADOS, TRANSICIONES, getNivelRetraso, formatFechaHora, formatNumeroOrden } from "@/lib/constants";
-import { getTalleres, getSucursales } from "@/lib/data";
+import { getTalleres, getSucursales, getMarcas } from "@/lib/data";
 import { formatMonto, monedaPrefix } from "@/lib/currency";
 import { generarTicketIngreso } from "@/lib/ticket";
 
@@ -47,6 +47,13 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
   const [editingTaller, setEditingTaller] = useState(false);
   const [tallerCambioId, setTallerCambioId] = useState(orden.taller_id || "");
   const [montoTaller, setMontoTaller] = useState("");
+  const [marcas, setMarcasState] = useState([]);
+  const [editingMarca, setEditingMarca] = useState(false);
+  const [marcaCambio, setMarcaCambio] = useState(orden.marca || "");
+  const [editingPresupuestoTaller, setEditingPresupuestoTaller] = useState(false);
+  const [presupuestoTallerCambio, setPresupuestoTallerCambio] = useState(
+    orden.monto_presupuesto_taller != null ? String(orden.monto_presupuesto_taller) : ""
+  );
 
   const retraso = getNivelRetraso(orden.estado, orden.dias_en_estado, umbrales);
   const siguientes = TRANSICIONES[orden.estado] || [];
@@ -77,16 +84,18 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
 
   async function loadData() {
     try {
-      const [historialRes, talleresData, trasladosRes, sucursalesRes] = await Promise.all([
+      const [historialRes, talleresData, trasladosRes, sucursalesRes, marcasData] = await Promise.all([
         jsonFetch(`/api/ordenes/${orden.id}/historial`).catch(() => ({ historial: [] })),
         getTalleres(),
         jsonFetch(`/api/ordenes/${orden.id}/traslados`).catch(() => ({ traslados: [] })),
         getSucursales(),
+        getMarcas().catch(() => []),
       ]);
       setHistorial(historialRes.historial || []);
       setTalleresState(talleresData);
       setTrasladosHistorial(trasladosRes.traslados || []);
       setSucursalesState(sucursalesRes || []);
+      setMarcasState(marcasData || []);
     } catch (e) {
       console.error(e);
     }
@@ -278,6 +287,50 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
     generarTicketIngreso(orden, cliente, nombreNegocio);
   }
 
+  async function handleGuardarMarca() {
+    if (!marcaCambio.trim() || marcaCambio === orden.marca) {
+      setEditingMarca(false);
+      setMarcaCambio(orden.marca || "");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await jsonFetch(`/api/ordenes/${orden.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marca: marcaCambio.trim() }),
+      });
+      setEditingMarca(false);
+      onUpdated();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGuardarPresupuestoTaller() {
+    const raw = presupuestoTallerCambio.trim();
+    const montoNum = raw === "" ? null : parseFloat(raw);
+    if (raw !== "" && (!Number.isFinite(montoNum) || montoNum < 0)) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await jsonFetch(`/api/ordenes/${orden.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monto_presupuesto_taller: montoNum }),
+      });
+      setEditingPresupuestoTaller(false);
+      onUpdated();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleDelete() {
     setLoading(true);
     setError(null);
@@ -343,7 +396,46 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
             <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
               <div className="text-xs text-slate-400 font-semibold uppercase">Artículo</div>
               <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{orden.tipo_articulo}</div>
-              <div className="text-xs text-slate-500">{orden.marca || "—"}</div>
+              {!editingMarca ? (
+                <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                  <span>{orden.marca || "—"}</span>
+                  <button
+                    onClick={() => setEditingMarca(true)}
+                    className="text-indigo-500 hover:text-indigo-700"
+                  >
+                    Editar
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <input
+                    type="text"
+                    list="marcas-datalist"
+                    value={marcaCambio}
+                    onChange={(e) => setMarcaCambio(e.target.value)}
+                    placeholder="Marca"
+                    className="flex-1 min-w-0 px-2 py-1 border rounded text-xs dark:bg-slate-900 dark:text-slate-100"
+                  />
+                  <datalist id="marcas-datalist">
+                    {marcas.map((m) => (
+                      <option key={m.id} value={m.nombre} />
+                    ))}
+                  </datalist>
+                  <button
+                    onClick={handleGuardarMarca}
+                    disabled={loading || !marcaCambio.trim()}
+                    className="px-2 py-1 bg-indigo-500 text-white rounded text-xs font-semibold disabled:opacity-50"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => { setEditingMarca(false); setMarcaCambio(orden.marca || ""); }}
+                    className="px-2 py-1 border rounded text-xs"
+                  >
+                    X
+                  </button>
+                </div>
+              )}
               {orden.material && (
                 <div className="text-xs text-slate-500 mt-1">
                   Material: {orden.material === "otro" ? orden.material_otro : orden.material.charAt(0).toUpperCase() + orden.material.slice(1)}
@@ -445,6 +537,58 @@ export function DetalleOrdenModal({ orden, onClose, onUpdated, isDueno, umbrales
                 </>
               )}
             </div>
+          </div>
+
+          {/* Presupuesto taller — editable en cualquier momento */}
+          <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-slate-400 font-semibold uppercase">Presupuesto taller</div>
+              {!editingPresupuestoTaller && (
+                <button
+                  onClick={() => setEditingPresupuestoTaller(true)}
+                  className="text-xs text-indigo-500 hover:text-indigo-700"
+                >
+                  Editar
+                </button>
+              )}
+            </div>
+            {!editingPresupuestoTaller ? (
+              <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {orden.monto_presupuesto_taller != null
+                  ? formatMonto(orden.monto_presupuesto_taller, orden.moneda)
+                  : "No establecido"}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 mt-1">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                  placeholder="Monto del taller"
+                  value={presupuestoTallerCambio}
+                  onChange={(e) => setPresupuestoTallerCambio(e.target.value)}
+                  onWheel={(e) => e.currentTarget.blur()}
+                  className="no-spinner flex-1 px-2 py-1 border rounded text-xs dark:bg-slate-900 dark:text-slate-100"
+                />
+                <button
+                  onClick={handleGuardarPresupuestoTaller}
+                  disabled={loading}
+                  className="px-2 py-1 bg-indigo-500 text-white rounded text-xs font-semibold disabled:opacity-50"
+                >
+                  OK
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingPresupuestoTaller(false);
+                    setPresupuestoTallerCambio(orden.monto_presupuesto_taller != null ? String(orden.monto_presupuesto_taller) : "");
+                  }}
+                  className="px-2 py-1 border rounded text-xs"
+                >
+                  X
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Ubicación actual */}

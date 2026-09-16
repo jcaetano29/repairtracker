@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getOrden, deleteOrden, updateSucursalRetiro, cambiarTallerOrden } from "@/lib/data"
+import { getOrden, deleteOrden, updateSucursalRetiro, cambiarTallerOrden, updateMarcaOrden, updatePresupuestoTaller } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -44,6 +44,23 @@ export async function PATCH(request, { params }) {
         return NextResponse.json({ error: "taller_id inválido" }, { status: 400 })
       }
       const data = await cambiarTallerOrden(id, body.taller_id)
+      return NextResponse.json({ orden: data })
+    }
+    if (body.marca !== undefined) {
+      const marca = typeof body.marca === "string" ? body.marca.trim() : ""
+      if (!marca) return NextResponse.json({ error: "marca inválida" }, { status: 400 })
+      const data = await updateMarcaOrden(id, marca)
+      return NextResponse.json({ orden: data })
+    }
+    if (body.monto_presupuesto_taller !== undefined) {
+      let monto = body.monto_presupuesto_taller
+      if (monto !== null) {
+        monto = parseFloat(monto)
+        if (!Number.isFinite(monto) || monto < 0) {
+          return NextResponse.json({ error: "monto_presupuesto_taller inválido" }, { status: 400 })
+        }
+      }
+      const data = await updatePresupuestoTaller(id, monto)
       return NextResponse.json({ orden: data })
     }
     return NextResponse.json({ error: "Nada para actualizar" }, { status: 400 })
